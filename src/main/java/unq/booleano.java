@@ -1,10 +1,10 @@
 package unq;
 
-public class booleano implements tipoValor {
+public class booleano implements TipoValor {
     public Object field;
 
     @Override
-    public boolean validate(Object valor) {
+    public boolean esValido(Object valor) {
         return valor instanceof Boolean;
     }
 }

@@ -1,10 +1,10 @@
 package unq;
 
-public class Numero implements tipoValor {
+public class Numero implements TipoValor {
     public Object field;
 
     @Override
-    public boolean validate(Object valor) {
+    public boolean esValido(Object valor) {
         return valor instanceof Number;
     }
 }
