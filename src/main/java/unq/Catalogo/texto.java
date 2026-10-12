@@ -1,4 +1,4 @@
-package unq;
+package unq.Catalogo;
 
 public class texto implements TipoValor {
     public Object field;

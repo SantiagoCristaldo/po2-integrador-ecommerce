@@ -1,7 +1,11 @@
 package unq;
 
 public class cancelada implements estadoDeReserva {
-    public Object field;
+    private Reserva reserva;
+
+    public cancelada(Reserva reserva) {
+        this.reserva = reserva;
+    }
 
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
@@ -38,7 +42,7 @@ public class cancelada implements estadoDeReserva {
         throw new exepcionPorInvalido("La reserva ya esta cancelada");
     }
 
-    public Object method() {
-        return null;
+    public Reembolso generarReembolso() {
+        return reserva.generarReembolso();
     }
 }

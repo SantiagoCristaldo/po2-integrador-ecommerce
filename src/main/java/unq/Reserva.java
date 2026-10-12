@@ -11,36 +11,32 @@ public class Reserva {
         this.estado = new solicitudPendiente();
     }
 
-    public List<Catalogo> getItemsCatalago() {
-        return itemsCatalago;
-    }
-
     public void agregarItem(Catalogo item) {
-        estado.agregarItem(this, item);
+        estado.agregarItem(item);
     }
 
     public void quitarItem(Catalogo item) {
-        estado.quitarItem(this, item);
+        estado.quitarItem(item);
     }
 
     public void confirmar() {
-        estado.confirmar(this);
+        estado.confirmar();
     }
 
     public void hacerCheckin() {
-        estado.hacerCheckin(this);
+        estado.hacerCheckin();
     }
 
     public void iniciar() {
-        estado.iniciar(this);
+        estado.iniciar();
     }
 
     public void finalizar() {
-        estado.finalizar(this);
+        estado.finalizar();
     }
 
     public void cancelar() {
-        estado.cancelar(this);
+        estado.cancelar();
     }
 
     public void cambiarEstado(estadoDeReserva nuevoEstado) {
@@ -48,11 +44,14 @@ public class Reserva {
     }
 
     public void bloquearCupos() {
+        this.estado.bloquearCupos();
     }
 
     public void liberarCupos() {
+        this.estado.liberarCupos();
     }
 
     public void reembolsar() {
+
     }
 }

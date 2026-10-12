@@ -1,7 +1,11 @@
 package unq;
 
 public class solicitudPendiente implements estadoDeReserva {
-    public Object field;
+    private Reserva reserva;
+
+    public solicitudPendiente(Reserva reserva) {
+        this.reserva = reserva;
+    }
 
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
@@ -38,7 +42,4 @@ public class solicitudPendiente implements estadoDeReserva {
         reserva.cambiarEstado(new cancelada());
     }
 
-    public Object method() {
-        return null;
-    }
 }

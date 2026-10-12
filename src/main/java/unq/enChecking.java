@@ -1,7 +1,11 @@
 package unq;
 
 public class enChecking implements estadoDeReserva {
-    public Object field;
+    private Reserva reserva;
+
+    public enChecking(Reserva reserva) {
+        this.reserva = reserva;
+    }
 
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
@@ -36,9 +40,5 @@ public class enChecking implements estadoDeReserva {
     @Override
     public void cancelar(Reserva reserva) {
         reserva.cambiarEstado(new cancelada());
-    }
-
-    public Object method() {
-        return null;
     }
 }

@@ -1,7 +1,7 @@
 package unq;
 
 public class finalizada implements estadoDeReserva {
-    public Object field;
+    private Reserva reserva;
 
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
@@ -38,7 +38,4 @@ public class finalizada implements estadoDeReserva {
         throw new exepcionPorInvalido("La reserva esta finalizada");
     }
 
-    public Object method() {
-        return null;
-    }
 }
