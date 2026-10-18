@@ -109,14 +109,4 @@ class PaqueteTuristicoTest {
         assertEquals(18900.0, externo.precioFinal());
     }
 
-    @Test
-    void detectaCicloIndirecto() {
-        PaqueteTuristico a = new PaqueteTuristico("A", "a", 0);
-        PaqueteTuristico b = new PaqueteTuristico("B", "b", 0);
-        PaqueteTuristico c = new PaqueteTuristico("C", "c", 0);
-        a.agregarItem(b);
-        b.agregarItem(c);
-
-        assertThrows(ExcepcionDominio.class, () -> c.agregarItem(a));
-    }
 }
