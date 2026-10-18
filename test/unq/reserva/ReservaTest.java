@@ -20,7 +20,7 @@ class ReservaTest {
 
     @BeforeEach
     void setUp() {
-        reserva = spy(new Reserva());
+        reserva = spy(new Reserva(mock.Destino(), 5));
         servicio = new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel",
                 "Operador SA", new Categoria("Hotel"), 15000.0);
     }

@@ -10,14 +10,16 @@ public class Reserva {
     private EstadoDeReserva estado;
     private List<Catalogo> items = new ArrayList<>();
     private Direccion destino;
-    
+    private int cantidadDePasajeros;
 
-    public Reserva() {
+    public Reserva(Direccion destino, int cantidadDePasajeros) {
         this.estado = new SolicitudPendiente();
+        this.destino = destino;
+        this.cantidadDePasajeros = cantidadDePasajeros;
     }
 
     public int cantidadDePasajeros(){
-        return 0; // ver como se calcula
+        return cantidadDePasajeros;
     }
 
     public float valorTotal(){
