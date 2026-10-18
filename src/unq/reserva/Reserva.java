@@ -3,14 +3,25 @@ package unq.reserva;
 import java.util.ArrayList;
 import java.util.List;
 
+import unq.traslado.*;
 import unq.catalogo.Catalogo;
 
 public class Reserva {
     private EstadoDeReserva estado;
     private List<Catalogo> items = new ArrayList<>();
+    private Direccion destino;
+    
 
     public Reserva() {
         this.estado = new SolicitudPendiente();
+    }
+
+    public int cantidadDePasajeros(){
+        return 0; // ver como se calcula
+    }
+
+    public float valorTotal(){
+        return 0; // hay que preguntar como se calcula el valor
     }
 
     public void agregarItem(Catalogo item) {
@@ -60,5 +71,9 @@ public class Reserva {
     }
 
     public void reembolsar() {
+    }
+
+    public Direccion getDestino() {
+        return this.destino;
     }
 }

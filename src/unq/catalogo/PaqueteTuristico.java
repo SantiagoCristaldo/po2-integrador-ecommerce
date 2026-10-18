@@ -28,11 +28,6 @@ public class PaqueteTuristico implements Catalogo {
         items.remove(item);
     }
 
-    private boolean contiene(Catalogo objetivo) {
-        return items.stream().anyMatch(item -> item == objetivo
-                || (item instanceof PaqueteTuristico && ((PaqueteTuristico) item).contiene(objetivo)));
-    }
-
     // TODO: consultar al docente. El enunciado (texto) dice que el precio base del
     // paquete es suma x (1 - descuento), pero la tabla muestra base = suma y final = suma x (1 - descuento).
     // Se implementa segun la tabla.
