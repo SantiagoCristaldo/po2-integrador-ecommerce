@@ -60,4 +60,14 @@ public class PaqueteTuristico implements Catalogo {
     public boolean contieneEnNombre(String texto) {
         return nombre != null && nombre.toLowerCase().contains(texto.toLowerCase());
     }
+
+    @Override
+    public boolean esDeCategoria(Categoria categoria) {
+        for (Catalogo item :items){
+            if (item.esDeCategoria(categoria)){
+                return true;
+            }
+        }
+        return false;
+    }  
 }

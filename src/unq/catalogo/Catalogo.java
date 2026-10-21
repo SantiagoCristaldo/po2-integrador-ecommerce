@@ -10,4 +10,6 @@ public interface Catalogo {
     double precioFinal();
 
     boolean contieneEnNombre(String texto);
+
+    boolean esDeCategoria(Categoria categoria);
 }
