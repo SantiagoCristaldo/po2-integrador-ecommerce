@@ -1,7 +1,5 @@
 package unq.buscador;
 
-import  java.util.ArrayList;
-import java.util.List;
 import unq.catalogo.Catalogo;
 
 public class FiltroAnd extends FiltroCompuesto {
@@ -16,5 +14,6 @@ public class FiltroAnd extends FiltroCompuesto {
                 return false;
             }
         }
+        return true;
     }
 }

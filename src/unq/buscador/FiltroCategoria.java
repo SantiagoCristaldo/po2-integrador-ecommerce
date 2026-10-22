@@ -1,7 +1,5 @@
 package unq.buscador;
 
-import  java.util.ArrayList;
-import java.util.List;
 import unq.catalogo.Catalogo;
 import unq.catalogo.Categoria;
 
