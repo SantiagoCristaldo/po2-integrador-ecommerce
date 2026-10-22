@@ -18,12 +18,14 @@ public class Reserva {
         this.cantidadDePasajeros = cantidadDePasajeros;
     }
 
-    public int cantidadDePasajeros(){
+    public int cantidadDePasajeros() {
         return cantidadDePasajeros;
     }
 
-    public float valorTotal(){
-        return 0; // hay que preguntar como se calcula el valor
+    public double valorTotal() {
+        return items.stream()
+                .mapToDouble(Catalogo::precioFinal)
+                .sum();
     }
 
     public void agregarItem(Catalogo item) {

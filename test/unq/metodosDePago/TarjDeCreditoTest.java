@@ -27,12 +27,13 @@ class TarjDeCreditoTest {
     @BeforeEach
     void setUp() {
         api = mock(APITarjetaDeCredito.class);
-        tarjeta = new TarjDeCredito(NUMERO_TARJETA, CVV, LocalDateTime.now().plusYears(2), MONTO, "TX-1001");
+        tarjeta = new TarjDeCredito(NUMERO_TARJETA, CVV, LocalDateTime.now().plusYears(2), MONTO, "TX-1001", api);
         inyectarApi(tarjeta, api);
     }
 
     /**
-     * La tarjeta no recibe la API por constructor (ver H24 en HALLAZGOS.md), asi que no hay forma de
+     * La tarjeta no recibe la API por constructor (ver H24 en HALLAZGOS.md), asi
+     * que no hay forma de
      * inyectarla sin tocar produccion. Se usa reflexion sobre el campo privado.
      */
     private static void inyectarApi(TarjDeCredito tarjeta, APITarjetaDeCredito api) {
