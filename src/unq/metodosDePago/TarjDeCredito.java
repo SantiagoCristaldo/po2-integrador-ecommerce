@@ -8,30 +8,32 @@ public class TarjDeCredito extends MedioDePago {
     private LocalDateTime vencimiento;
     private APITarjetaDeCredito api;
 
-    public TarjDeCredito(int nroTarjeta, int cvv, LocalDateTime vencimiento, float monto, String codigoDeTransaccion){
+    public TarjDeCredito(int nroTarjeta, int cvv, LocalDateTime vencimiento, float monto, String codigoDeTransaccion,
+            APITarjetaDeCredito api) {
         super(monto, codigoDeTransaccion);
         this.nroTarjeta = nroTarjeta;
         this.CVV = cvv;
         this.vencimiento = vencimiento;
+        this.api = api;
     }
 
-    @Override 
+    @Override
     public boolean validarDatos() {
         return api.validarDatos(this);
     }
 
-    @Override 
-    public void reservarFondos(){
+    @Override
+    public void reservarFondos() {
         api.preAutorizar(nroTarjeta, monto);
     }
-    
+
     @Override
-    public void ejecutarTransaccion(){
+    public void ejecutarTransaccion() {
         api.transferirInmediata(monto);
     }
-    
+
     @Override
-    public void notificarResultado(){
-        
+    public void notificarResultado() {
+
     }
 }
