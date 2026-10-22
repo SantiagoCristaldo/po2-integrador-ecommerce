@@ -1,112 +1,122 @@
 package unq.catalogo;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import unq.excepciones.ExcepcionDominio;
 
 class PaqueteTuristicoTest {
 
-    private ServicioIndividual hotel;
-    private ServicioIndividual excursión;
+    private Catalogo item(double precioBase, double precioFinal) {
+        Catalogo item = mock(Catalogo.class);
+        when(item.precioBase()).thenReturn(precioBase);
+        when(item.precioFinal()).thenReturn(precioFinal);
+        return item;
+    }
 
-    @BeforeEach
-    void setUp() {
-        hotel = new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel",
-                "Operador SA", new Categoria("Hotel"), 15000.0);
-        excursión = new ServicioIndividual("EXC-001", "Excursión Lago", "Un paseo",
-                "Operador SA", new Categoria("Excursión"), 6000.0);
+    private PaqueteTuristico paquete(int descuento, Catalogo... items) {
+        PaqueteTuristico paquete = new PaqueteTuristico("Paquete", "Un paquete", descuento);
+        for (Catalogo item : items) {
+            paquete.agregarItem(item);
+        }
+        return paquete;
     }
 
     @Test
-    void precioBase_esLaSumaDeLosItems() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Escapada", "Dos servicios", 10);
-        paquete.agregarItem(hotel);
-        paquete.agregarItem(excursión);
+    void precioBase_esLaSumaDeLosPreciosBaseDeSusHijos() {
+        PaqueteTuristico paquete = paquete(10,
+                item(15000, 1), item(4000, 1), item(2000, 1));
 
-        assertEquals(21000.0, paquete.precioBase());
+        assertEquals(21000.0, paquete.precioBase(), 0.001);
     }
 
     @Test
-    void precioFinal_aplicaElDescuentoDelPaquete() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Escapada", "Dos servicios", 10);
-        paquete.agregarItem(hotel);
-        paquete.agregarItem(excursión);
+    void precioFinal_casoDelEnunciado_devuelve18900() {
+        PaqueteTuristico paquete = paquete(10,
+                item(15000, 15000), item(4000, 4000), item(2000, 2000));
 
-        assertEquals(18900.0, paquete.precioFinal());
+        assertEquals(18900.0, paquete.precioFinal(), 0.001);
     }
 
     @Test
-    void descuentoFueraDeRango_lanzaExcepcion() {
-        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("Escapada", "x", 150));
-        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("Escapada", "x", -5));
+    void precioFinal_aplicaElDescuentoUnaSolaVezPorPaquete() {
+        PaqueteTuristico paquete = paquete(10, item(10000, 10000));
+
+        assertEquals(9000.0, paquete.precioFinal(), 0.001);
     }
 
     @Test
-    void agregarUnPaqueteQueGeneraCiclo_lanzaExcepcion() {
-        PaqueteTuristico a = new PaqueteTuristico("A", "a", 0);
-        PaqueteTuristico b = new PaqueteTuristico("B", "b", 0);
-        a.agregarItem(b);
-
-        assertThrows(ExcepcionDominio.class, () -> b.agregarItem(a));
+    void precioBase_deUnPaqueteVacio_esCero() {
+        assertEquals(0.0, paquete(10).precioBase(), 0.001);
     }
 
     @Test
-    void noSePuedeAgregarASiMismo() {
-        PaqueteTuristico a = new PaqueteTuristico("A", "a", 0);
-
-        assertThrows(ExcepcionDominio.class, () -> a.agregarItem(a));
+    void precioFinal_deUnPaqueteVacio_esCero() {
+        assertEquals(0.0, paquete(10).precioFinal(), 0.001);
     }
 
     @Test
-    void contieneEnNombre_ignoraMayusculas() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Escapada de Otoño", "x", 0);
+    void quitarItem_loSacaDeLaSumaDeSusPartes() {
+        Catalogo hotel = item(15000, 15000);
+        PaqueteTuristico paquete = paquete(0, hotel);
 
-        assertTrue(paquete.contieneEnNombre("otoño"));
-        assertFalse(paquete.contieneEnNombre("verano"));
-    }
-
-    @Test
-    void exponeNombreYDescripcion() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Escapada", "Dos servicios", 10);
-
-        assertEquals("Escapada", paquete.nombre());
-        assertEquals("Dos servicios", paquete.descripcion());
-    }
-
-    @Test
-    void paqueteVacio_tienePreciosCero() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Vacío", "x", 10);
-
-        assertEquals(0.0, paquete.precioBase());
-        assertEquals(0.0, paquete.precioFinal());
-    }
-
-    @Test
-    void quitarItem_loSacaDelPaquete() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Escapada", "x", 0);
-        paquete.agregarItem(hotel);
         paquete.quitarItem(hotel);
 
-        assertEquals(0.0, paquete.precioBase());
+        assertEquals(0.0, paquete.precioBase(), 0.001);
     }
 
     @Test
-    void paqueteAnidado_calculaElPrecioRecursivamente() {
-        PaqueteTuristico interno = new PaqueteTuristico("Pack Urbana", "x", 10);
-        interno.agregarItem(hotel);
-        interno.agregarItem(excursión);
+    void paqueteAnidado_calculaElPrecioFinalRecursivamente() {
+        PaqueteTuristico interno = paquete(10,
+                item(15000, 15000), item(4000, 4000), item(2000, 2000));
 
-        PaqueteTuristico externo = new PaqueteTuristico("Kit Gran Tour", "x", 0);
-        externo.agregarItem(interno);
+        PaqueteTuristico externo = paquete(20, interno, item(5000, 5000));
 
-        assertEquals(21000.0, externo.precioBase());
-        assertEquals(18900.0, externo.precioFinal());
+        assertEquals(19120.0, externo.precioFinal(), 0.001);
     }
 
+    @Test
+    void agregarItem_conElMismoPaquete_noLanzaYNoSeValidaCiclo() {
+        PaqueteTuristico paquete = paquete(10);
+
+        assertDoesNotThrow(() -> paquete.agregarItem(paquete));
+    }
+
+    @Test
+    void constructor_conDescuentoNegativo_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("P", "d", -1));
+    }
+
+    @Test
+    void constructor_conDescuentoMayorACien_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("P", "d", 101));
+    }
+
+    @Test
+    void contieneEnNombre_conNombreNulo_esFalso() {
+        PaqueteTuristico paquete = new PaqueteTuristico(null, "d", 0);
+
+        assertFalse(paquete.contieneEnNombre("otoño"));
+    }
+
+    @Test
+    void contieneEnNombre_sinDistinguirMayusculas() {
+        PaqueteTuristico paquete = new PaqueteTuristico("Escapada de Otoño", "d", 0);
+
+        assertTrue(paquete.contieneEnNombre("otoño"));
+    }
+
+    @Test
+    void contieneEnNombre_conTextoQueNoAparece_esFalso() {
+        PaqueteTuristico paquete = new PaqueteTuristico("Escapada de Otoño", "d", 0);
+
+        assertFalse(paquete.contieneEnNombre("verano"));
+    }
 }

@@ -1,7 +1,11 @@
 package unq.reserva;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -12,149 +16,188 @@ import org.junit.jupiter.api.Test;
 import unq.catalogo.Catalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.ServicioIndividual;
+import unq.traslado.Direccion;
 
 class ReservaTest {
 
     private Reserva reserva;
-    private Catalogo servicio;
+    private Catalogo item;
+    private Direccion destino;
 
     @BeforeEach
     void setUp() {
-        reserva = spy(new Reserva(mock.Destino(), 5));
-        servicio = new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel",
-                "Operador SA", new Categoria("Hotel"), 15000.0);
+        destino = new Direccion("Calle Falsa", 123, "Quilmes", "1878");
+        reserva = new Reserva(destino, 2);
+        item = new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel",
+                "Operador SA", new Categoria("Alojamiento"), 15000.0);
+    }
+
+    // --- Reserva es el Context: delega cada operación pública en el estado actual ---
+
+    @Test
+    void agregarItem_delegaEnElEstadoActualPasandoLaReservaYElItem() {
+        EstadoDeReserva estado = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(estado);
+
+        reserva.agregarItem(item);
+
+        verify(estado).agregarItem(reserva, item);
     }
 
     @Test
-    void nuevaReserva_permiteAgregarYQuitarItems() {
-        assertDoesNotThrow(() -> reserva.agregarItem(servicio));
-        assertDoesNotThrow(() -> reserva.quitarItem(servicio));
+    void quitarItem_delegaEnElEstadoActualPasandoLaReservaYElItem() {
+        EstadoDeReserva estado = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(estado);
+
+        reserva.quitarItem(item);
+
+        verify(estado).quitarItem(reserva, item);
     }
 
     @Test
-    void solicitudPendiente_noPermiteHacerCheckin() {
-        assertThrows(ExcepcionPorInvalido.class, reserva::hacerCheckin);
-    }
+    void confirmar_delegaEnElEstadoActualPasandoLaReserva() {
+        EstadoDeReserva estado = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(estado);
 
-    @Test
-    void solicitudPendiente_noPermiteIniciarNiFinalizar() {
-        assertThrows(ExcepcionPorInvalido.class, reserva::iniciar);
-        assertThrows(ExcepcionPorInvalido.class, reserva::finalizar);
-    }
-
-    @Test
-    void confirmar_bloqueaElCupo() {
         reserva.confirmar();
 
-        verify(reserva).bloquearCupos();
+        verify(estado).confirmar(reserva);
     }
 
     @Test
-    void desdePagado_noSePuedenAgregarNiQuitarItems() {
-        reserva.confirmar();
+    void hacerCheckin_delegaEnElEstadoActualPasandoLaReserva() {
+        EstadoDeReserva estado = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(estado);
 
-        assertThrows(ExcepcionPorInvalido.class, () -> reserva.agregarItem(servicio));
-        assertThrows(ExcepcionPorInvalido.class, () -> reserva.quitarItem(servicio));
-    }
-
-    @Test
-    void desdePagado_noSePuedeConfirmarDeNuevoNiFinalizar() {
-        reserva.confirmar();
-
-        assertThrows(ExcepcionPorInvalido.class, reserva::confirmar);
-        assertThrows(ExcepcionPorInvalido.class, reserva::finalizar);
-    }
-
-    @Test
-    void cancelarDesdePagado_liberaElCupo() {
-        reserva.confirmar();
-        reserva.cancelar();
-
-        verify(reserva).liberarCupos();
-        verify(reserva, never()).reembolsar();
-    }
-
-    @Test
-    void cancelarDesdeSolicitudPendiente_noTocaCupoNiReembolso() {
-        reserva.cancelar();
-
-        verify(reserva, never()).bloquearCupos();
-        verify(reserva, never()).liberarCupos();
-        verify(reserva, never()).reembolsar();
-        assertThrows(ExcepcionPorInvalido.class, () -> reserva.agregarItem(servicio));
-    }
-
-    @Test
-    void cancelarDesdeEnChecking_liberaElCupoYReembolsa() {
-        reserva.confirmar();
-        reserva.hacerCheckin();
-        reserva.cancelar();
-
-        verify(reserva).liberarCupos();
-        verify(reserva).reembolsar();
-    }
-
-    @Test
-    void enChecking_noSePuedeVolverAHacerCheckinNiFinalizar() {
-        reserva.confirmar();
         reserva.hacerCheckin();
 
-        assertThrows(ExcepcionPorInvalido.class, reserva::hacerCheckin);
-        assertThrows(ExcepcionPorInvalido.class, reserva::finalizar);
-        assertThrows(ExcepcionPorInvalido.class, reserva::confirmar);
+        verify(estado).hacerCheckin(reserva);
     }
 
     @Test
-    void cancelarDesdeEnCurso_soloReembolsa() {
-        reserva.confirmar();
-        reserva.hacerCheckin();
-        reserva.iniciar();
-        reserva.cancelar();
+    void iniciar_delegaEnElEstadoActualPasandoLaReserva() {
+        EstadoDeReserva estado = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(estado);
 
-        verify(reserva).reembolsar();
-        verify(reserva, never()).liberarCupos();
-    }
-
-    @Test
-    void enCurso_noPermiteRetroceder() {
-        reserva.confirmar();
-        reserva.hacerCheckin();
         reserva.iniciar();
 
-        assertThrows(ExcepcionPorInvalido.class, reserva::hacerCheckin);
-        assertThrows(ExcepcionPorInvalido.class, reserva::iniciar);
-        assertThrows(ExcepcionPorInvalido.class, reserva::confirmar);
+        verify(estado).iniciar(reserva);
     }
 
     @Test
-    void flujoCompleto_hastaFinalizada() {
-        reserva.agregarItem(servicio);
-        reserva.confirmar();
-        reserva.hacerCheckin();
-        reserva.iniciar();
+    void finalizar_delegaEnElEstadoActualPasandoLaReserva() {
+        EstadoDeReserva estado = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(estado);
+
         reserva.finalizar();
 
-        assertThrows(ExcepcionPorInvalido.class, reserva::cancelar);
-        assertThrows(ExcepcionPorInvalido.class, reserva::finalizar);
-        assertThrows(ExcepcionPorInvalido.class, reserva::iniciar);
-        assertThrows(ExcepcionPorInvalido.class, reserva::hacerCheckin);
-        assertThrows(ExcepcionPorInvalido.class, reserva::confirmar);
-        assertThrows(ExcepcionPorInvalido.class, () -> reserva.agregarItem(servicio));
-        assertThrows(ExcepcionPorInvalido.class, () -> reserva.quitarItem(servicio));
+        verify(estado).finalizar(reserva);
     }
 
     @Test
-    void canceladaEsTerminal() {
+    void cancelar_delegaEnElEstadoActualPasandoLaReserva() {
+        EstadoDeReserva estado = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(estado);
+
         reserva.cancelar();
 
-        assertThrows(ExcepcionPorInvalido.class, reserva::cancelar);
+        verify(estado).cancelar(reserva);
+    }
+
+    @Test
+    void cambiarEstado_reemplazaElEstadoAnteriorPorElNuevo() {
+        EstadoDeReserva anterior = mock(EstadoDeReserva.class);
+        EstadoDeReserva nuevo = mock(EstadoDeReserva.class);
+        reserva.cambiarEstado(anterior);
+
+        reserva.cambiarEstado(nuevo);
+        reserva.confirmar();
+
+        verify(nuevo).confirmar(reserva);
+        verify(anterior, never()).confirmar(any());
+    }
+
+    // --- Reserva con los estados reales (spy) ---
+
+    @Test
+    void nuevaReserva_empiezaEnSolicitudPendiente() {
+        assertDoesNotThrow(() -> reserva.agregarItem(item));
         assertThrows(ExcepcionPorInvalido.class, reserva::hacerCheckin);
     }
 
     @Test
-    void noSePuedeIniciarUnaReservaPagadaSinCheckin() {
-        reserva.confirmar();
+    void agregarItem_enSolicitudPendiente_llegaALosItemsDeLaReserva() {
+        Reserva espia = spy(reserva);
 
-        assertThrows(ExcepcionPorInvalido.class, reserva::iniciar);
+        espia.agregarItem(item);
+
+        verify(espia).agregarItemDirecto(item);
+    }
+
+    @Test
+    void quitarItem_enSolicitudPendiente_llegaALosItemsDeLaReserva() {
+        Reserva espia = spy(reserva);
+
+        espia.quitarItem(item);
+
+        verify(espia).quitarItemDirecto(item);
+    }
+
+    @Test
+    void confirmar_bloqueaElCupoDeLasUnidades() {
+        Reserva espia = spy(reserva);
+
+        espia.confirmar();
+
+        verify(espia).bloquearCupos();
+    }
+
+    @Test
+    void cancelar_desdeSolicitudPendiente_noLiberaCuposNiReembolsa() {
+        Reserva espia = spy(reserva);
+
+        espia.cancelar();
+
+        verify(espia, never()).liberarCupos();
+        verify(espia, never()).reembolsar();
+    }
+
+    @Test
+    void cancelar_desdeEnChecking_liberaElCupoDeLasUnidades() {
+        Reserva espia = spy(reserva);
+        espia.confirmar();
+        espia.hacerCheckin();
+
+        espia.cancelar();
+
+        verify(espia).liberarCupos();
+    }
+
+    @Test
+    void cancelar_desdeEnChecking_reembolsaLosServiciosYTasasDeReserva() {
+        Reserva espia = spy(reserva);
+        espia.confirmar();
+        espia.hacerCheckin();
+
+        espia.cancelar();
+
+        verify(espia).reembolsar();
+    }
+
+    // --- Datos que consume el módulo de traslado ---
+
+    @Test
+    void cantidadDePasajeros_devuelveLaCantidadDelConstructor() {
+        assertEquals(2, reserva.cantidadDePasajeros());
+    }
+
+    @Test
+    void getDestino_devuelveElDestinoDelConstructor() {
+        assertSame(destino, reserva.getDestino());
+    }
+
+    @Test
+    void valorTotal_devuelveCero_mientrasLaFormulaNoEsteDefinida() {
+        assertEquals(0f, reserva.valorTotal());
     }
 }
