@@ -11,7 +11,7 @@ public class PuntoEncuentro implements MetodoTranslado {
         this.cuposGuias = cuposGuias;
     }
 
-    public float calcularCosto(Reserva reserva) {
+    public double calcularCosto(Reserva reserva) {
         return 0; // no tiene costo
     }
 
@@ -21,5 +21,13 @@ public class PuntoEncuentro implements MetodoTranslado {
 
     public String getUbicacion() {
         return ubicacion;
+    }
+
+    public asignarGuia(Reserva reserva){
+        if(cuposGuias <= 0){
+            throw new ExcepcionDominio("No hay mas guias para asignar");
+        }else{
+            cuposGuias -= reserva.cantidadDePasajeros();
+        }
     }
 }

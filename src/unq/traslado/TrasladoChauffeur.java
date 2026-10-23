@@ -9,7 +9,7 @@ public class TrasladoChauffeur implements MetodoTraslado {
         this.servicioVIP = servicioVIP;
     }
 
-    public float calcularCosto(Reserva reserva) {
-        return servicioVIP.calcularCosto(reserva.valorTotal());
+    public double calcularCosto(Reserva reserva) {
+        return servicioVIP.calcularCosto(reserva.valorServicios());
     }
 }

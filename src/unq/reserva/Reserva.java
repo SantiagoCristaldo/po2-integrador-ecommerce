@@ -11,6 +11,7 @@ public class Reserva {
     private List<Catalogo> items = new ArrayList<>();
     private Direccion destino;
     private int cantidadDePasajeros;
+    private MetodoTraslado metodoTraslado;
 
     public Reserva(Direccion destino, int cantidadDePasajeros) {
         this.estado = new SolicitudPendiente();
@@ -22,10 +23,14 @@ public class Reserva {
         return cantidadDePasajeros;
     }
 
-    public double valorTotal() {
+    public double valorServicios() {
         return items.stream()
                 .mapToDouble(Catalogo::precioFinal)
                 .sum();
+    }
+
+    public double valorTotal() {
+        return this.valorServicios() + metodoTraslado.calcularCosto(this);
     }
 
     public void agregarItem(Catalogo item) {

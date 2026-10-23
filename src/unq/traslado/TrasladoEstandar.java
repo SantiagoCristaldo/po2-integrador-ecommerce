@@ -9,7 +9,7 @@ public class TrasladoEstandar implements MetodoTraslado {
         this.plataforma = plataforma;
     }
 
-    public float calcularCosto(Reserva reserva) {
+    public double calcularCosto(Reserva reserva) {
 
         int cantClientes = reserva.cantidadDePasajeros();
         Direccion direccionDestino = reserva.getDestino();
