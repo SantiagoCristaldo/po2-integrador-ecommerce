@@ -3,6 +3,11 @@ package unq.reserva;
 import unq.catalogo.Catalogo;
 
 public class Cancelada extends EstadoDeReserva {
+
+    public Cancelada(){
+        this.nombreDeEstado = "CANCELADA";
+    }
+
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         throw new ExcepcionPorInvalido("La reserva esta cancelada");
@@ -37,4 +42,11 @@ public class Cancelada extends EstadoDeReserva {
     public void cancelar(Reserva reserva) {
         throw new ExcepcionPorInvalido("La reserva ya esta cancelada");
     }
+
+    @Override
+    public boolean esCancelada(){
+        return true;
+    } 
+
+
 }

@@ -3,6 +3,11 @@ package unq.reserva;
 import unq.catalogo.Catalogo;
 
 public class SolicitudPendiente extends EstadoDeReserva {
+
+    public SolicitudPendiente(){
+        this.nombreDeEstado = "SolicitudPendiente";
+    }
+
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         reserva.agregarItemDirecto(item);

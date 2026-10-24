@@ -3,6 +3,11 @@ package unq.reserva;
 import unq.catalogo.Catalogo;
 
 public class EnCurso extends EstadoDeReserva {
+
+    public EnCurso(){
+        this.nombreDeEstado = "EnCurso";
+    }
+
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         throw new ExcepcionPorInvalido("No se pueden agregar items a una reserva en curso");

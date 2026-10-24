@@ -3,6 +3,12 @@ package unq.reserva;
 import unq.catalogo.Catalogo;
 
 public abstract class EstadoDeReserva {
+    public String nombreDeEstado;
+
+    public String nombre(){
+        return this.nombreDeEstado;
+    }
+
     public void agregarItem(Reserva reserva, Catalogo item){}
 
     public void quitarItem(Reserva reserva, Catalogo item){}
@@ -22,6 +28,10 @@ public abstract class EstadoDeReserva {
     }
     
     public boolean debeGenerarVoucher(){
+        return false;
+    }
+
+    public boolean esCancelada(){
         return false;
     }
 }

@@ -4,17 +4,25 @@ import java.time.LocalDateTime;
 
 public class TarjDeCredito extends MedioDePago {
     private int nroTarjeta;
-    private int CVV;
+    private String CVV;
     private LocalDateTime vencimiento;
     private APITarjetaDeCredito api;
 
-    public TarjDeCredito(int nroTarjeta, int cvv, LocalDateTime vencimiento, float monto, String codigoDeTransaccion,
+    public TarjDeCredito(int nroTarjeta, String cvv, LocalDateTime vencimiento, float monto, String codigoDeTransaccion,
             APITarjetaDeCredito api) {
         super(monto, codigoDeTransaccion);
         this.nroTarjeta = nroTarjeta;
         this.CVV = cvv;
         this.vencimiento = vencimiento;
         this.api = api;
+    }
+
+    public String getCVV(){
+        return this.CVV;
+    }
+
+    public LocalDateTime getVencimiento(){
+        return this.vencimiento;
     }
 
     @Override

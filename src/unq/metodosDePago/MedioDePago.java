@@ -12,6 +12,10 @@ public abstract class MedioDePago {
         this.codigoTransaccion = codigoTransaccion;
     }
 
+    public String getCodigoTransaccion(){
+        return this.codigoTransaccion;
+    }
+    
     public void procesoDePago(){
         if (this.validarDatos()){
             this.reservarFondos();

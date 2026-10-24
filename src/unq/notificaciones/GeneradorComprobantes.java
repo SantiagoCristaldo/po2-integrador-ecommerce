@@ -1,29 +1,29 @@
 package unq.notificaciones;
 
-import java.time.LocalDate;
-
 import unq.reserva.Reserva;
 
 public class GeneradorComprobantes implements ObservadorReserva {
-    private RegistroTransacciones registro;
+    private int contadorFacturas;
+    private int contadorVouchers;
 
-    public GeneradorComprobantes(RegistroTransacciones registro) {
-        this.registro = registro;
-    }
 
     @Override
-    public void actualizar(EstadoDeReserva estadoAnterior, EstadoDeReserva estadoNuevo, Reserva reserva) {
-
+    public void actualizar(Reserva reserva) {
+        if (reserva.getEstadoActual().debeGenerarVoucher()){
+            this.generarFactura(reserva);
+            this.generarVoucher(reserva);
+        }
     }
 
-    private FacturaFiscal generarFactura(Reserva r) {
-
+    private FacturaFiscal generarFactura(Reserva reserva) {
+        contadorFacturas++;
+        return new FacturaFiscal(contadorFacturas, reserva.valorTotal(), reserva);
     }
 
-    private VoucherViaje generarVoucher(Reserva r) {
 
-    }
+    private VoucherViaje generarVoucher(Reserva reserva) {
+        contadorVouchers++;
+        return new VoucherViaje(contadorVouchers, reserva);
 
-    private Reserva obtenerReserva() {
     }
 }

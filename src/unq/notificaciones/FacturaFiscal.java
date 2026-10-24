@@ -1,33 +1,27 @@
 package unq.notificaciones;
 
-import java.time.LocalDate;
+import unq.reserva.*;
 
 public class FacturaFiscal {
-    private String numero;
-    private LocalDate fechaEmision;
-    private float total;
-    private unq.reserva.Reserva reserva;
+    private int numero;
+    private double total;
+    private Reserva reserva;
 
-    public FacturaFiscal(String numero, LocalDate fechaEmision, float total, unq.reserva.Reserva reserva) {
+    public FacturaFiscal(int numero, double total, Reserva reserva) {
         this.numero = numero;
-        this.fechaEmision = fechaEmision;
         this.total = total;
         this.reserva = reserva;
     }
 
-    public String getNumero() {
+    public int getNumero() {
         return numero;
     }
 
-    public LocalDate getFechaEmision() {
-        return fechaEmision;
+    public double getTotal() {
+        return this.total;
     }
 
-    public float getTotal() {
-        return total;
-    }
-
-    public unq.reserva.Reserva getReserva() {
+    public Reserva getReserva() {
         return reserva;
     }
 }

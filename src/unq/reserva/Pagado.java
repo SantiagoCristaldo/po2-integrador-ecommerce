@@ -3,6 +3,11 @@ package unq.reserva;
 import unq.catalogo.Catalogo;
 
 public class Pagado extends EstadoDeReserva {
+
+    public Pagado(){
+        this.nombreDeEstado = "Pagado";
+    }
+
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         throw new ExcepcionPorInvalido("No se pueden agregar items a una reserva pagada");

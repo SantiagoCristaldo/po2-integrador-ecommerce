@@ -8,6 +8,7 @@ import unq.notificaciones.*;
 
 public class Reserva {
     private EstadoDeReserva estado;
+    private EstadoDeReserva estadoAnterior;
     private List<Catalogo> items = new ArrayList<>();
     private Direccion destino;
     private int cantidadDePasajeros;
@@ -21,6 +22,18 @@ public class Reserva {
         this.destino = destino;
         this.cantidadDePasajeros = cantidadDePasajeros;
         this.email = email;
+    }
+
+    public EstadoDeReserva getEstadoActual(){
+        return this.estado;
+    }
+
+    public EstadoDeReserva getEstadoAnterior(){
+        return this.estadoAnterior;
+    }
+
+    public String getEmail(){
+        return this.email;
     }
 
     public int cantidadDePasajeros() {
@@ -66,7 +79,7 @@ public class Reserva {
     }
 
     public void cambiarEstado(EstadoDeReserva nuevoEstado) {
-        notificacion.actualizarEstados(this.estado, nuevoEstado);
+        notificacion.actualizarEstados(this);
         this.estado = nuevoEstado;
     }
 

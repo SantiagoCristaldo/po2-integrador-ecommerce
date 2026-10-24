@@ -16,6 +16,14 @@ public class PagoTransferencia extends MedioDePago {
         this.api = api;
     }
 
+    public LocalDateTime getFechaProgramada(){
+        return this.fechaProgramada;
+    }
+
+    public String getAlias(){
+        return this.alias;
+    }
+
     @Override 
     public boolean validarDatos(){
         return api.validarDatos(this);

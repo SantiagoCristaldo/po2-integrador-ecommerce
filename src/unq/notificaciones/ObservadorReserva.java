@@ -1,6 +1,7 @@
 package unq.notificaciones;
 
+import unq.reserva.*;
 public interface ObservadorReserva {
 
-    public void actualizar(EstadoDeReserva estadoAnterior, EstadoDeReserva estadoNuevo, Reserva reserva);
+    public void actualizar(Reserva reserva);
 }

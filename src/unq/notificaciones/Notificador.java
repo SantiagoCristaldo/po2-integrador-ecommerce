@@ -7,7 +7,6 @@ import java.util.List;
 
 public class Notificador {
     private List<ObservadorReserva> observadores = new ArrayList<>();
-    private Reserva reserva;
 
     public void agregarObservador(ObservadorReserva observador) {
         observadores.add(observador);
@@ -17,9 +16,9 @@ public class Notificador {
         observadores.remove(observador);
     }
 
-    public void actualizarEstados(EstadoDeReserva estadoAnterior, EstadoDeReserva estadoNuevo, Reserva reserva) {
+    public void actualizarEstados(Reserva reserva) {
         for (ObservadorReserva observador : observadores) {
-            observador.actualizar(estadoAnterior, estadoNuevo, this);
+            observador.actualizar(reserva);
         }
     }
 }

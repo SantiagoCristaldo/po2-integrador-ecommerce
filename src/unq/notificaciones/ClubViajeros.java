@@ -5,22 +5,24 @@ import unq.reserva.Reserva;
 public class ClubViajeros implements ObservadorReserva {
     private MailSender mailSender;
     private float porcentajeCupon = 5;
+    private static int contadorCupones = 0;
 
     public ClubViajeros(MailSender mailSender) {
         this.mailSender = mailSender;
     }
 
     @Override
-    public void actualizar(EstadoDeReserva estadoAnterior, EstadoDeReserva estadoNuevo, Reserva reserva) {
-        // 1. Delegación polimórfica sobre el estado nuevo
-        if (e.getEstadoActual().esCancelada()) {
-            mailSender.enviarMail("direccionDestino", "titulo", "mensaje", generarCupon(null));
+    public void actualizar(Reserva reserva) {
+        
+        if (reserva.getEstadoActual().esCancelada()) {
+            mailSender.enviarMail(reserva.getEmail(),"Actualizacion de el estado de la reserva",
+                                     "Su reserva se encuentra cancelada", this.generarCupon(null));
         }
     }
 
     private CuponDescuento generarCupon(Reserva r) {
-        return new CuponDescuento("CUPON-" + System.currentTimeMillis(), porcentajeCupon,
-                java.time.LocalDate.now().plusMonths(1));
+        contadorCupones++;
+        return new CuponDescuento("CuponNro" + contadorCupones, porcentajeCupon);
     }
 
 }
