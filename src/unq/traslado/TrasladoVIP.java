@@ -2,7 +2,7 @@ package unq.traslado;
 
 public class TrasladoVIP {
     
-    public float calcularCosto(Float precio) {
-        return 0; //para que no moleste
+    public double calcularCosto(double precio) {
+        return precio; //para que no moleste
     }
 }

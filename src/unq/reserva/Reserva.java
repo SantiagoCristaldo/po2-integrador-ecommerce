@@ -2,9 +2,9 @@ package unq.reserva;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import unq.traslado.*;
 import unq.catalogo.Catalogo;
+import unq.notificaciones.*;
 
 public class Reserva {
     private EstadoDeReserva estado;
@@ -12,6 +12,9 @@ public class Reserva {
     private Direccion destino;
     private int cantidadDePasajeros;
     private MetodoTraslado metodoTraslado;
+    private Notificador notificacion = new Notificador();
+    
+
 
     public Reserva(Direccion destino, int cantidadDePasajeros) {
         this.estado = new SolicitudPendiente();
@@ -62,6 +65,7 @@ public class Reserva {
     }
 
     public void cambiarEstado(EstadoDeReserva nuevoEstado) {
+        notificacion.actualizarEstados(this.estado, nuevoEstado);
         this.estado = nuevoEstado;
     }
 

@@ -1,8 +1,9 @@
 package unq.traslado;
 
+import unq.excepciones.*;
 import unq.reserva.*;
 
-public class PuntoEncuentro implements MetodoTranslado {
+public class PuntoEncuentro implements MetodoTraslado {
     private String ubicacion;
     private int cuposGuias;
 
@@ -23,7 +24,7 @@ public class PuntoEncuentro implements MetodoTranslado {
         return ubicacion;
     }
 
-    public asignarGuia(Reserva reserva){
+    public void asignarGuia(Reserva reserva){
         if(cuposGuias <= 0){
             throw new ExcepcionDominio("No hay mas guias para asignar");
         }else{
