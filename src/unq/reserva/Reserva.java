@@ -79,8 +79,9 @@ public class Reserva {
     }
 
     public void cambiarEstado(EstadoDeReserva nuevoEstado) {
-        notificacion.actualizarEstados(this);
+        this.estadoAnterior = estado;
         this.estado = nuevoEstado;
+        notificacion.actualizarEstados(this);
     }
 
     void agregarItemDirecto(Catalogo item) {
