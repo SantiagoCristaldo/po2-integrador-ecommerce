@@ -12,15 +12,15 @@ public class ClubViajeros implements ObservadorReserva {
 
     @Override
     public void actualizar(EventoCambioEstado e) {
-    // 1. Delegación polimórfica sobre el estado nuevo
-    if (e.getEstadoActual().esCancelada()) {
-        notificarCuponDescuento(e.getReserva());
+        // 1. Delegación polimórfica sobre el estado nuevo
+        if (e.getEstadoActual().esCancelada()) {
+            mailSender.enviarMail("direccionDestino", "titulo", "mensaje", generarCupon(null));
+        }
     }
-}
 
     private CuponDescuento generarCupon(Reserva r) {
-        if (r == null) {
-            return new CuponDescuento("CUPON-DEFAULT", porcentajeCupon, java.time.LocalDate.now().plusMonths(1));
-        }
-        return new CuponDescuento("CUPON-" + System.currentTimeMillis(), porcentajeCupon, java.time.LocalDate.now().plusMonths(1));
+        return new CuponDescuento("CUPON-" + System.currentTimeMillis(), porcentajeCupon,
+                java.time.LocalDate.now().plusMonths(1));
     }
+
+}

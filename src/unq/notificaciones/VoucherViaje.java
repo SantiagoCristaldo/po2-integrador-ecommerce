@@ -2,7 +2,6 @@ package unq.notificaciones;
 
 import java.time.LocalDate;
 
-
 import unq.reserva.Reserva;
 
 public class VoucherViaje {
