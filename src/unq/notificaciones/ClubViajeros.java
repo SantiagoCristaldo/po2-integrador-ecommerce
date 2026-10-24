@@ -11,7 +11,7 @@ public class ClubViajeros implements ObservadorReserva {
     }
 
     @Override
-    public void actualizar(EventoCambioEstado e) {
+    public void actualizar(EstadoDeReserva estadoAnterior, EstadoDeReserva estadoNuevo, Reserva reserva) {
         // 1. Delegación polimórfica sobre el estado nuevo
         if (e.getEstadoActual().esCancelada()) {
             mailSender.enviarMail("direccionDestino", "titulo", "mensaje", generarCupon(null));

@@ -13,19 +13,17 @@ public class NotificadorEmail implements ObservadorReserva {
     }
 
     @Override
-    public void actualizar(EventoCambioEstado evento) {
-        
+    public void actualizar(EstadoDeReserva estadoAnterior, EstadoDeReserva estadoNuevo, Reserva reserva) {
         if (evento.getEstadoActual().debeNotificarEmail()) {
-            String destino = "clienteEmail@gmail.com" ;
-            String titulo  = "Actualización en su reserva - UNQ-Travel";
+            String destino = "clienteEmail@gmail.com";
+            String titulo = "Actualización en su reserva - UNQ-Travel";
             String mensaje = armarMensaje(evento);
-            
+
             mailSender.enviarMail(destino, titulo, mensaje, null);
         }
     }
 
-    private String armarMensaje(EventoCambioEstado e) {
+    private String armarMensaje() {
         return "El estado de la reserva cambio";
     }
-
-    
+}
