@@ -13,13 +13,14 @@ public class Reserva {
     private int cantidadDePasajeros;
     private MetodoTraslado metodoTraslado;
     private Notificador notificacion = new Notificador();
-    
+    private String email;
 
 
-    public Reserva(Direccion destino, int cantidadDePasajeros) {
+    public Reserva(String email, Direccion destino, int cantidadDePasajeros) {
         this.estado = new SolicitudPendiente();
         this.destino = destino;
         this.cantidadDePasajeros = cantidadDePasajeros;
+        this.email = email;
     }
 
     public int cantidadDePasajeros() {

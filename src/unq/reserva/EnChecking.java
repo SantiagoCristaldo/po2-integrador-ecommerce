@@ -2,7 +2,7 @@ package unq.reserva;
 
 import unq.catalogo.Catalogo;
 
-public class EnChecking implements EstadoDeReserva {
+public class EnChecking extends EstadoDeReserva {
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         throw new ExcepcionPorInvalido("No se pueden agregar items durante el check-in");

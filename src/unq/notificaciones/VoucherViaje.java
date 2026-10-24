@@ -1,8 +1,7 @@
 package unq.notificaciones;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+
 
 import unq.reserva.Reserva;
 

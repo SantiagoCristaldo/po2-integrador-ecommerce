@@ -2,34 +2,30 @@ package unq.notificaciones;
 
 import java.util.HashSet;
 import java.util.Set;
+import unq.reserva.*;
+import unq.notificaciones.*;
 
 public class NotificadorEmail implements ObservadorReserva {
     private MailSender mailSender;
-    private Set<String> estadosQueNotifica = new HashSet<String>();
 
     public NotificadorEmail(MailSender mailSender) {
         this.mailSender = mailSender;
-        this.estadosQueNotifica.add("CONFIRMADA");
-        this.estadosQueNotifica.add("EN_CURSO");
-        this.estadosQueNotifica.add("FINALIZADA");
     }
 
     @Override
-    public void actualizar(EventoCambioEstado e) {
-        if (estadosQueNotifica.contains(this.obtenerNombreEstado(e.getEstadoActual()))) {
-            String mensaje = armarMensaje(e);
-            mailSender.enviarMail(null, "Cambio de estado", mensaje, null);
+    public void actualizar(EventoCambioEstado evento) {
+        
+        if (evento.getEstadoActual().debeNotificarEmail()) {
+            String destino = "clienteEmail@gmail.com" ;
+            String titulo  = "Actualización en su reserva - UNQ-Travel";
+            String mensaje = armarMensaje(evento);
+            
+            mailSender.enviarMail(destino, titulo, mensaje, null);
         }
     }
 
     private String armarMensaje(EventoCambioEstado e) {
-        return "El estado de la reserva cambio a " + this.obtenerNombreEstado(e.getEstadoActual());
+        return "El estado de la reserva cambio";
     }
 
-    private String obtenerNombreEstado(unq.reserva.EstadoDeReserva estado) {
-        if (estado == null) {
-            return "";
-        }
-        return estado.getClass().getSimpleName().toUpperCase();
-    }
-}
+    

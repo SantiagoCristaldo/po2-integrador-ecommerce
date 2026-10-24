@@ -2,7 +2,7 @@ package unq.reserva;
 
 import unq.catalogo.Catalogo;
 
-public class SolicitudPendiente implements EstadoDeReserva {
+public class SolicitudPendiente extends EstadoDeReserva {
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         reserva.agregarItemDirecto(item);

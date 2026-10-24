@@ -2,7 +2,7 @@ package unq.reserva;
 
 import unq.catalogo.Catalogo;
 
-public class Finalizada implements EstadoDeReserva {
+public class Finalizada extends EstadoDeReserva {
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         throw new ExcepcionPorInvalido("La reserva esta finalizada");
@@ -37,4 +37,14 @@ public class Finalizada implements EstadoDeReserva {
     public void cancelar(Reserva reserva) {
         throw new ExcepcionPorInvalido("La reserva esta finalizada");
     }
+
+    @Override 
+    public boolean debeNotificarEmail(){
+        return true;
+    }
+
+    @Override 
+    public boolean debeGenerarVoucher(){
+        return true;
+    } 
 }

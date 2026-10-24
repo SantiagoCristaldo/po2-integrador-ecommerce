@@ -2,18 +2,26 @@ package unq.reserva;
 
 import unq.catalogo.Catalogo;
 
-public interface EstadoDeReserva {
-    void agregarItem(Reserva reserva, Catalogo item);
+public abstract class EstadoDeReserva {
+    public void agregarItem(Reserva reserva, Catalogo item){}
 
-    void quitarItem(Reserva reserva, Catalogo item);
+    public void quitarItem(Reserva reserva, Catalogo item){}
 
-    void confirmar(Reserva reserva);
+    public void confirmar(Reserva reserva){}
 
-    void hacerCheckin(Reserva reserva);
+    public void hacerCheckin(Reserva reserva){}
 
-    void iniciar(Reserva reserva);
+    public void iniciar(Reserva reserva){}
 
-    void finalizar(Reserva reserva);
+    public void finalizar(Reserva reserva){}
 
-    void cancelar(Reserva reserva);
+    public void cancelar(Reserva reserva){}
+
+    public boolean debeNotificarEmail(){
+        return false;
+    }
+    
+    public boolean debeGenerarVoucher(){
+        return false;
+    }
 }

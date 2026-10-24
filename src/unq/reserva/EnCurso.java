@@ -2,7 +2,7 @@ package unq.reserva;
 
 import unq.catalogo.Catalogo;
 
-public class EnCurso implements EstadoDeReserva {
+public class EnCurso extends EstadoDeReserva {
     @Override
     public void agregarItem(Reserva reserva, Catalogo item) {
         throw new ExcepcionPorInvalido("No se pueden agregar items a una reserva en curso");
@@ -37,5 +37,10 @@ public class EnCurso implements EstadoDeReserva {
     public void cancelar(Reserva reserva) {
         reserva.reembolsar();
         reserva.cambiarEstado(new Cancelada());
+    }
+
+    @Override 
+    public boolean debeNotificarEmail(){
+        return true;
     }
 }

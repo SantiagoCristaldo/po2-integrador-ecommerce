@@ -12,15 +12,11 @@ public class ClubViajeros implements ObservadorReserva {
 
     @Override
     public void actualizar(EventoCambioEstado e) {
-        if (e != null && e.getEstadoActual() != null
-                && e.getEstadoActual().getClass().getSimpleName().equalsIgnoreCase("FINALIZADA")) {
-            Reserva reserva = obtenerReserva(e);
-            CuponDescuento cupon = generarCupon(reserva);
-            if (cupon != null) {
-                mailSender.enviarMail(null, "Cupón de descuento", "Tu cupón es: " + cupon.getCodigo(), cupon);
-            }
-        }
+    // 1. Delegación polimórfica sobre el estado nuevo
+    if (e.getEstadoActual().esCancelada()) {
+        notificarCuponDescuento(e.getReserva());
     }
+}
 
     private CuponDescuento generarCupon(Reserva r) {
         if (r == null) {
@@ -28,14 +24,3 @@ public class ClubViajeros implements ObservadorReserva {
         }
         return new CuponDescuento("CUPON-" + System.currentTimeMillis(), porcentajeCupon, java.time.LocalDate.now().plusMonths(1));
     }
-
-    private Reserva obtenerReserva(EventoCambioEstado e) {
-        try {
-            java.lang.reflect.Field f = EventoCambioEstado.class.getDeclaredField("reserva");
-            f.setAccessible(true);
-            return (Reserva) f.get(e);
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-}
