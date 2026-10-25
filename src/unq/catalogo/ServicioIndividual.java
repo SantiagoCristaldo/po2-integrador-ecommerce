@@ -13,6 +13,7 @@ public class ServicioIndividual implements Catalogo {
     private Categoria categoria;
     private double precioBase;
     private double descuentoPromocional;
+    private int cupoTotal;
     private List<AtributoDinamico> atributosDinamicos = new ArrayList<>();
 
     public ServicioIndividual(String codigo, String nombre, String descripcion,
@@ -58,10 +59,45 @@ public class ServicioIndividual implements Catalogo {
         return nombre != null && nombre.toLowerCase().contains(texto.toLowerCase());
     }
 
+    @Override 
     public boolean esDeCategoria(Categoria categoria) {
         return this.categoria.equals(categoria);
     }
 
+    @Override
+    public List<ServicioIndividual> servicios() {
+        return List.of(this);
+    }
+
+    @Override
+    public List<Catalogo> componentes() {
+        return List.of();
+    }
+
+    @Override
+    public double factorDeDescuento() {
+        return 1.0;
+    }
+
+    public String getOperador() {
+        return operador;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public int getCupoTotal() {
+        return cupoTotal;
+    }
+
+    public void setCupoTotal(int cupoTotal) {
+        if (cupoTotal < 0) {
+            throw new ExcepcionDominio("El cupo total no puede ser negativo");
+        }
+        this.cupoTotal = cupoTotal;
+    }
+ 
     public void agregarAtributoDinamico(AtributoDinamico atributo) {
         if (atributosDinamicos.stream().anyMatch(a -> a.mismoNombreQue(atributo))) {
             throw new ExcepcionDominio("Ya existe un atributo dinámico con ese nombre");

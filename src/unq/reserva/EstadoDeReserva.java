@@ -34,4 +34,8 @@ public abstract class EstadoDeReserva {
     public boolean esCancelada(){
         return false;
     }
+    
+    public boolean cuentaComoVenta(){
+        return true;
+    }
 }

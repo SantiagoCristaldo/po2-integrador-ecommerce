@@ -1,5 +1,7 @@
 package unq.catalogo;
 
+import java.util.List;
+
 public interface Catalogo {
     String nombre();
 
@@ -12,4 +14,10 @@ public interface Catalogo {
     boolean contieneEnNombre(String texto);
 
     boolean esDeCategoria(Categoria categoria);
+
+    List<ServicioIndividual> servicios();
+
+    List<Catalogo> componentes();
+
+    double factorDeDescuento();
 }

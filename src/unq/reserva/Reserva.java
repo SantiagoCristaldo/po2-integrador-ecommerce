@@ -1,5 +1,6 @@
 package unq.reserva;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import unq.traslado.*;
@@ -15,6 +16,7 @@ public class Reserva {
     private MetodoTraslado metodoTraslado;
     private Notificador notificacion = new Notificador();
     private String email;
+    private LocalDate fecha;
 
 
     public Reserva(String email, Direccion destino, int cantidadDePasajeros) {
@@ -22,8 +24,22 @@ public class Reserva {
         this.destino = destino;
         this.cantidadDePasajeros = cantidadDePasajeros;
         this.email = email;
+        this.fecha = LocalDate.now();
+    }
+    public Reserva(String email, Direccion destino, int cantidadDePasajeros,LocalDate fecha){
+        this(email, destino, cantidadDePasajeros);
+        this.fecha =fecha;    
+    }
+    public LocalDate getFecha(){
+        return fecha;
+    }
+    public List<Catalogo> getItems(){
+        return new ArrayList<>(items);
     }
 
+    public  boolean cuentaComoVenta(){
+        return estado.cuentaComoVenta();
+    }
     public EstadoDeReserva getEstadoActual(){
         return this.estado;
     }

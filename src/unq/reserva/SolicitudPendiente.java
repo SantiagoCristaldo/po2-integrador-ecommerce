@@ -43,4 +43,9 @@ public class SolicitudPendiente extends EstadoDeReserva {
     public void cancelar(Reserva reserva) {
         reserva.cambiarEstado(new Cancelada());
     }
+
+    @Override 
+    public boolean cuentaComoVenta(){
+        return false;
+    }
 }
