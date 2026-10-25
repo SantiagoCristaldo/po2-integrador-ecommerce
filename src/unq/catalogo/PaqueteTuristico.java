@@ -28,9 +28,6 @@ public class PaqueteTuristico implements Catalogo {
         items.remove(item);
     }
 
-    // TODO: consultar al docente. El enunciado (texto) dice que el precio base del
-    // paquete es suma x (1 - descuento), pero la tabla muestra base = suma y final = suma x (1 - descuento).
-    // Se implementa segun la tabla.
     @Override
     public double precioBase() {
         return items.stream()
@@ -69,5 +66,24 @@ public class PaqueteTuristico implements Catalogo {
             }
         }
         return false;
-    }  
+    }
+    
+    @Override 
+    public List<Catalogo> componentes(){
+        return new ArrayList<>(items);
+    }
+
+    @Override 
+    public double factorDeDescuento(){
+        return 1 - descuento / 100;
+    }
+
+    @Override 
+    public List<ServicioIndividual> servicios(){
+        List<ServicioIndividual> servicios = new ArrayList<>();
+        for (Catalogo item : items){
+            servicios.addAll(item.servicios());
+        }
+        return servicios; 
+    }
 }
