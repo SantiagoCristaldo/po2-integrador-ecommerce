@@ -6,7 +6,7 @@ public abstract class MedioDePago {
     public  double monto;
     private String codigoTransaccion;
     
-    public MedioDePago(float monto, String codigoTransaccion){
+    public MedioDePago(double monto, String codigoTransaccion){
         
         this.monto = monto;
         this.codigoTransaccion = codigoTransaccion;
@@ -16,7 +16,7 @@ public abstract class MedioDePago {
         return this.codigoTransaccion;
     }
     
-    public void procesoDePago(){
+    public final void procesoDePago(){
         if (this.validarDatos()){
             this.reservarFondos();
             this.ejecutarTransaccion();
@@ -34,6 +34,8 @@ public abstract class MedioDePago {
     public abstract boolean validarDatos();
     public abstract void reservarFondos();   
     public abstract void ejecutarTransaccion();
-    public abstract void notificarResultado();
+    public void notificarResultado(){
+        // por defecto no notifica nada; cada medio puede sobrescribirlo
+    }
 
 }

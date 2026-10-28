@@ -46,7 +46,10 @@ public class Cancelada extends EstadoDeReserva {
     @Override
     public boolean esCancelada(){
         return true;
-    } 
+    }
 
-
+    @Override
+    public boolean cuentaComoVenta(){
+        return false;
+    }
 }

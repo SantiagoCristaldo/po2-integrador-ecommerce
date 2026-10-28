@@ -10,8 +10,8 @@ public interface APITarjetaDeCredito {
 
     public boolean validarVencimiento(LocalDateTime fecha);
 
-    public boolean preAutorizar(int numero, float monto);
+    public boolean preAutorizar(int numero, double monto);
 
-    public void transferirInmediata(float monto);    
+    public void transferirInmediata(double monto);    
 
 }

@@ -4,7 +4,7 @@ public class BilleteraVirtual extends MedioDePago {
     private String idCuenta;
     private APIBilletera api;
 
-    public BilleteraVirtual(float monto, APIBilletera api, String idCuenta, String codigoTransaccion){
+    public BilleteraVirtual(double monto, APIBilletera api, String idCuenta, String codigoTransaccion){
         super(monto, codigoTransaccion);
         this.monto = monto;
         this.api = api;

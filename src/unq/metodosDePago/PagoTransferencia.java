@@ -8,7 +8,7 @@ public class PagoTransferencia extends MedioDePago {
     private LocalDateTime fechaProgramada;
     private APIBancaria api;
 
-    public PagoTransferencia(int CBU, String alias, LocalDateTime fechaProgramada, APIBancaria api, float monto, String codigoTransaccion){
+    public PagoTransferencia(int CBU, String alias, LocalDateTime fechaProgramada, APIBancaria api, double monto, String codigoTransaccion){
         super(monto, codigoTransaccion);
         this.CBU = CBU;
         this.alias = alias;

@@ -45,4 +45,9 @@ class CanceladaTest {
         assertFalse(estado.debeNotificarEmail());
         assertFalse(estado.debeGenerarVoucher());
     }
+
+    @Test
+    void noCuentaComoVenta() {
+        assertFalse(estado.cuentaComoVenta());
+    }
 }

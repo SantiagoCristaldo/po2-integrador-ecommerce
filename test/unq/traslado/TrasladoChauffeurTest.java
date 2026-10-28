@@ -21,7 +21,7 @@ class TrasladoChauffeurTest {
         servicioVIP = mock(TrasladoVIP.class);
         chauffeur = new TrasladoChauffeur(servicioVIP);
         reserva = mock(Reserva.class);
-        when(reserva.valorTotal()).thenReturn(15000.0);
+        when(reserva.valorServicios()).thenReturn(15000.0);
     }
 
     @Test
@@ -32,9 +32,9 @@ class TrasladoChauffeurTest {
     }
 
     @Test
-    void calcularCosto_pasaElValorTotalDeLaReservaAlServicioVIP() {
+    void calcularCosto_pasaElValorDeLosServiciosDeLaReservaAlServicioVIP() {
         chauffeur.calcularCosto(reserva);
 
-        verify(servicioVIP).calcularCosto(15000f);
+        verify(servicioVIP).calcularCosto(15000.0);
     }
 }

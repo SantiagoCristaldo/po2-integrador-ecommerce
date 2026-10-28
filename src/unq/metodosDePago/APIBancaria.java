@@ -8,6 +8,6 @@ public interface APIBancaria {
 
     public boolean validarAlias(String alias);
 
-    public boolean transferirDeInmediato(int CBU, float monto);
+    public boolean transferirDeInmediato(int CBU, double monto);
     
 }

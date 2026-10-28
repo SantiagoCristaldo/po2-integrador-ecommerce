@@ -9,16 +9,12 @@ import org.junit.jupiter.api.Test;
  * Verifica que los tres metodos de traslado del enunciado (estandar, chauffeur/VIP y punto de
  * encuentro) sean intercambiables a traves de la interfaz {@link MetodoTraslado}, es decir, que el
  * patron Strategy este efectivamente implementado.
- *
- * <p>Los tests de {@code TrasladoChauffeur} y {@code PuntoEncuentro} fallan a proposito: esas clases
- * tienen el metodo {@code calcularCosto(Reserva)} con la firma correcta pero no declaran
- * {@code implements MetodoTraslado}. Ver H18 en HALLAZGOS.md.</p>
  */
 class MetodoTrasladoTest {
 
     @Test
     void trasladoEstandar_esUnMetodoDeTraslado() {
-        TrasladoEstandar traslado = new TrasladoEstandar(mock(PlataformaTransporte.class));
+        TrasladoEstandar traslado = new TrasladoEstandar(mock(PlataformaTransporte.class), mock(Direccion.class));
 
         assertInstanceOf(MetodoTraslado.class, traslado);
     }

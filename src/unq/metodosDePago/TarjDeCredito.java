@@ -8,7 +8,7 @@ public class TarjDeCredito extends MedioDePago {
     private LocalDateTime vencimiento;
     private APITarjetaDeCredito api;
 
-    public TarjDeCredito(int nroTarjeta, int cvv, LocalDateTime vencimiento, float monto, String codigoDeTransaccion,
+    public TarjDeCredito(int nroTarjeta, int cvv, LocalDateTime vencimiento, double monto, String codigoDeTransaccion,
             APITarjetaDeCredito api) {
         super(monto, codigoDeTransaccion);
         this.nroTarjeta = nroTarjeta;
