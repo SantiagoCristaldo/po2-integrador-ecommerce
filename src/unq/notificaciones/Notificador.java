@@ -16,9 +16,9 @@ public class Notificador {
         observadores.remove(observador);
     }
 
-    public void actualizarEstados(Reserva reserva) {
+    public void actualizarEstados(Reserva reserva, EstadoDeReserva estadoAnterior, EstadoDeReserva estadoActual) {
         for (ObservadorReserva observador : observadores) {
-            observador.actualizar(reserva);
+            observador.actualizar(reserva, estadoAnterior, estadoActual);
         }
     }
 }

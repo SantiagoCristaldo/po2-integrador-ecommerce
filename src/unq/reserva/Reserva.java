@@ -9,13 +9,11 @@ import unq.notificaciones.*;
 
 public class Reserva {
     private EstadoDeReserva estado;
-    private EstadoDeReserva estadoAnterior;
     private List<Catalogo> items = new ArrayList<>();
     private Direccion destino;
     private int cantidadDePasajeros;
     private MetodoTraslado metodoTraslado;
     private Notificador notificacion = new Notificador();
-    private String email;
     private LocalDate fecha;
 
 
@@ -23,7 +21,6 @@ public class Reserva {
         this.estado = new SolicitudPendiente();
         this.destino = destino;
         this.cantidadDePasajeros = cantidadDePasajeros;
-        this.email = email;
         this.fecha = LocalDate.now();
     }
     public Reserva(String email, Direccion destino, int cantidadDePasajeros,LocalDate fecha){
@@ -44,13 +41,6 @@ public class Reserva {
         return this.estado;
     }
 
-    public EstadoDeReserva getEstadoAnterior(){
-        return this.estadoAnterior;
-    }
-
-    public String getEmail(){
-        return this.email;
-    }
 
     public int cantidadDePasajeros() {
         return cantidadDePasajeros;
@@ -95,9 +85,8 @@ public class Reserva {
     }
 
     public void cambiarEstado(EstadoDeReserva nuevoEstado) {
-        this.estadoAnterior = estado;
+        notificacion.actualizarEstados(this, this.estado, nuevoEstado);
         this.estado = nuevoEstado;
-        notificacion.actualizarEstados(this);
     }
 
     void agregarItemDirecto(Catalogo item) {

@@ -1,5 +1,6 @@
 package unq.notificaciones;
 
+import unq.reserva.EstadoDeReserva;
 import unq.reserva.Reserva;
 
 public class ClubViajeros implements ObservadorReserva {
@@ -12,10 +13,10 @@ public class ClubViajeros implements ObservadorReserva {
     }
 
     @Override
-    public void actualizar(Reserva reserva) {
+    public void actualizar(Reserva reserva, EstadoDeReserva estadoAnterior, EstadoDeReserva estadoActual) {
         
-        if (reserva.getEstadoActual().esCancelada()) {
-            mailSender.enviarMail(reserva.getEmail(),"Actualizacion de el estado de la reserva",
+        if (estadoActual.esCancelada()) {
+            mailSender.enviarMail(null,"Actualizacion de el estado de la reserva",
                                      "Su reserva se encuentra cancelada", this.generarCupon(null));
         }
     }

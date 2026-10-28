@@ -1,5 +1,6 @@
 package unq.notificaciones;
 
+import unq.reserva.EstadoDeReserva;
 import unq.reserva.Reserva;
 
 public class GeneradorComprobantes implements ObservadorReserva {
@@ -8,8 +9,8 @@ public class GeneradorComprobantes implements ObservadorReserva {
 
 
     @Override
-    public void actualizar(Reserva reserva) {
-        if (reserva.getEstadoActual().debeGenerarVoucher()){
+    public void actualizar(Reserva reserva, EstadoDeReserva estadoAnterior, EstadoDeReserva estadoActual) {
+        if (estadoAnterior.debeGenerarVoucher()){
             this.generarFactura(reserva);
             this.generarVoucher(reserva);
         }
