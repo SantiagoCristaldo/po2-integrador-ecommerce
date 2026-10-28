@@ -6,6 +6,8 @@ import java.util.List;
 import unq.traslado.*;
 import unq.catalogo.Catalogo;
 import unq.notificaciones.*;
+import unq.excepciones.*;
+import unq.metodosDePago.*;
 
 public class Reserva {
     private EstadoDeReserva estado;
@@ -14,18 +16,15 @@ public class Reserva {
     private MetodoTraslado metodoTraslado;
     private Notificador notificacion = new Notificador();
     private LocalDate fecha;
+    private MedioDePago medioDePago;
 
 
     public Reserva(String email, Direccion destino, int cantidadDePasajeros) {
         this.estado = new SolicitudPendiente();
-        this.destino = destino;
         this.cantidadDePasajeros = cantidadDePasajeros;
         this.fecha = LocalDate.now();
     }
-    public Reserva(String email, Direccion destino, int cantidadDePasajeros,LocalDate fecha){
-        this(email, destino, cantidadDePasajeros);
-        this.fecha =fecha;    
-    }
+
     public LocalDate getFecha(){
         return fecha;
     }
@@ -40,6 +39,10 @@ public class Reserva {
         return this.estado;
     }
 
+    public double getCostoEnvio() {
+        if (this.metodoTraslado == null) throw new ExcepcionDominio("Método de envío no seleccionado");
+        return this.metodoTraslado.calcularCosto(this);
+    }
 
     public int cantidadDePasajeros() {
         return cantidadDePasajeros;
@@ -52,7 +55,8 @@ public class Reserva {
     }
 
     public double valorTotal() {
-        return this.valorServicios() + metodoTraslado.calcularCosto(this);
+        double costoEnvio = this.getCostoEnvio();
+        return this.valorServicios() + costoEnvio;
     }
 
     public void agregarItem(Catalogo item) {
@@ -88,6 +92,14 @@ public class Reserva {
         this.estado = nuevoEstado;
     }
 
+    public void setMetodoTraslado(MetodoTraslado metodoTraslado) {
+        this.metodoTraslado = metodoTraslado;
+    }
+
+    public void setMetodoPago(MedioDePago medioDePago) {
+        this.medioDePago = medioDePago;
+    }
+
     void agregarItemDirecto(Catalogo item) {
         items.add(item);
     }
@@ -103,5 +115,13 @@ public class Reserva {
     }
 
     public void reembolsar() {
+    }
+
+    public void procesarPago() {
+        if(this.medioDePago == null){
+            throw new ExcepcionDominio("No se puede procesar el pago sin un metodo de pago asignado");  
+        }
+        this.medioDePago.setMonto(this.valorTotal());
+        this.medioDePago.procesoDePago();
     }
 }

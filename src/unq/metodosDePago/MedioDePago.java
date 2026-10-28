@@ -3,7 +3,7 @@ package unq.metodosDePago;
 import unq.excepciones.ExcepcionDominio;
 
 public abstract class MedioDePago {
-    public  float monto;
+    public  double monto;
     private String codigoTransaccion;
     
     public MedioDePago(float monto, String codigoTransaccion){
@@ -24,6 +24,11 @@ public abstract class MedioDePago {
         }else{
             throw new ExcepcionDominio("los datos no fueron validados correctamente");
         }     
+    }
+
+    public double setMonto(double monto){
+        this.monto = monto;
+        return this.monto;
     }
 
     public abstract boolean validarDatos();
