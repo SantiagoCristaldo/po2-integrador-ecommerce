@@ -11,12 +11,12 @@ public class PuntoEncuentro implements MetodoTraslado {
         this.ubicacion = ubicacion;
         this.cuposGuias = cuposGuias;
     }
-
+    @Override 
     public double calcularCosto(Reserva reserva) {
         return 0; // no tiene costo
     }
 
-    public boolean estaDisponible(Reserva reserva) {
+    public boolean estaDisponible(Reserva reserva) { // preguntar que es mejor cupo de guias en reserva o aca.
         return cuposGuias > 0;
     }
 
@@ -28,7 +28,7 @@ public class PuntoEncuentro implements MetodoTraslado {
         if(cuposGuias <= 0){
             throw new ExcepcionDominio("No hay mas guias para asignar");
         }else{
-            cuposGuias -= reserva.cantidadDePasajeros();
+            cuposGuias -= reserva.cantidadDePasajeros(); // o puede ser menos 1 simplemente 
         }
     }
 }

@@ -10,7 +10,6 @@ import unq.notificaciones.*;
 public class Reserva {
     private EstadoDeReserva estado;
     private List<Catalogo> items = new ArrayList<>();
-    private Direccion destino;
     private int cantidadDePasajeros;
     private MetodoTraslado metodoTraslado;
     private Notificador notificacion = new Notificador();
@@ -104,9 +103,5 @@ public class Reserva {
     }
 
     public void reembolsar() {
-    }
-
-    public Direccion getDestino() {
-        return this.destino;
     }
 }

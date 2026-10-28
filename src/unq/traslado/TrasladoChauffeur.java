@@ -8,7 +8,7 @@ public class TrasladoChauffeur implements MetodoTraslado {
     public TrasladoChauffeur(TrasladoVIP servicioVIP) {
         this.servicioVIP = servicioVIP;
     }
-
+    @Override 
     public double calcularCosto(Reserva reserva) {
         return servicioVIP.calcularCosto(reserva.valorServicios());
     }
