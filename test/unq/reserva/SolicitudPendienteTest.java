@@ -1,112 +1,86 @@
 package unq.reserva;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-
 import unq.catalogo.Catalogo;
-import unq.catalogo.Categoria;
-import unq.catalogo.ServicioIndividual;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class SolicitudPendienteTest {
 
     private SolicitudPendiente estado;
-    private Reserva reserva;
-    private Catalogo item;
+    private Reserva reserva;   // MOCK: el estado se testea aislado de la reserva real
+    private Catalogo item;     // DUMMY: solo se pasa como parámetro
 
     @BeforeEach
     void setUp() {
         estado = new SolicitudPendiente();
         reserva = mock(Reserva.class);
-        item = new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel",
-                "Operador SA", new Categoria("Alojamiento"), 15000.0);
+        item = mock(Catalogo.class);
     }
 
     @Test
-    void agregarItem_agregaElItemALaReserva() {
+    void agregarItemDelegaEnLaReserva() {
         estado.agregarItem(reserva, item);
-
         verify(reserva).agregarItemDirecto(item);
     }
 
     @Test
-    void quitarItem_quitaElItemDeLaReserva() {
+    void quitarItemDelegaEnLaReserva() {
         estado.quitarItem(reserva, item);
-
         verify(reserva).quitarItemDirecto(item);
     }
 
     @Test
-    void confirmar_bloqueaElCupoDeLasUnidades() {
+    void confirmarBloqueaCuposYPasaAPagado() {
         estado.confirmar(reserva);
 
         verify(reserva).bloquearCupos();
+        verify(reserva).cambiarEstado(any(Pagado.class));
     }
 
     @Test
-    void confirmar_cambiaElEstadoAPagado() {
+    void confirmarBloqueaCuposAntesDeCambiarDeEstado() {
         estado.confirmar(reserva);
 
-        ArgumentCaptor<EstadoDeReserva> captor = ArgumentCaptor.forClass(EstadoDeReserva.class);
-        verify(reserva).cambiarEstado(captor.capture());
-
-        assertInstanceOf(Pagado.class, captor.getValue());
-    }
-
-    @Test
-    void confirmar_bloqueaElCupoAntesDeCambiarElEstado() {
-        estado.confirmar(reserva);
-
-        InOrder orden = inOrder(reserva);
+        var orden = inOrder(reserva);
         orden.verify(reserva).bloquearCupos();
-        orden.verify(reserva).cambiarEstado(any(EstadoDeReserva.class));
+        orden.verify(reserva).cambiarEstado(any(Pagado.class));
     }
 
     @Test
-    void cancelar_cambiaElEstadoACancelada() {
+    void cancelarPasaACanceladaSinLiberarNiReembolsar() {
         estado.cancelar(reserva);
 
-        ArgumentCaptor<EstadoDeReserva> captor = ArgumentCaptor.forClass(EstadoDeReserva.class);
-        verify(reserva).cambiarEstado(captor.capture());
-
-        assertInstanceOf(Cancelada.class, captor.getValue());
-    }
-
-    @Test
-    void cancelar_noLiberaCuposNiReembolsa() {
-        estado.cancelar(reserva);
-
+        verify(reserva).cambiarEstado(any(Cancelada.class));
         verify(reserva, never()).liberarCupos();
         verify(reserva, never()).reembolsar();
     }
 
     @Test
-    void hacerCheckin_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void hacerCheckinEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.hacerCheckin(reserva));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void iniciar_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void iniciarEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.iniciar(reserva));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void finalizar_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void finalizarEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.finalizar(reserva));
+        verifyNoInteractions(reserva);
+    }
 
-        verify(reserva, never()).cambiarEstado(any());
+    @Test
+    void noCuentaComoVentaNiNotifica() {
+        assertFalse(estado.cuentaComoVenta());
+        assertFalse(estado.debeNotificarEmail());
+        assertFalse(estado.debeGenerarVoucher());
+        assertFalse(estado.esCancelada());
     }
 }

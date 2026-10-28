@@ -21,14 +21,14 @@ class TrasladoChauffeurTest {
         servicioVIP = mock(TrasladoVIP.class);
         chauffeur = new TrasladoChauffeur(servicioVIP);
         reserva = mock(Reserva.class);
-        when(reserva.valorTotal()).thenReturn(15000f);
+        when(reserva.valorTotal()).thenReturn(15000.0);
     }
 
     @Test
     void calcularCosto_devuelveElCostoCalculadoPorElServicioVIP() {
-        when(servicioVIP.calcularCosto(15000f)).thenReturn(2000f);
+        when(servicioVIP.calcularCosto(15000.0)).thenReturn(2000.0);
 
-        assertEquals(2000f, chauffeur.calcularCosto(reserva), 0.001f);
+        assertEquals(2000.0, chauffeur.calcularCosto(reserva), 0.001);
     }
 
     @Test

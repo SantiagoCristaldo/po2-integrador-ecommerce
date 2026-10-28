@@ -1,100 +1,80 @@
 package unq.reserva;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
 import unq.catalogo.Catalogo;
-import unq.catalogo.Categoria;
-import unq.catalogo.ServicioIndividual;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class PagadoTest {
 
     private Pagado estado;
-    private Reserva reserva;
-    private Catalogo item;
+    private Reserva reserva;   // MOCK
+    private Catalogo item;     // DUMMY
 
     @BeforeEach
     void setUp() {
         estado = new Pagado();
         reserva = mock(Reserva.class);
-        item = new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel",
-                "Operador SA", new Categoria("Alojamiento"), 15000.0);
+        item = mock(Catalogo.class);
     }
 
     @Test
-    void hacerCheckin_cambiaElEstadoAEnChecking() {
+    void hacerCheckinPasaAEnChecking() {
         estado.hacerCheckin(reserva);
-
-        ArgumentCaptor<EstadoDeReserva> captor = ArgumentCaptor.forClass(EstadoDeReserva.class);
-        verify(reserva).cambiarEstado(captor.capture());
-
-        assertInstanceOf(EnChecking.class, captor.getValue());
+        verify(reserva).cambiarEstado(any(EnChecking.class));
     }
 
     @Test
-    void cancelar_liberaElCupoDeLasUnidades() {
+    void cancelarLiberaCuposYPasaACancelada() {
         estado.cancelar(reserva);
 
-        verify(reserva).liberarCupos();
+        var orden = inOrder(reserva);
+        orden.verify(reserva).liberarCupos();
+        orden.verify(reserva).cambiarEstado(any(Cancelada.class));
     }
 
     @Test
-    void cancelar_cambiaElEstadoACancelada() {
+    void cancelarNoReembolsa() {
         estado.cancelar(reserva);
-
-        ArgumentCaptor<EstadoDeReserva> captor = ArgumentCaptor.forClass(EstadoDeReserva.class);
-        verify(reserva).cambiarEstado(captor.capture());
-
-        assertInstanceOf(Cancelada.class, captor.getValue());
-    }
-
-    @Test
-    void cancelar_noReembolsa() {
-        estado.cancelar(reserva);
-
         verify(reserva, never()).reembolsar();
     }
 
     @Test
-    void agregarItem_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void agregarItemEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.agregarItem(reserva, item));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verify(reserva, never()).agregarItemDirecto(any());
     }
 
     @Test
-    void quitarItem_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void quitarItemEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.quitarItem(reserva, item));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verify(reserva, never()).quitarItemDirecto(any());
     }
 
     @Test
-    void confirmar_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void confirmarDeNuevoEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.confirmar(reserva));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void iniciar_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void iniciarSinCheckinEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.iniciar(reserva));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void finalizar_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void finalizarEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.finalizar(reserva));
+        verifyNoInteractions(reserva);
+    }
 
-        verify(reserva, never()).cambiarEstado(any());
+    @Test
+    void notificaPorEmailYCuentaComoVenta() {
+        assertTrue(estado.debeNotificarEmail());
+        assertTrue(estado.cuentaComoVenta());
+        assertFalse(estado.debeGenerarVoucher());
     }
 }

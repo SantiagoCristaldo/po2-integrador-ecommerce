@@ -1,100 +1,79 @@
 package unq.reserva;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
 import unq.catalogo.Catalogo;
-import unq.catalogo.Categoria;
-import unq.catalogo.ServicioIndividual;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class EnCursoTest {
 
     private EnCurso estado;
-    private Reserva reserva;
-    private Catalogo item;
+    private Reserva reserva;   // MOCK
+    private Catalogo item;     // DUMMY
 
     @BeforeEach
     void setUp() {
         estado = new EnCurso();
         reserva = mock(Reserva.class);
-        item = new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel",
-                "Operador SA", new Categoria("Alojamiento"), 15000.0);
+        item = mock(Catalogo.class);
     }
 
     @Test
-    void finalizar_cambiaElEstadoAFinalizada() {
+    void finalizarPasaAFinalizada() {
         estado.finalizar(reserva);
-
-        ArgumentCaptor<EstadoDeReserva> captor = ArgumentCaptor.forClass(EstadoDeReserva.class);
-        verify(reserva).cambiarEstado(captor.capture());
-
-        assertInstanceOf(Finalizada.class, captor.getValue());
+        verify(reserva).cambiarEstado(any(Finalizada.class));
     }
 
     @Test
-    void cancelar_reembolsaLosServiciosNoDisfrutados() {
+    void cancelarReembolsaYPasaACancelada() {
         estado.cancelar(reserva);
 
-        verify(reserva).reembolsar();
+        var orden = inOrder(reserva);
+        orden.verify(reserva).reembolsar();
+        orden.verify(reserva).cambiarEstado(any(Cancelada.class));
     }
 
     @Test
-    void cancelar_noLiberaElCupoPorqueLasUnidadesYaEstanEnUso() {
+    void cancelarNoLiberaCupos() {
         estado.cancelar(reserva);
-
         verify(reserva, never()).liberarCupos();
     }
 
     @Test
-    void cancelar_cambiaElEstadoACancelada() {
-        estado.cancelar(reserva);
-
-        ArgumentCaptor<EstadoDeReserva> captor = ArgumentCaptor.forClass(EstadoDeReserva.class);
-        verify(reserva).cambiarEstado(captor.capture());
-
-        assertInstanceOf(Cancelada.class, captor.getValue());
-    }
-
-    @Test
-    void agregarItem_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void agregarItemEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.agregarItem(reserva, item));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void quitarItem_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void quitarItemEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.quitarItem(reserva, item));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void confirmar_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void confirmarEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.confirmar(reserva));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void hacerCheckin_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void hacerCheckinEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.hacerCheckin(reserva));
-
-        verify(reserva, never()).cambiarEstado(any());
+        verifyNoInteractions(reserva);
     }
 
     @Test
-    void iniciar_lanzaExcepcionDeDominioYNoCambiaElEstado() {
+    void iniciarDeNuevoEsInvalido() {
         assertThrows(ExcepcionPorInvalido.class, () -> estado.iniciar(reserva));
+        verifyNoInteractions(reserva);
+    }
 
-        verify(reserva, never()).cambiarEstado(any());
+    @Test
+    void notificaPorEmail() {
+        assertTrue(estado.debeNotificarEmail());
+        assertFalse(estado.debeGenerarVoucher());
     }
 }
