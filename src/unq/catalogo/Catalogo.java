@@ -17,6 +17,8 @@ public interface Catalogo {
 
     void decrementarCupo();
 
+    int getCuposDisponibles();
+
     List<ServicioIndividual> servicios();
 
     List<Catalogo> componentes();

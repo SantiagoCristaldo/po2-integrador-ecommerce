@@ -22,7 +22,7 @@ class PaqueteTuristicoTest {
     }
 
     private PaqueteTuristico paquete(int descuento, Catalogo... items) {
-        PaqueteTuristico paquete = new PaqueteTuristico("Paquete", "Un paquete", descuento);
+        PaqueteTuristico paquete = new PaqueteTuristico("Paquete", "Un paquete", descuento, 10);
         for (Catalogo item : items) {
             paquete.agregarItem(item);
         }
@@ -91,31 +91,31 @@ class PaqueteTuristicoTest {
 
     @Test
     void constructor_conDescuentoNegativo_lanzaExcepcionDeDominio() {
-        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("P", "d", -1));
+        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("P", "d", -1, 10));
     }
 
     @Test
     void constructor_conDescuentoMayorACien_lanzaExcepcionDeDominio() {
-        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("P", "d", 101));
+        assertThrows(ExcepcionDominio.class, () -> new PaqueteTuristico("P", "d", 101, 10));
     }
 
     @Test
     void contieneEnNombre_conNombreNulo_esFalso() {
-        PaqueteTuristico paquete = new PaqueteTuristico(null, "d", 0);
+        PaqueteTuristico paquete = new PaqueteTuristico(null, "d", 0, 10);
 
         assertFalse(paquete.contieneEnNombre("otoño"));
     }
 
     @Test
     void contieneEnNombre_sinDistinguirMayusculas() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Escapada de Otoño", "d", 0);
+        PaqueteTuristico paquete = new PaqueteTuristico("Escapada de Otoño", "d", 0, 10);
 
         assertTrue(paquete.contieneEnNombre("otoño"));
     }
 
     @Test
     void contieneEnNombre_conTextoQueNoAparece_esFalso() {
-        PaqueteTuristico paquete = new PaqueteTuristico("Escapada de Otoño", "d", 0);
+        PaqueteTuristico paquete = new PaqueteTuristico("Escapada de Otoño", "d", 0, 10);
 
         assertFalse(paquete.contieneEnNombre("verano"));
     }

@@ -22,7 +22,7 @@ public class Direccion {
     }
 
     public void asignarGuia(){
-
+        this.cuposGuias--;
     }
 
     public String getCalle(){

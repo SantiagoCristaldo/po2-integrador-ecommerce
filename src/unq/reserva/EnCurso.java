@@ -40,8 +40,8 @@ public class EnCurso extends EstadoDeReserva {
 
     @Override
     public void cancelar(Reserva reserva) {
-        reserva.cambiarEstado(new Cancelada());
         reserva.reembolsar();
+        reserva.cambiarEstado(new Cancelada());
     }
 
     @Override 

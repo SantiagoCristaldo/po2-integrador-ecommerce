@@ -14,7 +14,7 @@ class VoucherReembolsoTest {
         Reserva reserva = mock(Reserva.class);   // DUMMY
         LocalDate hoy = LocalDate.of(2026, 10, 27);
 
-        VoucherReembolso voucher = new VoucherReembolso(hoy, reserva);
+        VoucherReembolso voucher = new VoucherReembolso(hoy, reserva, 5000.0);
 
         assertEquals(hoy, voucher.fechaEmision);
         assertSame(reserva, voucher.reservaAsociada);
@@ -22,8 +22,8 @@ class VoucherReembolsoTest {
     }
 
     @Test
-    void montoDevuelveLoQueSeLePasa() {
-        VoucherReembolso voucher = new VoucherReembolso(LocalDate.now(), mock(Reserva.class));
-        assertEquals(5000.0, voucher.monto(5000));
+    void montoDevuelveElMontoAReembolsar() {
+        VoucherReembolso voucher = new VoucherReembolso(LocalDate.now(), mock(Reserva.class), 5000.0);
+        assertEquals(5000.0, voucher.monto());
     }
 }

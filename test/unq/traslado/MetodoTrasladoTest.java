@@ -28,6 +28,6 @@ class MetodoTrasladoTest {
 
     @Test
     void puntoDeEncuentro_esUnMetodoDeTraslado() {
-        assertInstanceOf(MetodoTraslado.class, new PuntoEncuentro("Aeropuerto Ezeiza", 3));
+        assertInstanceOf(MetodoTraslado.class, new PuntoEncuentro(new Direccion("Ezeiza", 1, "Ezeiza", "1802", 3)));
     }
 }

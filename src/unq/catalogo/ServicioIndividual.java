@@ -13,6 +13,7 @@ public class ServicioIndividual implements Catalogo {
     private Categoria categoria;
     private double precioBase;
     private double descuentoPromocional;
+    private int cupoTotal;
     private int cuposDisponibles;
     private List<AtributoDinamico> atributosDinamicos = new ArrayList<>();
 
@@ -25,6 +26,7 @@ public class ServicioIndividual implements Catalogo {
         this.categoria = categoria;
         this.precioBase = precioBase;
         this.descuentoPromocional = 0;
+        this.cupoTotal = cuposDisponibles;
         this.cuposDisponibles = cuposDisponibles;
     }
 
@@ -35,12 +37,18 @@ public class ServicioIndividual implements Catalogo {
         this.descuentoPromocional = porcentaje;
     }
 
+    @Override
     public void decrementarCupo(){
         this.cuposDisponibles--;
     }
-    
+
+    @Override
     public int getCuposDisponibles(){
         return this.cuposDisponibles;
+    }
+
+    public int getCupoTotal() {
+        return cupoTotal;
     }
 
     @Override

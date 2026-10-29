@@ -20,7 +20,7 @@ class TrasladoEstandarTest {
     @BeforeEach
     void setUp() {
         plataforma = mock(PlataformaTransporte.class);
-        destino = new Direccion("Calle Falsa", 123, "Quilmes", "1878");
+        destino = new Direccion("Calle Falsa", 123, "Quilmes", "1878", 3);
         traslado = new TrasladoEstandar(plataforma, destino);
         reserva = mock(Reserva.class);
         when(reserva.cantidadDePasajeros()).thenReturn(3);

@@ -27,7 +27,7 @@ class ServicioIndividualTest {
 
     private ServicioIndividual servicioValido() {
         return new ServicioIndividual("HOT-001", "Hotel Central", "Un hotel céntrico",
-                "Operador SA", new Categoria("Alojamiento"), 15000.0);
+                "Operador SA", new Categoria("Alojamiento"), 15000.0, 10);
     }
 
     @Test
@@ -38,7 +38,7 @@ class ServicioIndividualTest {
     @Test
     void validar_sinCodigo_lanzaExcepcionDeDominio() {
         ServicioIndividual sinCodigo = new ServicioIndividual(null, "Hotel", "d",
-                "op", new Categoria("Alojamiento"), 1.0);
+                "op", new Categoria("Alojamiento"), 1.0, 10);
 
         assertThrows(ExcepcionDominio.class, sinCodigo::validar);
     }
@@ -46,7 +46,7 @@ class ServicioIndividualTest {
     @Test
     void validar_conCodigoEnBlanco_lanzaExcepcionDeDominio() {
         ServicioIndividual codigoEnBlanco = new ServicioIndividual("   ", "Hotel", "d",
-                "op", new Categoria("Alojamiento"), 1.0);
+                "op", new Categoria("Alojamiento"), 1.0, 10);
 
         assertThrows(ExcepcionDominio.class, codigoEnBlanco::validar);
     }
@@ -54,7 +54,7 @@ class ServicioIndividualTest {
     @Test
     void validar_sinNombre_lanzaExcepcionDeDominio() {
         ServicioIndividual sinNombre = new ServicioIndividual("HOT-001", null, "d",
-                "op", new Categoria("Alojamiento"), 1.0);
+                "op", new Categoria("Alojamiento"), 1.0, 10);
 
         assertThrows(ExcepcionDominio.class, sinNombre::validar);
     }
@@ -62,7 +62,7 @@ class ServicioIndividualTest {
     @Test
     void validar_sinOperador_lanzaExcepcionDeDominio() {
         ServicioIndividual sinOperador = new ServicioIndividual("HOT-001", "Hotel", "d",
-                null, new Categoria("Alojamiento"), 1.0);
+                null, new Categoria("Alojamiento"), 1.0, 10);
 
         assertThrows(ExcepcionDominio.class, sinOperador::validar);
     }
@@ -70,7 +70,7 @@ class ServicioIndividualTest {
     @Test
     void validar_sinCategoria_lanzaExcepcionDeDominio() {
         ServicioIndividual sinCategoria = new ServicioIndividual("HOT-001", "Hotel", "d",
-                "op", null, 1.0);
+                "op", null, 1.0, 10);
 
         assertThrows(ExcepcionDominio.class, sinCategoria::validar);
     }
@@ -173,7 +173,7 @@ class ServicioIndividualTest {
     @Test
     void contieneEnNombre_conNombreNulo_esFalso() {
         ServicioIndividual sinNombre = new ServicioIndividual("HOT-001", null, "d",
-                "op", new Categoria("Alojamiento"), 1.0);
+                "op", new Categoria("Alojamiento"), 1.0, 10);
 
         assertFalse(sinNombre.contieneEnNombre("central"));
     }
