@@ -76,42 +76,6 @@ class ServicioIndividualTest {
     }
 
     @Test
-    void validar_conUnAtributoDinamicoInvalido_lanzaExcepcionDeDominio() {
-        AtributoDinamico invalido = mock(AtributoDinamico.class);
-        when(invalido.validar()).thenReturn(false);
-        servicio.agregarAtributoDinamico(invalido);
-
-        assertThrows(ExcepcionDominio.class, servicio::validar);
-    }
-
-    @Test
-    void validar_recorreTodosLosAtributosDinamicosAunqueElPrimeroSeaValido() {
-        AtributoDinamico valido = mock(AtributoDinamico.class);
-        AtributoDinamico invalido = mock(AtributoDinamico.class);
-        when(valido.validar()).thenReturn(true);
-        when(invalido.validar()).thenReturn(false);
-        servicio.agregarAtributoDinamico(valido);
-        servicio.agregarAtributoDinamico(invalido);
-
-        assertThrows(ExcepcionDominio.class, servicio::validar);
-
-        verify(valido).validar();
-        verify(invalido).validar();
-    }
-
-    @Test
-    void validar_conTodosLosAtributosDinamicosValidos_noLanza() {
-        AtributoDinamico primero = mock(AtributoDinamico.class);
-        AtributoDinamico segundo = mock(AtributoDinamico.class);
-        when(primero.validar()).thenReturn(true);
-        when(segundo.validar()).thenReturn(true);
-        servicio.agregarAtributoDinamico(primero);
-        servicio.agregarAtributoDinamico(segundo);
-
-        assertDoesNotThrow(servicio::validar);
-    }
-
-    @Test
     void setValorAtributo_delegaSoloEnElAtributoConEseNombre() {
         AtributoDinamico hotel = mock(AtributoDinamico.class);
         AtributoDinamico vuelo = mock(AtributoDinamico.class);

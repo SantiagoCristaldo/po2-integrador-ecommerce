@@ -1,94 +1,102 @@
 package unq.catalogo;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
+
+import unq.excepciones.ExcepcionDominio;
 
 class AtributoDinamicoTest {
 
-    private TipoValor tipo;
-
-    @BeforeEach
-    void setUp() {
-        tipo = mock(TipoValor.class);
+    @Test
+    void constructor_obligatorioSinValor_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class,
+                () -> new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
     }
 
     @Test
-    void validar_obligatorioSinValor_esInvalidoYNoConsultaElTipo() {
-        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", true, tipo);
-
-        assertFalse(atributo.validar());
-
-        verify(tipo, never()).esValido(any());
+    void constructor_noObligatorioSinValor_noLanza() {
+        assertDoesNotThrow(() -> new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
     }
 
     @Test
-    void validar_noObligatorioSinValor_esValidoYNoConsultaElTipo() {
-        AtributoDinamico atributo = new AtributoDinamico("PoliticaMascotas", false, tipo);
-
-        assertTrue(atributo.validar());
-
-        verify(tipo, never()).esValido(any());
+    void constructor_conValorDelTipoCorrecto_noLanza() {
+        assertDoesNotThrow(() -> new AtributoDinamico("RatingEstrellas", true, new Numero(), 5));
+        assertDoesNotThrow(() -> new AtributoDinamico("RatingEstrellas", true, new Numero(), 4.5));
+        assertDoesNotThrow(() -> new AtributoDinamico("Politica", true, new Texto(), ""));
+        assertDoesNotThrow(() -> new AtributoDinamico("Salida", true, new Fecha(), LocalDate.of(2026, 11, 12)));
+        assertDoesNotThrow(() -> new AtributoDinamico("Mascotas", true, new Booleano(), true));
     }
 
     @Test
-    void validar_conValorAceptadoPorElTipo_esValido() {
-        AtributoDinamico atributo = new AtributoDinamico("RatingEstrellas", true, tipo);
-        atributo.setValor(5);
-        when(tipo.esValido(5)).thenReturn(true);
-
-        assertTrue(atributo.validar());
+    void constructor_conValorDeOtroTipo_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class,
+                () -> new AtributoDinamico("RatingEstrellas", true, new Numero(), "cinco"));
+        assertThrows(ExcepcionDominio.class,
+                () -> new AtributoDinamico("Salida", true, new Fecha(), "2026-11-12"));
+        assertThrows(ExcepcionDominio.class,
+                () -> new AtributoDinamico("Mascotas", true, new Booleano(), "true"));
     }
 
     @Test
-    void validar_conValorRechazadoPorElTipo_esInvalido() {
-        AtributoDinamico atributo = new AtributoDinamico("RatingEstrellas", true, tipo);
-        atributo.setValor("cinco");
-        when(tipo.esValido("cinco")).thenReturn(false);
+    void setValor_conValorDeOtroTipo_lanzaExcepcionDeDominio() {
+        AtributoDinamico atributo = new AtributoDinamico("RatingEstrellas", true, new Numero(), 5);
 
-        assertFalse(atributo.validar());
+        assertThrows(ExcepcionDominio.class, () -> atributo.setValor("cinco"));
+    }
+
+    @Test
+    void setValor_nuloEnObligatorio_lanzaExcepcionDeDominio() {
+        AtributoDinamico atributo = new AtributoDinamico("RatingEstrellas", true, new Numero(), 5);
+
+        assertThrows(ExcepcionDominio.class, () -> atributo.setValor(null));
+    }
+
+    @Test
+    void setValor_conValorDelTipoCorrecto_noLanza() {
+        AtributoDinamico atributo = new AtributoDinamico("RatingEstrellas", true, new Numero(), 5);
+
+        assertDoesNotThrow(() -> atributo.setValor(3));
     }
 
     @Test
     void tieneNombre_conElMismoNombre_esVerdadero() {
-        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", true, tipo);
+        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
 
         assertTrue(atributo.tieneNombre("CapacidadMaxima"));
     }
 
     @Test
     void tieneNombre_conOtroNombre_esFalso() {
-        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", true, tipo);
+        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
 
         assertFalse(atributo.tieneNombre("PoliticaMascotas"));
     }
 
     @Test
     void tieneNombre_conNombreInternoNulo_esFalso() {
-        AtributoDinamico atributo = new AtributoDinamico(null, true, tipo);
+        AtributoDinamico atributo = new AtributoDinamico(null, false, new Numero(), null);
 
         assertFalse(atributo.tieneNombre("CapacidadMaxima"));
     }
 
     @Test
     void mismoNombreQue_conAtributosHomónimos_esVerdadero() {
-        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", true, tipo);
-        AtributoDinamico otro = new AtributoDinamico("CapacidadMaxima", false, tipo);
+        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
+        AtributoDinamico otro = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
 
         assertTrue(uno.mismoNombreQue(otro));
     }
 
     @Test
     void mismoNombreQue_conDistintoNombre_esFalso() {
-        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", true, tipo);
-        AtributoDinamico otro = new AtributoDinamico("PoliticaMascotas", true, tipo);
+        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
+        AtributoDinamico otro = new AtributoDinamico("PoliticaMascotas", false, new Numero(), null);
 
         assertFalse(uno.mismoNombreQue(otro));
     }

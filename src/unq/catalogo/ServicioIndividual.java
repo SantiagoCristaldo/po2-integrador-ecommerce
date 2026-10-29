@@ -131,15 +131,6 @@ public class ServicioIndividual implements Catalogo {
         exigirTexto(nombre, "nombre");
         exigirTexto(operador, "operador");
         exigirNoNulo(categoria, "categoria");
-        validarAtributosDinamicos();
-    }
-
-    private void validarAtributosDinamicos() {
-        for (AtributoDinamico atributo : atributosDinamicos) {
-            if (!atributo.validar()) {
-                throw new ExcepcionDominio("Hay un atributo dinámico inválido");
-            }
-        }
     }
 
     private void exigirTexto(String valor, String atributo) {
