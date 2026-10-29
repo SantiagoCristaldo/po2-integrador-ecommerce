@@ -26,9 +26,8 @@ public abstract class MedioDePago {
         }     
     }
 
-    public double setMonto(double monto){
+    public void setMonto(double monto){
         this.monto = monto;
-        return this.monto;
     }
 
     public abstract boolean validarDatos();
