@@ -6,10 +6,11 @@ public class AtributoDinamico {
     private Object valor;
     private TipoValor tipoValor;
 
-    public AtributoDinamico(String nombre, boolean obligatorio, TipoValor tipoValor) {
+    public AtributoDinamico(String nombre, boolean obligatorio, TipoValor tipoValor, Object valor) {
         this.nombre = nombre;
         this.obligatorio = obligatorio;
         this.tipoValor = tipoValor;
+        this.valor = valor;
     }
 
     public void setValor(Object valor) {

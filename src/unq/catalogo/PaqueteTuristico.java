@@ -27,15 +27,13 @@ public class PaqueteTuristico implements Catalogo {
         item.decrementarCupo();
     }
 
-    public void decrementarCupo(){
+    public void decrementarCupo() {
         this.cuposDisponibles--;
     }
 
-    public int getCuposDisponibles(){
+    public int getCuposDisponibles() {
         return this.cuposDisponibles;
     }
-
-    
 
     public void quitarItem(Catalogo item) {
         items.remove(item);
@@ -43,19 +41,16 @@ public class PaqueteTuristico implements Catalogo {
 
     @Override
     public double precioBase() {
-        double precioSinDescuento = items.stream()
-                .mapToDouble(Catalogo::precioBase)
-                .sum(); 
-        return precioSinDescuento - (precioSinDescuento * (descuento/100));
-    } // Preguntar esto
+        return items.stream()
+                .mapToDouble(Catalogo::precioFinal)
+                .sum();
+    }
 
     @Override
     public double precioFinal() {
-        double sumaFinales = items.stream()
-                .mapToDouble(Catalogo::precioFinal)
-                .sum();
-        return sumaFinales - (sumaFinales * (descuento/100));
-    } // preguntar este tambien
+        double sumaFinales = this.precioBase();
+        return sumaFinales - (sumaFinales * (descuento / 100));
+    }
 
     @Override
     public String nombre() {
@@ -74,30 +69,30 @@ public class PaqueteTuristico implements Catalogo {
 
     @Override
     public boolean esDeCategoria(Categoria categoria) {
-        for (Catalogo item :items){
-            if (item.esDeCategoria(categoria)){
+        for (Catalogo item : items) {
+            if (item.esDeCategoria(categoria)) {
                 return true;
             }
         }
         return false;
     }
-    
-    @Override 
-    public List<Catalogo> componentes(){
+
+    @Override
+    public List<Catalogo> componentes() {
         return new ArrayList<>(items);
     }
 
-    @Override 
-    public double factorDeDescuento(){
+    @Override
+    public double factorDeDescuento() {
         return 1 - descuento / 100;
     }
 
-    @Override 
-    public List<ServicioIndividual> servicios(){
+    @Override
+    public List<ServicioIndividual> servicios() {
         List<ServicioIndividual> servicios = new ArrayList<>();
-        for (Catalogo item : items){
+        for (Catalogo item : items) {
             servicios.addAll(item.servicios());
         }
-        return servicios; 
+        return servicios;
     }
 }
