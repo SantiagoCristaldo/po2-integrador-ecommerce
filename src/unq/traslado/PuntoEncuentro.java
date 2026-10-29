@@ -4,31 +4,30 @@ import unq.excepciones.*;
 import unq.reserva.*;
 
 public class PuntoEncuentro implements MetodoTraslado {
-    private String ubicacion;
-    private int cuposGuias;
+    private Direccion ubicacion;
 
-    public PuntoEncuentro(String ubicacion, int cuposGuias) {
+    public PuntoEncuentro(Direccion ubicacion) {
         this.ubicacion = ubicacion;
-        this.cuposGuias = cuposGuias;
     }
+
     @Override 
     public double calcularCosto(Reserva reserva) {
         return 0; // no tiene costo
     }
 
-    public boolean estaDisponible(Reserva reserva) { // preguntar que es mejor cupo de guias en reserva o aca.
-        return cuposGuias > 0;
+    public boolean estaDisponible(Direccion destino) { // preguntar que es mejor cupo de guias en reserva o aca.
+        return destino.getCuposDisponibles() > 0;
     }
 
-    public String getUbicacion() {
+    public Direccion getUbicacion() {
         return ubicacion;
     }
 
-    public void asignarGuia(Reserva reserva){
-        if(cuposGuias <= 0){
+    public void asignarGuia(Direccion destino){
+        if(destino.getCuposDisponibles() <= 0){
             throw new ExcepcionDominio("No hay mas guias para asignar");
         }else{
-            cuposGuias -= reserva.cantidadDePasajeros(); // o puede ser menos 1 simplemente 
+            destino.asignarGuia(); 
         }
     }
 }

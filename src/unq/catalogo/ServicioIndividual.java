@@ -13,11 +13,11 @@ public class ServicioIndividual implements Catalogo {
     private Categoria categoria;
     private double precioBase;
     private double descuentoPromocional;
-    private int cupoTotal;
+    private int cuposDisponibles;
     private List<AtributoDinamico> atributosDinamicos = new ArrayList<>();
 
     public ServicioIndividual(String codigo, String nombre, String descripcion,
-                              String operador, Categoria categoria, double precioBase) {
+                              String operador, Categoria categoria, double precioBase, int cuposDisponibles) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -25,6 +25,7 @@ public class ServicioIndividual implements Catalogo {
         this.categoria = categoria;
         this.precioBase = precioBase;
         this.descuentoPromocional = 0;
+        this.cuposDisponibles = cuposDisponibles;
     }
 
     public void aplicarDescuentoPromocional(double porcentaje) {
@@ -32,6 +33,14 @@ public class ServicioIndividual implements Catalogo {
             throw new ExcepcionDominio("El descuento promocional debe estar entre 0 y 100");
         }
         this.descuentoPromocional = porcentaje;
+    }
+
+    public void decrementarCupo(){
+        this.cuposDisponibles--;
+    }
+    
+    public int getCuposDisponibles(){
+        return this.cuposDisponibles;
     }
 
     @Override
@@ -85,17 +94,6 @@ public class ServicioIndividual implements Catalogo {
 
     public Categoria getCategoria() {
         return categoria;
-    }
-
-    public int getCupoTotal() {
-        return cupoTotal;
-    }
-
-    public void setCupoTotal(int cupoTotal) {
-        if (cupoTotal < 0) {
-            throw new ExcepcionDominio("El cupo total no puede ser negativo");
-        }
-        this.cupoTotal = cupoTotal;
     }
  
     public void agregarAtributoDinamico(AtributoDinamico atributo) {

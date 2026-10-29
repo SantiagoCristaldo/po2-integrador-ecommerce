@@ -14,6 +14,6 @@ public class FiltroPrecioMaximo implements Filtro {
 
     public  boolean cumple(Catalogo item) {
         
-        return item.precioFinal() <= precioMaximo;
+        return item.precioBase() <= precioMaximo;
     }
 } 

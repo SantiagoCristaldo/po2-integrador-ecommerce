@@ -115,6 +115,8 @@ public class Reserva {
     }
 
     public void reembolsar() {
+        double montoAReembolsar = this.valorServicios() + metodoTraslado.calcularCosto(this); 
+        new VoucherReembolso(this.fecha, this, montoAReembolsar); 
     }
 
     public void procesarPago() {

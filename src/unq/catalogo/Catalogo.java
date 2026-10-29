@@ -15,6 +15,8 @@ public interface Catalogo {
 
     boolean esDeCategoria(Categoria categoria);
 
+    void decrementarCupo();
+
     List<ServicioIndividual> servicios();
 
     List<Catalogo> componentes();

@@ -10,19 +10,32 @@ public class PaqueteTuristico implements Catalogo {
     private String descripcion;
     private int descuento;
     private List<Catalogo> items = new ArrayList<>();
+    private int cuposDisponibles;
 
-    public PaqueteTuristico(String nombre, String descripcion, int descuento) {
+    public PaqueteTuristico(String nombre, String descripcion, int descuento, int cuposDisponibles) {
         if (descuento < 0 || descuento > 100) {
             throw new ExcepcionDominio("El descuento debe estar entre 0 y 100");
         }
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.descuento = descuento;
+        this.cuposDisponibles = cuposDisponibles;
     }
 
     public void agregarItem(Catalogo item) {
         items.add(item);
+        item.decrementarCupo();
     }
+
+    public void decrementarCupo(){
+        this.cuposDisponibles--;
+    }
+
+    public int getCuposDisponibles(){
+        return this.cuposDisponibles;
+    }
+
+    
 
     public void quitarItem(Catalogo item) {
         items.remove(item);
@@ -30,18 +43,19 @@ public class PaqueteTuristico implements Catalogo {
 
     @Override
     public double precioBase() {
-        return items.stream()
+        double precioSinDescuento = items.stream()
                 .mapToDouble(Catalogo::precioBase)
-                .sum();
-    }
+                .sum(); 
+        return precioSinDescuento - (precioSinDescuento * (descuento/100));
+    } // Preguntar esto
 
     @Override
     public double precioFinal() {
         double sumaFinales = items.stream()
                 .mapToDouble(Catalogo::precioFinal)
                 .sum();
-        return sumaFinales * (1 - descuento / 100.0);
-    }
+        return sumaFinales - (sumaFinales * (descuento/100));
+    } // preguntar este tambien
 
     @Override
     public String nombre() {
