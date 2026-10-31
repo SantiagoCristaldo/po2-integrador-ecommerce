@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import unq.excepciones.ExcepcionDominio;
+import unq.excepciones.ExcepcionPagoInvalido;
 
 /**
  * Tests de la plantilla (Template Method) de {@link MedioDePago}.
@@ -46,10 +47,6 @@ class MedioDePagoTest {
 
         @Override
         public void ejecutarTransaccion() {
-        }
-
-        @Override
-        public void notificarResultado() {
         }
     }
 
@@ -87,6 +84,13 @@ class MedioDePagoTest {
     void procesoDePago_conDatosInvalidos_lanzaLaExcepcionDePagoInvalido() {
         doReturn(false).when(medio).validarDatos();
 
+        assertThrows(ExcepcionPagoInvalido.class, medio::procesoDePago);
+    }
+
+    @Test
+    void laExcepcionDePagoInvalidoEsUnaExcepcionDeDominio() {
+        doReturn(false).when(medio).validarDatos();
+
         assertThrows(ExcepcionDominio.class, medio::procesoDePago);
     }
 
@@ -103,10 +107,59 @@ class MedioDePagoTest {
 
     @Test
     void elMontoQuedaGuardadoEnElMedioDePago() {
-        assertEquals(1000f, medio.monto, 0.001f);
+        assertEquals(1000.0, medio.getMonto(), 0.001);
     }
 
-    // --- Garantías del patrón que el código hoy no cumple (ver H21 y H22) ---
+    @Test
+    void setMonto_reemplazaElMontoACobrar() {
+        medio.setMonto(2500.0);
+
+        assertEquals(2500.0, medio.getMonto(), 0.001);
+    }
+
+    @Test
+    void elMontoNoSePuedeModificarDesdeAfuera() throws Exception {
+        assertTrue(Modifier.isPrivate(MedioDePago.class.getDeclaredField("monto").getModifiers()),
+                "el monto deberia ser privado: solo se cambia con setMonto");
+    }
+
+    // --- Notificacion por defecto: registro del codigo de transaccion ---
+
+    @Test
+    void notificarResultado_porDefecto_registraElCodigoDeTransaccion() {
+        medio.notificarResultado();
+
+        assertEquals(1, medio.getComprobantes().size());
+        assertEquals("TX-0001", medio.getComprobantes().get(0).getCodigoTransaccion());
+        assertEquals(1000.0, medio.getComprobantes().get(0).getMonto(), 0.001);
+    }
+
+    @Test
+    void procesoDePago_conDatosValidos_dejaRegistradaLaTransaccion() {
+        medio.procesoDePago();
+
+        assertEquals(1, medio.getComprobantes().size());
+    }
+
+    @Test
+    void procesoDePago_conDatosInvalidos_noRegistraLaTransaccion() {
+        doReturn(false).when(medio).validarDatos();
+
+        assertThrows(ExcepcionPagoInvalido.class, medio::procesoDePago);
+
+        assertTrue(medio.getComprobantes().isEmpty());
+    }
+
+    @Test
+    void getComprobantes_devuelveUnaCopia() {
+        medio.notificarResultado();
+
+        medio.getComprobantes().clear();
+
+        assertEquals(1, medio.getComprobantes().size());
+    }
+
+    // --- Garantías del patrón ---
 
     @Test
     void procesoDePago_esFinalParaQueNingunaSubclasePuedaCambiarElOrdenDeLosPasos() throws Exception {

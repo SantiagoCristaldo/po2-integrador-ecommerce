@@ -55,7 +55,8 @@ class SolicitudPendienteTest {
 
         verify(reserva).cambiarEstado(any(Cancelada.class));
         verify(reserva, never()).liberarCupos();
-        verify(reserva, never()).reembolsar();
+        verify(reserva, never()).reembolsarServicios();
+        verify(reserva, never()).reembolsarServiciosYTasas();
     }
 
     @Test

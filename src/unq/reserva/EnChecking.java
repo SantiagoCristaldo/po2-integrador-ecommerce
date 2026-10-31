@@ -41,7 +41,7 @@ public class EnChecking extends EstadoDeReserva {
     @Override
     public void cancelar(Reserva reserva) {
         reserva.liberarCupos();
-        reserva.reembolsar();
+        reserva.reembolsarServiciosYTasas();
         reserva.cambiarEstado(new Cancelada());
     }
 }

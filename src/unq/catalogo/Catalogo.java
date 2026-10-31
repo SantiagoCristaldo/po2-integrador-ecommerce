@@ -17,6 +17,8 @@ public interface Catalogo {
 
     void decrementarCupo();
 
+    void incrementarCupo();
+
     int getCuposDisponibles();
 
     List<ServicioIndividual> servicios();

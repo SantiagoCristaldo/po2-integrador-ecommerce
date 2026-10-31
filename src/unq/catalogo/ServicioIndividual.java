@@ -43,6 +43,11 @@ public class ServicioIndividual implements Catalogo {
     }
 
     @Override
+    public void incrementarCupo() {
+        this.cuposDisponibles++;
+    }
+
+    @Override
     public int getCuposDisponibles() {
         return this.cuposDisponibles;
     }

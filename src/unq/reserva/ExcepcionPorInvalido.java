@@ -1,6 +1,8 @@
 package unq.reserva;
 
-public class ExcepcionPorInvalido extends RuntimeException {
+import unq.excepciones.ExcepcionDominio;
+
+public class ExcepcionPorInvalido extends ExcepcionDominio {
     public ExcepcionPorInvalido(String mensaje) {
         super(mensaje);
     }

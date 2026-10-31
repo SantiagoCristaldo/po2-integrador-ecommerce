@@ -1,11 +1,14 @@
 package unq.notificaciones;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import unq.reserva.EstadoDeReserva;
 import unq.reserva.Reserva;
 
 public class GeneradorComprobantes implements ObservadorReserva {
-    private int contadorFacturas;
-    private int contadorVouchers;
+    private List<FacturaFiscal> facturas = new ArrayList<>();
+    private List<VoucherViaje> vouchers = new ArrayList<>();
 
 
     @Override
@@ -16,15 +19,20 @@ public class GeneradorComprobantes implements ObservadorReserva {
         }
     }
 
-    private FacturaFiscal generarFactura(Reserva reserva) {
-        contadorFacturas++;
-        return new FacturaFiscal(contadorFacturas, reserva.valorTotal(), reserva);
+    private void generarFactura(Reserva reserva) {
+        facturas.add(new FacturaFiscal(facturas.size() + 1, reserva.valorTotal(), reserva));
     }
 
 
-    private VoucherViaje generarVoucher(Reserva reserva) {
-        contadorVouchers++;
-        return new VoucherViaje(contadorVouchers, reserva);
+    private void generarVoucher(Reserva reserva) {
+        vouchers.add(new VoucherViaje(vouchers.size() + 1, reserva));
+    }
 
+    public List<FacturaFiscal> getFacturas() {
+        return new ArrayList<>(facturas);
+    }
+
+    public List<VoucherViaje> getVouchers() {
+        return new ArrayList<>(vouchers);
     }
 }

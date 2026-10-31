@@ -32,8 +32,14 @@ class EnCheckingTest {
 
         var orden = inOrder(reserva);
         orden.verify(reserva).liberarCupos();
-        orden.verify(reserva).reembolsar();
+        orden.verify(reserva).reembolsarServiciosYTasas();
         orden.verify(reserva).cambiarEstado(any(Cancelada.class));
+    }
+
+    @Test
+    void cancelarNoReembolsaSoloLosServicios() {
+        estado.cancelar(reserva);
+        verify(reserva, never()).reembolsarServicios();
     }
 
     @Test

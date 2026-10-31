@@ -17,6 +17,10 @@ public class TarjDeCredito extends MedioDePago {
         this.api = api;
     }
 
+    public int getNroTarjeta(){
+        return this.nroTarjeta;
+    }
+
     public int getCVV(){
         return this.CVV;
     }
@@ -27,21 +31,21 @@ public class TarjDeCredito extends MedioDePago {
 
     @Override
     public boolean validarDatos() {
-        return api.validarDatos(this);
+        return api.validarCVV(nroTarjeta, CVV) && api.validarVencimiento(vencimiento);
     }
 
     @Override
     public void reservarFondos() {
-        api.preAutorizar(nroTarjeta, monto);
+        api.preAutorizar(nroTarjeta, getMonto());
     }
 
     @Override
     public void ejecutarTransaccion() {
-        api.transferirInmediata(monto);
+        api.transferirInmediata(getMonto());
     }
 
     @Override
     public void notificarResultado() {
-
+        registrar(new ComprobantePago("Voucher", getCodigoTransaccion(), getMonto()));
     }
 }

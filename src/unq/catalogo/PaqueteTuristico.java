@@ -23,12 +23,19 @@ public class PaqueteTuristico implements Catalogo {
     }
 
     public void agregarItem(Catalogo item) {
+        if (item == this || contieneA(item, this)) {
+            throw new ExcepcionDominio("Un paquete no puede contenerse a sí mismo");
+        }
         items.add(item);
         item.decrementarCupo();
     }
 
     public void decrementarCupo() {
         this.cuposDisponibles--;
+    }
+
+    public void incrementarCupo() {
+        this.cuposDisponibles++;
     }
 
     public int getCuposDisponibles() {
@@ -85,6 +92,15 @@ public class PaqueteTuristico implements Catalogo {
     @Override
     public double factorDeDescuento() {
         return 1 - descuento / 100;
+    }
+
+    private static boolean contieneA(Catalogo contenedor, Catalogo buscado) {
+        for (Catalogo componente : contenedor.componentes()) {
+            if (componente == buscado || contieneA(componente, buscado)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

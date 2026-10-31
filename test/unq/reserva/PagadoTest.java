@@ -38,7 +38,8 @@ class PagadoTest {
     @Test
     void cancelarNoReembolsa() {
         estado.cancelar(reserva);
-        verify(reserva, never()).reembolsar();
+        verify(reserva, never()).reembolsarServicios();
+        verify(reserva, never()).reembolsarServiciosYTasas();
     }
 
     @Test

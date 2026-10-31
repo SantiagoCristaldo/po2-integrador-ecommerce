@@ -83,10 +83,45 @@ class PaqueteTuristicoTest {
     }
 
     @Test
-    void agregarItem_conElMismoPaquete_noLanzaYNoSeValidaCiclo() {
+    void agregarItem_conElMismoPaquete_lanzaExcepcionDeDominio() {
         PaqueteTuristico paquete = paquete(10);
 
-        assertDoesNotThrow(() -> paquete.agregarItem(paquete));
+        assertThrows(ExcepcionDominio.class, () -> paquete.agregarItem(paquete));
+    }
+
+    @Test
+    void agregarItem_conUnPaqueteQueYaLoContiene_lanzaExcepcionDeDominio() {
+        PaqueteTuristico interno = paquete(10);
+        PaqueteTuristico externo = paquete(10, interno);
+
+        assertThrows(ExcepcionDominio.class, () -> interno.agregarItem(externo));
+    }
+
+    @Test
+    void agregarItem_conUnPaqueteQueLoContieneEnProfundidad_lanzaExcepcionDeDominio() {
+        PaqueteTuristico nivel1 = paquete(10);
+        PaqueteTuristico nivel2 = paquete(10, nivel1);
+        PaqueteTuristico nivel3 = paquete(10, nivel2);
+
+        assertThrows(ExcepcionDominio.class, () -> nivel1.agregarItem(nivel3));
+    }
+
+    @Test
+    void agregarItem_conPaquetesSinCiclo_noLanza() {
+        PaqueteTuristico italia = paquete(10);
+        PaqueteTuristico europa = paquete(5);
+
+        assertDoesNotThrow(() -> europa.agregarItem(italia));
+    }
+
+    @Test
+    void agregarItem_noConsumeElCupoDelItem() {
+        ServicioIndividual hotel = new ServicioIndividual("H1", "Hotel", "d", "op",
+                new Categoria("Alojamiento"), 15000.0, 10);
+
+        paquete(10, hotel);
+
+        assertEquals(10, hotel.getCuposDisponibles());
     }
 
     @Test

@@ -6,9 +6,12 @@ public class BilleteraVirtual extends MedioDePago {
 
     public BilleteraVirtual(double monto, APIBilletera api, String idCuenta, String codigoTransaccion){
         super(monto, codigoTransaccion);
-        this.monto = monto;
         this.api = api;
         this.idCuenta = idCuenta;
+    }
+
+    public String getIdCuenta(){
+        return this.idCuenta;
     }
 
     @Override 
@@ -18,16 +21,16 @@ public class BilleteraVirtual extends MedioDePago {
 
     @Override 
     public void reservarFondos(){
-        api.bloquearElSaldo(idCuenta, monto);
+        api.bloquearElSaldo(idCuenta, getMonto());
     }
 
     @Override 
     public void ejecutarTransaccion(){
-        api.acreditarVendedor(idCuenta, monto);
+        api.acreditarVendedor(idCuenta, getMonto());
     }
 
     @Override 
     public void notificarResultado(){
-        api.notificarPush(idCuenta, monto);
+        api.notificarPush(idCuenta, getMonto());
     }
 }

@@ -1,62 +1,88 @@
 package unq.notificaciones;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import unq.reserva.EstadoDeReserva;
+import unq.reserva.Cancelada;
+import unq.reserva.EnChecking;
+import unq.reserva.EnCurso;
 import unq.reserva.Finalizada;
 import unq.reserva.Pagado;
 import unq.reserva.Reserva;
+import unq.reserva.SolicitudPendiente;
 
+/**
+ * Enunciado 2.5: "Generador de voucher/factura: crea el comprobante fiscal y voucher cuando la
+ * reserva alcanza el estado FINALIZADA."
+ */
 class GeneradorComprobantesTest {
 
     private GeneradorComprobantes generador;
     private Reserva reserva;
-    private EstadoDeReserva anterior;
-    private EstadoDeReserva actual;
 
     @BeforeEach
     void setUp() {
         generador = new GeneradorComprobantes();
         reserva = mock(Reserva.class);
-        anterior = mock(EstadoDeReserva.class);
-        actual = mock(EstadoDeReserva.class);
+        when(reserva.valorTotal()).thenReturn(35000.0);
     }
 
     @Test
-    void actualizar_cuandoElEstadoAnteriorDebeGenerarVoucher_facturaElValorTotalDeLaReserva() {
-        when(anterior.debeGenerarVoucher()).thenReturn(true);
+    void alFinalizarLaReserva_creaUnaFacturaFiscal() {
+        generador.actualizar(reserva, new EnCurso(), new Finalizada());
 
-        generador.actualizar(reserva, anterior, actual);
-
-        verify(reserva).valorTotal();
+        assertEquals(1, generador.getFacturas().size());
     }
 
     @Test
-    void actualizar_cuandoElEstadoAnteriorNoDebeGenerarVoucher_noFactura() {
-        when(anterior.debeGenerarVoucher()).thenReturn(false);
+    void alFinalizarLaReserva_creaUnVoucherDeViaje() {
+        generador.actualizar(reserva, new EnCurso(), new Finalizada());
 
-        generador.actualizar(reserva, anterior, actual);
-
-        verify(reserva, never()).valorTotal();
+        assertEquals(1, generador.getVouchers().size());
     }
 
     @Test
-    void actualizar_desdeFinalizada_generaComprobantes() {
-        generador.actualizar(reserva, new Finalizada(), actual);
+    void laFacturaEsPorElValorTotalDeLaReserva() {
+        generador.actualizar(reserva, new EnCurso(), new Finalizada());
 
-        verify(reserva).valorTotal();
+        FacturaFiscal factura = generador.getFacturas().get(0);
+        assertEquals(35000.0, factura.getTotal(), 0.001);
+        assertSame(reserva, factura.getReserva());
     }
 
     @Test
-    void actualizar_desdePagado_noGeneraComprobantes() {
-        generador.actualizar(reserva, new Pagado(), actual);
+    void elVoucherQuedaAsociadoALaReserva() {
+        generador.actualizar(reserva, new EnCurso(), new Finalizada());
 
-        verify(reserva, never()).valorTotal();
+        assertSame(reserva, generador.getVouchers().get(0).getReserva());
+    }
+
+    @Test
+    void cadaReservaFinalizadaTieneSuPropioNumeroDeFactura() {
+        Reserva otra = mock(Reserva.class);
+
+        generador.actualizar(reserva, new EnCurso(), new Finalizada());
+        generador.actualizar(otra, new EnCurso(), new Finalizada());
+
+        assertEquals(2, generador.getFacturas().size());
+        assertNotEquals(generador.getFacturas().get(0).getNumero(), generador.getFacturas().get(1).getNumero());
+    }
+
+    @Test
+    void lasTransicionesQueNoLleganAFinalizada_noGeneranComprobantes() {
+        generador.actualizar(reserva, new SolicitudPendiente(), new Pagado());
+        generador.actualizar(reserva, new Pagado(), new EnChecking());
+        generador.actualizar(reserva, new EnChecking(), new EnCurso());
+        generador.actualizar(reserva, new EnCurso(), new Cancelada());
+
+        assertTrue(generador.getFacturas().isEmpty());
+        assertTrue(generador.getVouchers().isEmpty());
     }
 }

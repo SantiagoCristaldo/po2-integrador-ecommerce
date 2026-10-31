@@ -3,6 +3,9 @@ package unq.reserva;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import unq.catalogo.Catalogo;
+import unq.catalogo.Categoria;
+import unq.catalogo.ServicioIndividual;
+import unq.notificaciones.ObservadorReserva;
 import unq.excepciones.ExcepcionDominio;
 import unq.metodosDePago.MedioDePago;
 import unq.traslado.Direccion;
@@ -132,7 +135,7 @@ class ReservaTest {
         reserva.cancelar();
 
         verify(reserva).liberarCupos();
-        verify(reserva, never()).reembolsar();
+        assertTrue(reserva.getVouchersDeReembolso().isEmpty());
         assertTrue(reserva.getEstadoActual().esCancelada());
     }
 
@@ -143,7 +146,7 @@ class ReservaTest {
         reserva.cancelar();
 
         verify(reserva).liberarCupos();
-        verify(reserva).reembolsar();
+        verify(reserva).reembolsarServiciosYTasas();
         assertTrue(reserva.getEstadoActual().esCancelada());
     }
 
@@ -154,7 +157,7 @@ class ReservaTest {
         reserva.iniciar();
         reserva.cancelar();
 
-        verify(reserva).reembolsar();
+        verify(reserva).reembolsarServicios();
         verify(reserva, never()).liberarCupos();
     }
 
@@ -163,7 +166,7 @@ class ReservaTest {
         reserva.cancelar();
 
         verify(reserva, never()).liberarCupos();
-        verify(reserva, never()).reembolsar();
+        assertTrue(reserva.getVouchersDeReembolso().isEmpty());
         assertTrue(reserva.getEstadoActual().esCancelada());
     }
 
@@ -279,5 +282,192 @@ class ReservaTest {
         reserva.setMetodoPago(medio);
 
         assertThrows(ExcepcionDominio.class, reserva::procesarPago);
+    }
+
+    // ---------- cupos (enunciado 2.2) ----------
+
+    private ServicioIndividual servicioConCupo(int cupo) {
+        return new ServicioIndividual("H1", "Hotel", "d", "op", new Categoria("Alojamiento"), 15000.0, cupo);
+    }
+
+    @Test
+    void confirmarDecrementaElCupoDeCadaItemPorPasajero() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        reserva.agregarItem(servicio);
+
+        reserva.confirmar();
+
+        assertEquals(8, servicio.getCuposDisponibles());
+    }
+
+    @Test
+    void cancelarDesdePagadoDevuelveElCupo() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        reserva.agregarItem(servicio);
+        reserva.confirmar();
+
+        reserva.cancelar();
+
+        assertEquals(10, servicio.getCuposDisponibles());
+    }
+
+    @Test
+    void cancelarDesdeCheckinDevuelveElCupo() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        reserva.agregarItem(servicio);
+        reserva.confirmar();
+        reserva.hacerCheckin();
+
+        reserva.cancelar();
+
+        assertEquals(10, servicio.getCuposDisponibles());
+    }
+
+    @Test
+    void cancelarEnCursoNoDevuelveElCupo() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        reserva.agregarItem(servicio);
+        reserva.confirmar();
+        reserva.hacerCheckin();
+        reserva.iniciar();
+
+        reserva.cancelar();
+
+        assertEquals(8, servicio.getCuposDisponibles());
+    }
+
+    @Test
+    void cancelarDesdePendienteNoTocaElCupo() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        reserva.agregarItem(servicio);
+
+        reserva.cancelar();
+
+        assertEquals(10, servicio.getCuposDisponibles());
+    }
+
+    // ---------- reembolsos (enunciado 2.2) ----------
+
+    private MetodoTraslado trasladoQueCuesta(double costo) {
+        MetodoTraslado traslado = mock(MetodoTraslado.class);
+        when(traslado.calcularCosto(any())).thenReturn(costo);
+        return traslado;
+    }
+
+    @Test
+    void cancelarDesdeCheckinRegistraUnVoucherPorServiciosYTasas() {
+        reserva.setMetodoTraslado(trasladoQueCuesta(2500.0));
+        reserva.agregarItem(hotel);
+        reserva.confirmar();
+        reserva.hacerCheckin();
+
+        reserva.cancelar();
+
+        assertEquals(1, reserva.getVouchersDeReembolso().size());
+        assertEquals(17500.0, reserva.getVouchersDeReembolso().get(0).monto());
+    }
+
+    @Test
+    void cancelarDesdeCheckinSinTrasladoReembolsaSoloLosServicios() {
+        reserva.agregarItem(hotel);
+        reserva.confirmar();
+        reserva.hacerCheckin();
+
+        reserva.cancelar();
+
+        assertEquals(15000.0, reserva.getVouchersDeReembolso().get(0).monto());
+    }
+
+    @Test
+    void cancelarEnCursoRegistraUnVoucherSinLasTasas() {
+        reserva.setMetodoTraslado(trasladoQueCuesta(2500.0));
+        reserva.agregarItem(hotel);
+        reserva.confirmar();
+        reserva.hacerCheckin();
+        reserva.iniciar();
+
+        reserva.cancelar();
+
+        assertEquals(1, reserva.getVouchersDeReembolso().size());
+        assertEquals(15000.0, reserva.getVouchersDeReembolso().get(0).monto());
+    }
+
+    @Test
+    void elVoucherDeReembolsoQuedaAsociadoALaReserva() {
+        reserva.agregarItem(hotel);
+        reserva.confirmar();
+        reserva.hacerCheckin();
+
+        reserva.cancelar();
+
+        assertSame(reserva, reserva.getVouchersDeReembolso().get(0).reservaAsociada);
+    }
+
+    @Test
+    void cancelarDesdePagadoNoGeneraVoucher() {
+        reserva.agregarItem(hotel);
+        reserva.confirmar();
+
+        reserva.cancelar();
+
+        assertTrue(reserva.getVouchersDeReembolso().isEmpty());
+    }
+
+    // ---------- notificaciones (enunciado 2.5) ----------
+
+    @Test
+    void guardaElEmailDelCliente() {
+        assertEquals("cliente@mail.com", reserva.getEmail());
+    }
+
+    @Test
+    void cadaCambioDeEstadoAvisaALosObservadoresConElEstadoAnteriorYElNuevo() {
+        ObservadorReserva observador = mock(ObservadorReserva.class);
+        reserva.agregarObservador(observador);
+
+        reserva.confirmar();
+
+        verify(observador).actualizar(eq(reserva), isA(SolicitudPendiente.class), isA(Pagado.class));
+    }
+
+    @Test
+    void avisaATodosLosObservadoresRegistrados() {
+        ObservadorReserva email = mock(ObservadorReserva.class);
+        ObservadorReserva club = mock(ObservadorReserva.class);
+        reserva.agregarObservador(email);
+        reserva.agregarObservador(club);
+
+        reserva.cancelar();
+
+        verify(email).actualizar(eq(reserva), isA(SolicitudPendiente.class), isA(Cancelada.class));
+        verify(club).actualizar(eq(reserva), isA(SolicitudPendiente.class), isA(Cancelada.class));
+    }
+
+    @Test
+    void unObservadorQuitadoNoRecibeAvisos() {
+        ObservadorReserva observador = mock(ObservadorReserva.class);
+        reserva.agregarObservador(observador);
+        reserva.quitarObservador(observador);
+
+        reserva.confirmar();
+
+        verifyNoInteractions(observador);
+    }
+
+    @Test
+    void unaOperacionInvalidaNoAvisaALosObservadores() {
+        ObservadorReserva observador = mock(ObservadorReserva.class);
+        reserva.agregarObservador(observador);
+
+        assertThrows(ExcepcionPorInvalido.class, reserva::finalizar);
+
+        verifyNoInteractions(observador);
+    }
+
+    // ---------- excepcion de dominio propia (enunciado 2.2) ----------
+
+    @Test
+    void laExcepcionDeOperacionInvalidaEsUnaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class, reserva::finalizar);
     }
 }

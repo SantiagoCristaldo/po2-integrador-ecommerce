@@ -1,0 +1,224 @@
+﻿Programación Orientada a Objetos
+Trabajo Práctico Integrador — UNQ-Travel
+1. Contexto y alcance
+Una empresa de viajes y turismo online necesita un sistema que gestione su catálogo de servicios turísticos (alojamientos, pasajes y excursiones), procese reservas, calcule costos de traslado/tasas, y gestione pagos. El trabajo consiste en diseñar e implementar únicamente la capa de dominio en Java: sin interfaces gráficas, sin persistencia, sin frameworks. Solo clases, interfaces y pruebas.
+
+
+El objetivo no es construir una aplicación completa, sino demostrar la correcta aplicación de los principios de diseño orientado a objetos en un dominio realista. Cada decisión de diseño debe poder justificarse en términos de qué problema resuelve y qué alternativa más frágil evita.
+2. Descripción del dominio
+El sistema se organiza en torno a siete módulos funcionales. Para cada uno se describen las responsabilidades, los contratos de las interfaces principales y las variantes concretas que el grupo debe implementar.
+2.1 Catálogo de servicios y paquetes
+El catálogo contiene dos tipos de elementos: servicios individuales y paquetes turísticos. Un servicio individual posee un Código de Reserva/ID, Nombre, Operador/Proveedor, Categoría (Alojamiento, Vuelo, Excursión, Alquiler de Auto), precio base y precio final (precio con un descuento promocional solo de ese servicio), entre otros.
+
+
+La solución deberá ser escalable y deberá permitir definir agregar nuevos atributos dinámicos (que no sean atributos de una Clase de su modelo orientado a objeto). Por ejemplo, un servicio en particular podría contar con los atributos dinámicos llamados CapacidadMáxima, PolíticaMascotas y RatingEstrellas. Un servicio debería poder ser validado para comprobar que los atributos obligatorios como nombre y Código estén asignados así como también los atributos dinámicos (sólo debe chequearse la asignación de un valor a los atributos, sean éstos fijos o dinámicos). Cada atributo dinámico se define con un nombre, un indicador de obligatoriedad y un tipo de valor: texto, numérico, booleano, y fecha pero en el futuro se podrían incorporar mas. La validación de un servicio comprueba (a) que todo atributo obligatorio —fijo o dinámico— tenga valor, y (b) que el valor asignado sea consistente con el tipo declarado.
+
+
+Un paquete turístico agrupa varios ítems (servicios individuales u otros paquetes) y aplica un descuento sobre la suma de sus partes. El cliente que navega el catálogo no necesita saber si está consultando un servicio individual o un paquete compuesto: ambos responden al mismo contrato.
+
+
+Toda entidad del catálogo debe exponer nombre, descripción y precio base calculado. Para los paquetes, el precio base es la suma de los precios de sus ítems multiplicada por (1 − descuento%). Este cálculo debe funcionar de forma uniforme incluso cuando un paquete contiene otros paquetes anidados (por ejemplo, un Paquete Escapada Europa que incluye un Paquete Italia más pasajes adicionales).
+
+
+Ítem del catálogo
+	Precio base
+	Descuento
+	Precio final
+	Noche de Hotel Central
+	$15.000
+	—
+	$15.000
+	Excursión Guiada Museo
+	$4.000
+	—
+	$4.000
+	Traslado Aeropuerto-Hotel
+	$2.000
+	—
+	$2.000
+	Pack Escapada Urbana (paquete)
+	$21.000 (suma)
+	10 %
+	$18.900
+	
+
+Un paquete puede contener otros paquetes. Por ejemplo, un Kit Gran Tour puede incluir el Pack Escapada Urbana más un tour gastronómico, con su propio porcentaje de descuento. El precio final debe calcularse de forma recursiva y correcta en toda la jerarquía.
+2.2 Ciclo de vida de la reserva
+Una reserva modifica su comportamiento a lo largo de su ciclo de vida. Según el contexto, existen operaciones que son válidas desde él. Intentar una operación inválida debe lanzar una excepción de dominio propia, no una excepción genérica.
+
+
+Contexto
+	Descripción
+	Transiciones válidas
+	SOLICITUD_PENDIENTE
+	El cliente está armando la reserva. Se pueden agregar o quitar servicios solo en este contexto.
+	→ CONFIRMADA, → CANCELADA
+	CONFIRMADA/PAGADA
+	El cliente confirmó la reserva. Se decrementa/bloquea el cupo disponible.
+	→ EN_CHECKIN, → CANCELADA
+	EN_CHECKIN
+	El cliente ha realizado el registro/check-in previo. Si se cancela, se libera el cupo y se reembolsa tanto el costo de los servicios como el de las tasas de reserva.
+	→ EN_CURSO, → CANCELADA
+	EN_CURSO
+	El viaje o servicio está en ejecución. Si pasa a cancelado, solo se reembolsa el costo de los servicios no disfrutados pero no de las tasas administrativas.
+	→ FINALIZADA, → CANCELADA
+	FINALIZADA
+	El cliente completó la estadía/viaje. Estado terminal.
+	(ninguna)
+	CANCELADA
+	La reserva fue cancelada. Estado terminal. Si viene de Confirmada se incrementa/libera el cupo de las unidades.
+	(ninguna)
+	
+
+Una reserva debe respetar las operaciones válidas para el estado vigente.
+
+
+Los reembolsos al cliente simplemente se resuelven generando y registrando un Voucher de Crédito / Reembolso en el sistema.
+2.3 Métodos de traslado y tasas
+El costo y las condiciones de traslado/tasas varían según el método elegido. El sistema debe soportar los siguientes tres métodos, cada uno con criterios distintos para calcular su costo:
+Traslado estándar
+Calcula el costo en función de la cantidad de pasajeros y la distancia en kilómetros hasta el hotel/destino. La estimación de tiempo es según el trayecto. Para calcularlo se necesita conocer la cantidad de pasajeros y la dirección de destino.
+
+
+Para esto usted cuenta con la siguiente librería que sólo debe utilizar:
+
+
+float PlataformaTransporte.estimarTraslado(int cantidadPasajeros, Direccion direccionDestino);
+Traslado VIP / Chauffeur
+Prioriza la comodidad. El costo se calcula como un porcentaje fijo sobre el valor total de la reserva más un cargo base. La reserva garantizada en vehículo de alta gama. Para calcularlo solo se necesita conocer el valor monetario total de la reserva.
+
+
+float TrasladoVIP.calcularCosto(float precio);
+Punto de encuentro / Recepción
+El cliente se presenta en el punto de encuentro en la terminal/aeropuerto. El costo de traslado es siempre cero. La estimación de disponibilidad depende de si hay cupo de guías en dicho punto.
+2.4 Métodos de pago
+El procesamiento de un pago siempre sigue los mismos pasos en el mismo orden: validar los datos, reservar los fondos, ejecutar la transacción y notificar el resultado. Sin embargo, cada medio de pago implementa esos pasos de manera diferente.
+
+
+Paso del proceso
+	Tarjeta de crédito internacional
+	Transferencia bancaria directa
+	Billetera virtual / Crypto
+	Validar datos
+	N.° de tarjeta, CVV y vencimiento (*)
+	CBU/CVU y alias válido (*)
+	Saldo suficiente en cuenta (*)
+	Reservar fondos
+	Pre-autorización al banco emisor (*)
+	No aplica (transferencia directa)
+	Bloqueo del saldo hasta confirmar (*)
+	Ejecutar transacción
+	Transferencia inmediata (*)
+	Transferencia inmediata o programada (*)
+	Acreditación en tiempo real al vendedor (*)
+	Notificar resultado
+	Voucher impreso/digital (Generarlo y registrarlo)
+	Comprobante CBU con número de operación (Generarlo y registrarlo)
+	Notificación push. (*)
+	
+
+El paso de notificación tiene una implementación por defecto (registro del código de transacción) que las subclases pueden personalizar sin estar obligadas a hacerlo. Los pasos de validación, reserva y ejecución son obligatorios y específicos de cada medio.
+
+
+(*) Cree una interfaz para cada medio de pago que sea utilizada como API (mediante una interfaz con varios mensajes) que le permita validar estos aspectos y disparar estas operaciones. No necesita implementar estas interfaces, sólo definirlas.
+2.5 Notificaciones de la Reserva
+Cada vez que una reserva cambia de estado, distintos subsistemas deben reaccionar de forma independiente. El módulo de reservas no debe conocer ni depender de esos subsistemas: sólo debe comunicar que ocurrió un cambio, indicando el estado anterior y el nuevo.
+
+
+Los subsistemas que reaccionan ante cambios de estado son:
+
+
+* Notificador de email: envía un correo al cliente con el nuevo estado de su reserva. Solo actúa ante las transiciones CONFIRMADA, EN_CURSO y FINALIZADA.
+* Generador de voucher/factura: crea el comprobante fiscal y voucher cuando la reserva alcanza el estado FINALIZADA.
+* Fidelización / Club de Viajeros: si se cancela una reserva, se le envía un mensaje con un cupón de descuento del 5%.
+
+
+Para los envíos de mail, asuma que existe la siguiente interfaz:public interface MailSender {
+
+
+    void enviarMail(String direccionDestino, String titulo, String mensaje, Object adjunto);
+
+
+}
+
+
+Nuevos subsistemas podrían ser agregados a futuro; por lo pronto no se sabe quiénes serán ni qué harán ante cada evento.
+2.6 Búsqueda en el catálogo
+El sistema debe ofrecer una funcionalidad de búsqueda que permita al cliente encontrar servicios y paquetes aplicando criterios simples o combinando varios de ellos. La búsqueda opera sobre la colección de ítems del catálogo y devuelve aquellos que cumplen la condición especificada.
+
+
+Cada criterio de búsqueda es una unidad independiente que sabe si un ítem del catálogo lo satisface o no. Los criterios se pueden combinar entre sí para construir consultas más complejas. El sistema debe soportar las siguientes combinaciones:
+Criterios simples
+* Por nombre: el nombre del ítem contiene el texto ingresado (sin distinción de mayúsculas).
+* Por precio máximo: el precio base del ítem es menor o igual al valor indicado.
+* Por categoría: el ítem pertenece a una categoría dada (Alojamiento, Vuelo, Excursión, etc.).
+* Por disponibilidad´t: el ítem tiene cupos disponibles en al menos una fecha/destino.
+Criterios Complejos
+Los criterios simples pueden combinarse mediante tres operadores lógicos:
+
+
+Operador
+	Semántica
+	Ejemplo de uso
+	AND (conjunción)
+	El ítem debe satisfacer todos los criterios combinados.
+	Alojamiento AND precio ≤ $20.000 AND disponible
+	OR (disyunción)
+	El ítem debe satisfacer al menos uno de los criterios combinados.
+	Nombre contiene "hotel" OR nombre contiene "resort"
+	NOT (negación)
+	El ítem no debe satisfacer el criterio envuelto.
+	NOT categoría = Excursión
+	
+
+Los operadores complejos también son criterios de búsqueda. Esto significa que pueden anidarse libremente para construir consultas de cualquier profundidad. Por ejemplo:
+
+
+* (Alojamiento AND disponible) OR (Nombre contiene "oferta")
+* NOT (precio > $15.000) AND (Alojamiento OR Excursión)
+* Nombre contiene "pack" AND NOT categoría = Excursión AND precio ≤ $25.000
+
+
+La interfaz de búsqueda del catálogo debe aceptar un único criterio como argumento. Cuando se quieran combinar varios criterios, el cliente del sistema construye el criterio compuesto antes de invocar la búsqueda. El módulo de búsqueda no toma ninguna decisión sobre cómo evaluar los ítems: esa responsabilidad recae en el criterio recibido.
+2.8 Reportes
+El sistema debe poder generar reportes sobre el estado del negocio. Cada reporte puede exportarse en más de un formato de salida. El núcleo de cada reporte —qué datos recolectar y cómo estructurarlos— debe ser independiente del formato en el que se presente. Los tres formatos requeridos son: texto plano, CSV y HTML.
+
+
+, investigue el patrón Visitor para su implementación.
+Reporte de servicios más reservados
+Ordena los ítems del catálogo (servicios y paquetes) por cantidad de unidades/reservas vendidas en un período. Incluye el precio promedio efectivamente cobrado, que puede diferir del precio base si se aplicaron descuentos de paquete.
+
+Ocupación y cupo disponible
+Cupos totales, reservados y libres por categoría y período.
+
+
+Exposición por proveedor / operador
+Qué porcentaje del catálogo depende de cada operador, para medir riesgo de concentración.
+
+
+4. Entregables
+Se deberán completar y entregar los siguientes puntos:
+
+
+* Un diseño de la solución completa utilizando diagrama de clases UML.
+* Documentación en un archivo PDF que incluya los integrantes del grupo y sus direcciones de email, las decisiones de diseño, detalles de implementación que merezcan ser explicados, patrones de diseño utilizados y los roles según la definición de Gamma et. al.
+* Implementación completa en lenguaje JAVA que incluya test de unidad con un 95 % de cobertura del código de dominio.
+* Todo lo anterior debe estar alojado en un repositorio de acceso por parte de los docentes donde se pueda realizar un seguimiento del trabajo.
+
+
+Nota: no se requiere la implementación de interfaces gráficas de ningún tipo. La participación de les integrantes del proyecto debe ser equitativa en función del registro del repositorio git y los commits con los usuarios correspondientes (las discrepancias pueden generar desaprobaciones personales del TP).
+5. Fechas y modalidad de entrega
+Las fechas de entrega de este TP son las siguientes:
+
+
+* 1ra. fecha: 12 de noviembre en el horario de práctica.
+* 2da. fecha: 19 de noviembre de  2026 en el horario de práctica
+
+
+Las entregas deberán estar subidas a GitHub, desde donde los docentes podrán accederlas.
+
+
+En cada fecha, los docentes realizarán una corrección "off-line", y de forma posterior una entrevista individual y remota con cada uno de los miembros del grupo para conversar sobre los distintos aspectos de diseño e implementación del trabajo.
+
+
+En esas instancias de entrevista, cada alumno deberá tener disponible, en ese momento, un IDE con el TP abierto y ejecutable para inspeccionar la solución entregada.

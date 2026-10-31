@@ -10,6 +10,10 @@ import org.junit.jupiter.api.Test;
 import unq.reserva.EstadoDeReserva;
 import unq.reserva.Reserva;
 
+/**
+ * Enunciado 2.5: el módulo de reservas sólo comunica el cambio (estado anterior y nuevo) y
+ * "nuevos subsistemas podrían ser agregados a futuro": cualquier observador registrado se entera.
+ */
 class NotificadorTest {
 
     private Notificador notificador;
@@ -28,7 +32,7 @@ class NotificadorTest {
     }
 
     @Test
-    void actualizarEstados_avisaAlObservadorRegistrado() {
+    void actualizarEstados_avisaAlObservadorConElEstadoAnteriorYElNuevo() {
         notificador.agregarObservador(observador);
 
         notificador.actualizarEstados(reserva, anterior, actual);

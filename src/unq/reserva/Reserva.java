@@ -10,6 +10,7 @@ import unq.excepciones.*;
 import unq.metodosDePago.*;
 
 public class Reserva {
+    private String email;
     private EstadoDeReserva estado;
     private List<Catalogo> items = new ArrayList<>();
     private int cantidadDePasajeros;
@@ -17,12 +18,26 @@ public class Reserva {
     private Notificador notificacion = new Notificador();
     private LocalDate fecha;
     private MedioDePago medioDePago;
+    private List<VoucherReembolso> vouchersDeReembolso = new ArrayList<>();
 
 
     public Reserva(String email, Direccion destino, int cantidadDePasajeros) {
+        this.email = email;
         this.estado = new SolicitudPendiente();
         this.cantidadDePasajeros = cantidadDePasajeros;
         this.fecha = LocalDate.now();
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void agregarObservador(ObservadorReserva observador) {
+        notificacion.agregarObservador(observador);
+    }
+
+    public void quitarObservador(ObservadorReserva observador) {
+        notificacion.quitarObservador(observador);
     }
 
     public LocalDate getFecha(){
@@ -109,14 +124,39 @@ public class Reserva {
     }
 
     public void bloquearCupos() {
+        for (Catalogo item : items) {
+            for (int i = 0; i < cantidadDePasajeros; i++) {
+                item.decrementarCupo();
+            }
+        }
     }
 
     public void liberarCupos() {
+        for (Catalogo item : items) {
+            for (int i = 0; i < cantidadDePasajeros; i++) {
+                item.incrementarCupo();
+            }
+        }
     }
 
-    public void reembolsar() {
-        double montoAReembolsar = this.valorServicios() + metodoTraslado.calcularCosto(this); 
-        new VoucherReembolso(this.fecha, this, montoAReembolsar); 
+    public void reembolsarServiciosYTasas() {
+        registrarReembolso(this.valorServicios() + this.costoTasas());
+    }
+
+    public void reembolsarServicios() {
+        registrarReembolso(this.valorServicios());
+    }
+
+    private double costoTasas() {
+        return metodoTraslado == null ? 0 : metodoTraslado.calcularCosto(this);
+    }
+
+    private void registrarReembolso(double monto) {
+        vouchersDeReembolso.add(new VoucherReembolso(LocalDate.now(), this, monto));
+    }
+
+    public List<VoucherReembolso> getVouchersDeReembolso() {
+        return new ArrayList<>(vouchersDeReembolso);
     }
 
     public void procesarPago() {

@@ -31,7 +31,7 @@ class EnCursoTest {
         estado.cancelar(reserva);
 
         var orden = inOrder(reserva);
-        orden.verify(reserva).reembolsar();
+        orden.verify(reserva).reembolsarServicios();
         orden.verify(reserva).cambiarEstado(any(Cancelada.class));
     }
 
@@ -39,6 +39,12 @@ class EnCursoTest {
     void cancelarNoLiberaCupos() {
         estado.cancelar(reserva);
         verify(reserva, never()).liberarCupos();
+    }
+
+    @Test
+    void cancelarNoReembolsaLasTasas() {
+        estado.cancelar(reserva);
+        verify(reserva, never()).reembolsarServiciosYTasas();
     }
 
     @Test

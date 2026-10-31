@@ -20,13 +20,17 @@ public class PagoTransferencia extends MedioDePago {
         return this.fechaProgramada;
     }
 
+    public int getCBU(){
+        return this.CBU;
+    }
+
     public String getAlias(){
         return this.alias;
     }
 
     @Override 
     public boolean validarDatos(){
-        return api.validarDatos(this);
+        return api.validarCBU(CBU) && api.validarAlias(alias);
     }
 
     @Override 
@@ -36,11 +40,11 @@ public class PagoTransferencia extends MedioDePago {
 
     @Override
     public void ejecutarTransaccion(){
-        api.transferirDeInmediato(CBU, monto);
+        api.transferirDeInmediato(CBU, getMonto());
     } 
 
     @Override 
     public void notificarResultado(){
-        // hay que hacerlo
+        registrar(new ComprobantePago("Comprobante CBU " + CBU, getCodigoTransaccion(), getMonto()));
     }
 }

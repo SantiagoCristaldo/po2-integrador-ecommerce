@@ -13,22 +13,32 @@ import org.junit.jupiter.api.Test;
 import unq.excepciones.ExcepcionDominio;
 import unq.reserva.Reserva;
 
+/**
+ * Enunciado 2.3: "El costo de traslado es siempre cero. La estimación de disponibilidad depende de
+ * si hay cupo de guías en dicho punto."
+ */
 class PuntoEncuentroTest {
 
     private Direccion ezeiza;
+    private Direccion hotel;
     private PuntoEncuentro punto;
     private Reserva reserva;
 
     @BeforeEach
     void setUp() {
         ezeiza = new Direccion("Aeropuerto Ezeiza", 1, "Ezeiza", "1802", 3);
+        hotel = new Direccion("Hotel Central", 10, "CABA", "1000", 5);
         punto = new PuntoEncuentro(ezeiza);
         reserva = mock(Reserva.class);
     }
 
+    private PuntoEncuentro puntoSinGuias() {
+        return new PuntoEncuentro(new Direccion("Aeroparque", 1, "CABA", "1425", 0));
+    }
+
     @Test
     void calcularCosto_esSiempreCero() {
-        assertEquals(0f, punto.calcularCosto(reserva), 0.001f);
+        assertEquals(0.0, punto.calcularCosto(reserva), 0.001);
     }
 
     @Test
@@ -37,28 +47,48 @@ class PuntoEncuentroTest {
     }
 
     @Test
-    void estaDisponible_conCuposDeGuias_esVerdadero() {
-        assertTrue(punto.estaDisponible(ezeiza));
+    void estaDisponible_conCupoDeGuiasEnElPunto_esVerdadero() {
+        assertTrue(punto.estaDisponible(hotel));
     }
 
     @Test
-    void estaDisponible_sinCuposDeGuias_esFalso() {
-        Direccion sinCupos = new Direccion("Aeropuerto Ezeiza", 1, "Ezeiza", "1802", 0);
-
-        assertFalse(punto.estaDisponible(sinCupos));
+    void estaDisponible_sinCupoDeGuiasEnElPunto_esFalso() {
+        assertFalse(puntoSinGuias().estaDisponible(hotel));
     }
 
     @Test
-    void asignarGuia_descuentaUnCupoDelDestino() {
-        punto.asignarGuia(ezeiza);
+    void estaDisponible_noDependeDelCupoDelDestino() {
+        Direccion destinoSinCupo = new Direccion("Hostel", 5, "CABA", "1001", 0);
+
+        assertTrue(punto.estaDisponible(destinoSinCupo));
+    }
+
+    @Test
+    void asignarGuia_descuentaUnCupoDelPunto() {
+        punto.asignarGuia(hotel);
 
         assertEquals(2, ezeiza.getCuposDisponibles());
     }
 
     @Test
-    void asignarGuia_sinCuposDeGuias_lanzaExcepcionDeDominio() {
-        Direccion sinCupos = new Direccion("Aeropuerto Ezeiza", 1, "Ezeiza", "1802", 0);
+    void asignarGuia_noTocaElCupoDelDestino() {
+        punto.asignarGuia(hotel);
 
-        assertThrows(ExcepcionDominio.class, () -> punto.asignarGuia(sinCupos));
+        assertEquals(5, hotel.getCuposDisponibles());
+    }
+
+    @Test
+    void asignarGuia_sinCupoDeGuiasEnElPunto_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class, () -> puntoSinGuias().asignarGuia(hotel));
+    }
+
+    @Test
+    void asignarGuia_hastaAgotarLosGuias_dejaElPuntoNoDisponible() {
+        punto.asignarGuia(hotel);
+        punto.asignarGuia(hotel);
+        punto.asignarGuia(hotel);
+
+        assertFalse(punto.estaDisponible(hotel));
+        assertThrows(ExcepcionDominio.class, () -> punto.asignarGuia(hotel));
     }
 }

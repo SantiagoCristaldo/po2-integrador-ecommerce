@@ -3,9 +3,9 @@ package unq.notificaciones;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -19,58 +19,66 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import unq.reserva.Cancelada;
-import unq.reserva.EstadoDeReserva;
+import unq.reserva.EnChecking;
+import unq.reserva.EnCurso;
+import unq.reserva.Finalizada;
 import unq.reserva.Pagado;
 import unq.reserva.Reserva;
+import unq.reserva.SolicitudPendiente;
 
+/**
+ * Enunciado 2.5: "Fidelización / Club de Viajeros: si se cancela una reserva, se le envía un
+ * mensaje con un cupón de descuento del 5%."
+ */
 class ClubViajerosTest {
+
+    private static final String EMAIL = "cliente@mail.com";
 
     private MailSender mailSender;
     private ClubViajeros club;
     private Reserva reserva;
-    private EstadoDeReserva anterior;
-    private EstadoDeReserva actual;
 
     @BeforeEach
     void setUp() {
         mailSender = mock(MailSender.class);
         club = new ClubViajeros(mailSender);
         reserva = mock(Reserva.class);
-        anterior = mock(EstadoDeReserva.class);
-        actual = mock(EstadoDeReserva.class);
+        when(reserva.getEmail()).thenReturn(EMAIL);
     }
 
-    @Test
-    void actualizar_cuandoLaReservaSeCancela_enviaMailConUnCuponDeDescuento() {
-        when(actual.esCancelada()).thenReturn(true);
+    private CuponDescuento cuponEnviado() {
         ArgumentCaptor<Object> adjunto = ArgumentCaptor.forClass(Object.class);
-
-        club.actualizar(reserva, anterior, actual);
-
         verify(mailSender).enviarMail(any(), anyString(), anyString(), adjunto.capture());
-        assertInstanceOf(CuponDescuento.class, adjunto.getValue());
+        return assertInstanceOf(CuponDescuento.class, adjunto.getValue());
     }
 
     @Test
-    void actualizar_elCuponGeneradoEsDel5PorCiento() {
-        when(actual.esCancelada()).thenReturn(true);
-        ArgumentCaptor<Object> adjunto = ArgumentCaptor.forClass(Object.class);
+    void alCancelarse_enviaUnMensajeConUnCupon() {
+        club.actualizar(reserva, new Pagado(), new Cancelada());
 
-        club.actualizar(reserva, anterior, actual);
-
-        verify(mailSender).enviarMail(any(), anyString(), anyString(), adjunto.capture());
-        CuponDescuento cupon = (CuponDescuento) adjunto.getValue();
-        assertEquals(5f, cupon.getPorcentaje(), 0.001f);
-        assertTrue(cupon.getCodigo().startsWith("CuponNro"));
+        cuponEnviado();
     }
 
     @Test
-    void actualizar_cadaCancelacionGeneraUnCuponConCodigoDistinto() {
-        when(actual.esCancelada()).thenReturn(true);
+    void elCuponEsDel5PorCiento() {
+        club.actualizar(reserva, new Pagado(), new Cancelada());
+
+        assertEquals(5f, cuponEnviado().getPorcentaje(), 0.001f);
+    }
+
+    @Test
+    void elMensajeSeEnviaAlClienteDeLaReserva() {
+        club.actualizar(reserva, new Pagado(), new Cancelada());
+
+        verify(mailSender).enviarMail(eq(EMAIL), anyString(), anyString(), any());
+    }
+
+    @Test
+    void cadaCancelacionGeneraUnCuponDistinto() {
         ArgumentCaptor<Object> adjunto = ArgumentCaptor.forClass(Object.class);
 
-        club.actualizar(reserva, anterior, actual);
-        club.actualizar(reserva, anterior, actual);
+        club.actualizar(reserva, new Pagado(), new Cancelada());
+        club.actualizar(reserva, new SolicitudPendiente(), new Cancelada());
 
         verify(mailSender, times(2)).enviarMail(any(), anyString(), anyString(), adjunto.capture());
         List<Object> cupones = adjunto.getAllValues();
@@ -79,19 +87,21 @@ class ClubViajerosTest {
     }
 
     @Test
-    void actualizar_cuandoLaReservaNoSeCancela_noEnviaMail() {
-        when(actual.esCancelada()).thenReturn(false);
+    void cancelarDesdeCualquierEstado_enviaElCupon() {
+        club.actualizar(reserva, new SolicitudPendiente(), new Cancelada());
+        club.actualizar(reserva, new EnChecking(), new Cancelada());
+        club.actualizar(reserva, new EnCurso(), new Cancelada());
 
-        club.actualizar(reserva, anterior, actual);
-
-        verify(mailSender, never()).enviarMail(any(), any(), any(), any());
+        verify(mailSender, times(3)).enviarMail(any(), anyString(), anyString(), any());
     }
 
     @Test
-    void actualizar_conEstadosReales_soloNotificaLaCancelacion() {
-        club.actualizar(reserva, new Pagado(), new Cancelada());
-        club.actualizar(reserva, new Cancelada(), new Pagado());
+    void lasTransicionesQueNoSonCancelacion_noEnvianNada() {
+        club.actualizar(reserva, new SolicitudPendiente(), new Pagado());
+        club.actualizar(reserva, new Pagado(), new EnChecking());
+        club.actualizar(reserva, new EnChecking(), new EnCurso());
+        club.actualizar(reserva, new EnCurso(), new Finalizada());
 
-        verify(mailSender, times(1)).enviarMail(any(), anyString(), anyString(), any());
+        verify(mailSender, never()).enviarMail(any(), any(), any(), any());
     }
 }
