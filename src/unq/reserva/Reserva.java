@@ -20,7 +20,6 @@ public class Reserva {
     private MedioDePago medioDePago;
     private List<VoucherReembolso> vouchersDeReembolso = new ArrayList<>();
 
-
     public Reserva(String email, Direccion destino, int cantidadDePasajeros) {
         this.email = email;
         this.estado = new SolicitudPendiente();
@@ -40,22 +39,25 @@ public class Reserva {
         notificacion.quitarObservador(observador);
     }
 
-    public LocalDate getFecha(){
+    public LocalDate getFecha() {
         return fecha;
     }
-    public List<Catalogo> getItems(){
+
+    public List<Catalogo> getItems() {
         return new ArrayList<>(items);
     }
 
-    public  boolean cuentaComoVenta(){
+    public boolean cuentaComoVenta() {
         return estado.cuentaComoVenta();
     }
-    public EstadoDeReserva getEstadoActual(){
+
+    public EstadoDeReserva getEstadoActual() {
         return this.estado;
     }
 
     public double getCostoEnvio() {
-        if (this.metodoTraslado == null) throw new ExcepcionDominio("Método de envío no seleccionado");
+        if (this.metodoTraslado == null)
+            throw new ExcepcionDominio("Método de envío no seleccionado");
         return this.metodoTraslado.calcularCosto(this);
     }
 
@@ -124,19 +126,14 @@ public class Reserva {
     }
 
     public void bloquearCupos() {
-        for (Catalogo item : items) {
-            for (int i = 0; i < cantidadDePasajeros; i++) {
-                item.decrementarCupo();
-            }
+        if (!items.stream().allMatch(i -> i.tieneCupo(cantidadDePasajeros))) {
+            throw new ExcepcionDominio("No hay cupo suficiente para todos los servicios");
         }
+        items.forEach(item -> item.decrementarCupo(cantidadDePasajeros));
     }
 
     public void liberarCupos() {
-        for (Catalogo item : items) {
-            for (int i = 0; i < cantidadDePasajeros; i++) {
-                item.incrementarCupo();
-            }
-        }
+        items.forEach(item -> item.incrementarCupo(cantidadDePasajeros));
     }
 
     public void reembolsarServiciosYTasas() {
@@ -160,8 +157,8 @@ public class Reserva {
     }
 
     public void procesarPago() {
-        if(this.medioDePago == null){
-            throw new ExcepcionDominio("No se puede procesar el pago sin un metodo de pago asignado");  
+        if (this.medioDePago == null) {
+            throw new ExcepcionDominio("No se puede procesar el pago sin un metodo de pago asignado");
         }
         this.medioDePago.setMonto(this.valorTotal());
         this.medioDePago.procesoDePago();

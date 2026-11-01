@@ -18,7 +18,8 @@ public class ServicioIndividual implements Catalogo {
     private List<AtributoDinamico> atributosDinamicos = new ArrayList<>();
 
     public ServicioIndividual(String codigo, String nombre, String descripcion,
-            String operador, Categoria categoria, double precioBase, int cuposDisponibles) {
+            String operador, Categoria categoria, double precioBase, int cuposDisponibles,
+            double descuentoPromocional) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -37,14 +38,21 @@ public class ServicioIndividual implements Catalogo {
         this.descuentoPromocional = porcentaje;
     }
 
-    @Override
-    public void decrementarCupo() {
-        this.cuposDisponibles--;
+    public boolean tieneCupo(int cantidad) {
+        return cuposDisponibles >= cantidad;
     }
 
     @Override
-    public void incrementarCupo() {
-        this.cuposDisponibles++;
+    public void decrementarCupo(int cantidad) {
+        if (cantidad > cuposDisponibles) {
+            throw new ExceptionDominio("No hay cupo disponible");
+        }
+        this.cuposDisponibles -= cantidad;
+    }
+
+    @Override
+    public void incrementarCupo(int cantidad) {
+        this.cuposDisponibles += cantidad;
     }
 
     @Override

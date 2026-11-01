@@ -15,9 +15,9 @@ public interface Catalogo {
 
     boolean esDeCategoria(Categoria categoria);
 
-    void decrementarCupo();
+    void decrementarCupo(int cantidad);
 
-    void incrementarCupo();
+    void incrementarCupo(int cantidad);
 
     int getCuposDisponibles();
 
@@ -25,5 +25,5 @@ public interface Catalogo {
 
     List<Catalogo> componentes();
 
-    double factorDeDescuento();
+    boolean tieneCupo(int cantidad);
 }
