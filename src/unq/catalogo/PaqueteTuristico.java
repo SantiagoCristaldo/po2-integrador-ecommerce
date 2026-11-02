@@ -10,7 +10,7 @@ public class PaqueteTuristico implements Catalogo {
     private String descripcion;
     private int descuento;
     private List<Catalogo> items = new ArrayList<>();
-    private int cuposDisponibles;
+    private int cuposDisponibles; // tendriamos que sacar esto y poner q se calcule a partir de los items. 
 
     public PaqueteTuristico(String nombre, String descripcion, int descuento, int cuposDisponibles) {
         if (descuento < 0 || descuento > 100) {
