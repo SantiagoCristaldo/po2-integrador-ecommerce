@@ -31,7 +31,7 @@ class ReporteExposicionProveedorTest {
         tour = new ServicioIndividual("T1", "Tour", "d", "Sur Viajes", categoria, 300.0, 20);
     }
 
-    private FilaExposicon filaDe(String operador) {
+    private FilaExposicion filaDe(String operador) {
         return reporte.getFilas().stream()
                 .filter(f -> f.getOperador().equals(operador)).findFirst().orElseThrow();
     }

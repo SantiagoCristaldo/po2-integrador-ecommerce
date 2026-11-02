@@ -105,8 +105,9 @@ public class Reserva {
     }
 
     public void cambiarEstado(EstadoDeReserva nuevoEstado) {
-        notificacion.actualizarEstados(this, this.estado, nuevoEstado);
+        EstadoDeReserva anterior = this.estado;
         this.estado = nuevoEstado;
+        notificacion.actualizarEstados(this, anterior, nuevoEstado);
     }
 
     public void setMetodoTraslado(MetodoTraslado metodoTraslado) {

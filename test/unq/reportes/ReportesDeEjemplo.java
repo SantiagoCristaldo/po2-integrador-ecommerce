@@ -49,7 +49,7 @@ class ReportesDeEjemplo {
         return reporte;
     }
 
-    static ReporteExposicionProveedor exposicion(FilaExposicon... filas) {
+    static ReporteExposicionProveedor exposicion(FilaExposicion... filas) {
         ReporteExposicionProveedor reporte = mock(ReporteExposicionProveedor.class);
         when(reporte.getFilas()).thenReturn(List.of(filas));
         return reporte;

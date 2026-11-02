@@ -3,6 +3,8 @@ package unq.reportes;
 import unq.catalogo.Categoria;
 
 public class FilaOcupacion {
+    private static final double PORCENTAJE_TOTAL = 100.0;
+
     private Categoria categoria;
     private int cuposTotales;
     private int cuposReservados;
@@ -40,6 +42,6 @@ public class FilaOcupacion {
             return 0;
         }
 
-        return cuposReservados * 100.0 / cuposTotales;
+        return cuposReservados * PORCENTAJE_TOTAL / cuposTotales;
     }
 }

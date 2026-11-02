@@ -55,7 +55,7 @@ class ExportadorCSVTest {
 
     @Test
     void visitarExposicion_generaEncabezadoYPorcentajeConDosDecimales() {
-        String csv = exportador.visitar(exposicion(new FilaExposicon("Andes SA", 3, 75.0)));
+        String csv = exportador.visitar(exposicion(new FilaExposicion("Andes SA", 3, 75.0)));
 
         assertEquals("operador,cantidadItems,porcentajeCatalogo\n"
                 + "Andes SA,3,75.00\n", csv);

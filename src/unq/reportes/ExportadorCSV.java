@@ -1,41 +1,42 @@
 package unq.reportes;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExportadorCSV implements ExportadorReporte {
 
     @Override
     public String visitar(ReporteServiciosMasReservados reporte) {
-        StringBuilder csv = new StringBuilder("item,unidadesVendidas,precioPromedioCobrado\n");
+        List<String> lineas = new ArrayList<>();
         for (FilaVentas fila : reporte.getFilas()) {
-            csv.append(campo(fila.getItem().nombre())).append(",")
-               .append(fila.getUnidadesVendidas()).append(",")
-               .append(numero(fila.getPrecioPromedioCobrado())).append("\n");
+            lineas.add(campo(fila.getItem().nombre()) + ","
+                    + fila.getUnidadesVendidas() + ","
+                    + Formato.numero(fila.getPrecioPromedioCobrado()));
         }
-        return csv.toString();
+        return Formato.conFilas("item,unidadesVendidas,precioPromedioCobrado\n", "", lineas);
     }
 
     @Override
     public String visitar(ReporteOcupacion reporte) {
-        StringBuilder csv = new StringBuilder("categoria,cuposTotales,cuposReservados,cuposLibres\n");
+        List<String> lineas = new ArrayList<>();
         for (FilaOcupacion fila : reporte.getFilas()) {
-            csv.append(campo(fila.getCategoria().getNombre())).append(",")
-               .append(fila.getCuposTotales()).append(",")
-               .append(fila.getCuposReservados()).append(",")
-               .append(fila.getCuposLibres()).append("\n");
+            lineas.add(campo(fila.getCategoria().getNombre()) + ","
+                    + fila.getCuposTotales() + ","
+                    + fila.getCuposReservados() + ","
+                    + fila.getCuposLibres());
         }
-        return csv.toString();
+        return Formato.conFilas("categoria,cuposTotales,cuposReservados,cuposLibres\n", "", lineas);
     }
 
     @Override
     public String visitar(ReporteExposicionProveedor reporte) {
-        StringBuilder csv = new StringBuilder("operador,cantidadItems,porcentajeCatalogo\n");
-        for (FilaExposicon fila : reporte.getFilas()) {
-            csv.append(campo(fila.getOperador())).append(",")
-               .append(fila.getCantidadItems()).append(",")
-               .append(numero(fila.getPorcentajeCatalogo())).append("\n");
+        List<String> lineas = new ArrayList<>();
+        for (FilaExposicion fila : reporte.getFilas()) {
+            lineas.add(campo(fila.getOperador()) + ","
+                    + fila.getCantidadItems() + ","
+                    + Formato.numero(fila.getPorcentajeCatalogo()));
         }
-        return csv.toString();
+        return Formato.conFilas("operador,cantidadItems,porcentajeCatalogo\n", "", lineas);
     }
 
     // Si el texto tiene comas o comillas, va entre comillas (regla de CSV)
@@ -44,9 +45,5 @@ public class ExportadorCSV implements ExportadorReporte {
             return "\"" + valor.replace("\"", "\"\"") + "\"";
         }
         return valor;
-    }
-
-    private String numero(double valor) {
-        return String.format(Locale.ROOT, "%.2f", valor);
     }
 }

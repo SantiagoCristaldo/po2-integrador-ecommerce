@@ -1,14 +1,20 @@
 package unq.reportes;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 import unq.catalogo.Catalogo;
 import unq.reserva.Reserva;
 
 public class ReporteServiciosMasReservados implements Reporte {
+    private static final double SIN_DESCUENTO = 1.0;
+
     private Periodo periodo;
     private List<FilaVentas> filas = new ArrayList<>();
+    private Map<Catalogo, FilaVentas> filasPorItem = new IdentityHashMap<>();
 
     public ReporteServiciosMasReservados(Periodo periodo) {
         this.periodo = periodo;
@@ -17,39 +23,54 @@ public class ReporteServiciosMasReservados implements Reporte {
     @Override
     public void generar(List<Reserva> reservas, List<Catalogo> catalogo) {
         filas = new ArrayList<>();
+        filasPorItem = new IdentityHashMap<>();
 
+        crearFilasDelCatalogo(catalogo);
+        registrarVentasDelPeriodo(reservas);
+
+        filas.sort(Comparator.comparingInt(FilaVentas::getUnidadesVendidas).reversed());
+    }
+
+    private void crearFilasDelCatalogo(List<Catalogo> catalogo) {
         for (Catalogo item : catalogo) {
             buscarFila(item);
         }
+    }
 
+    private void registrarVentasDelPeriodo(List<Reserva> reservas) {
         for (Reserva reserva : reservas) {
-            if (reserva.cuentaComoVenta() && periodo.contiene(reserva.getFecha())) {
-                for (Catalogo item : reserva.getItems()) {
-                    registrarVenta(item, 1.0);
-                }
+            if (esVentaDelPeriodo(reserva)) {
+                registrarItems(reserva.getItems(), SIN_DESCUENTO);
             }
         }
-
-        filas.sort((a, b) -> b.getUnidadesVendidas() - a.getUnidadesVendidas());
     }
 
-    private void registrarVenta(Catalogo item, double descuentoAcumulado) {
-        buscarFila(item).registrarVenta(item.precioFinal() * descuentoAcumulado);
+    private boolean esVentaDelPeriodo(Reserva reserva) {
+        return reserva.cuentaComoVenta() && periodo.contiene(reserva.getFecha());
+    }
 
-        for (Catalogo componente : item.componentes()) {
-            registrarVenta(componente, descuentoAcumulado * item.factorDeDescuento());
+    private void registrarItems(List<Catalogo> items, double factorAcumulado) {
+        for (Catalogo item : items) {
+            registrarVenta(item, factorAcumulado);
         }
     }
 
+    private void registrarVenta(Catalogo item, double factorAcumulado) {
+        buscarFila(item).registrarVenta(item.precioFinal() * factorAcumulado);
+
+        // Cada componente de un paquete hereda el descuento que ya trae la jerarquía.
+        registrarItems(item.componentes(), factorAcumulado * item.factorDeDescuento());
+    }
+
+    // La fila se busca por identidad: dos ítems distintos con los mismos datos son ventas distintas.
     private FilaVentas buscarFila(Catalogo item) {
-        for (FilaVentas fila : filas) {
-            if (fila.getItem() == item) {
-                return fila;
-            }
+        FilaVentas fila = filasPorItem.get(item);
+        if (fila == null) {
+            fila = new FilaVentas(item);
+            filasPorItem.put(item, fila);
+            filas.add(fila);
         }
-        FilaVentas nueva = new FilaVentas(item);
-        filas.add(nueva);
-        return nueva;
+        return fila;
     }
 
     public List<FilaVentas> getFilas() {

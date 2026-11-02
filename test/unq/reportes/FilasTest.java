@@ -69,7 +69,7 @@ class FilasTest {
 
     @Test
     void filaExposicion_guardaOperadorCantidadYPorcentaje() {
-        FilaExposicon fila = new FilaExposicon("Operador SA", 3, 75.0);
+        FilaExposicion fila = new FilaExposicion("Operador SA", 3, 75.0);
 
         assertEquals("Operador SA", fila.getOperador());
         assertEquals(3, fila.getCantidadItems());

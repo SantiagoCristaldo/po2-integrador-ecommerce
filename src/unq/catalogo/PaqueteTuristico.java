@@ -38,7 +38,7 @@ public class PaqueteTuristico implements Catalogo {
         items.forEach(i -> i.decrementarCupo(cantidad));
     }
 
-    public void incrementarCupo() {
+    public void incrementarCupo(int cantidad) {
         items.forEach(i -> i.incrementarCupo(cantidad));
     }
 

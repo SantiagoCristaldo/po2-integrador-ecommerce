@@ -34,7 +34,7 @@ class ExportadorTextoPlanoTest {
 
     @Test
     void visitarExposicion_muestraCantidadYPorcentajeDelCatalogo() {
-        String texto = exportador.visitar(exposicion(new FilaExposicon("Andes SA", 3, 75.0)));
+        String texto = exportador.visitar(exposicion(new FilaExposicion("Andes SA", 3, 75.0)));
 
         assertEquals("EXPOSICION POR PROVEEDOR\n"
                 + "- Andes SA: 3 items (75.00% del catalogo)\n", texto);

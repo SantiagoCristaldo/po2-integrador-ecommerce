@@ -43,7 +43,7 @@ class ExportadorHTMLTest {
 
     @Test
     void visitarExposicion_generaTituloTablaYFilas() {
-        String html = exportador.visitar(exposicion(new FilaExposicon("Andes SA", 3, 75.0)));
+        String html = exportador.visitar(exposicion(new FilaExposicion("Andes SA", 3, 75.0)));
 
         assertEquals("<h1>Exposicion por proveedor</h1>\n<table>\n"
                 + "<tr><th>Operador</th><th>Cantidad de items</th><th>% del catalogo</th></tr>\n"

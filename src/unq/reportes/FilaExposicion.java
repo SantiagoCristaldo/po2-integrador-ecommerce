@@ -1,11 +1,11 @@
 package unq.reportes;
 
-public class FilaExposicon {
+public class FilaExposicion {
     private String operador;
     private int cantidadItems;
     private double porcentajeCatalogo;
 
-    public FilaExposicon(String operador, int cantidadItems, double porcentajeCatalogo) {
+    public FilaExposicion(String operador, int cantidadItems, double porcentajeCatalogo) {
         this.operador = operador;
         this.cantidadItems = cantidadItems;
         this.porcentajeCatalogo = porcentajeCatalogo;

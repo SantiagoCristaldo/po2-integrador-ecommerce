@@ -1,48 +1,52 @@
 package unq.reportes;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExportadorTextoPlano implements ExportadorReporte {
 
     @Override
     public String visitar(ReporteServiciosMasReservados reporte) {
-        StringBuilder texto = new StringBuilder("SERVICIOS MAS RESERVADOS ("
-                + reporte.getPeriodo().getDesde() + " a " + reporte.getPeriodo().getHasta() + ")\n");
+        List<String> lineas = new ArrayList<>();
         for (FilaVentas fila : reporte.getFilas()) {
-            texto.append("- ").append(fila.getItem().nombre())
-                 .append(": ").append(fila.getUnidadesVendidas()).append(" vendidos")
-                 .append(", precio promedio $").append(numero(fila.getPrecioPromedioCobrado()))
-                 .append("\n");
+            lineas.add(lineaDeVentas(fila));
         }
-        return texto.toString();
+        return Formato.conFilas(
+                Formato.encabezadoConPeriodo("SERVICIOS MAS RESERVADOS", reporte.getPeriodo()),
+                "", lineas);
     }
 
     @Override
     public String visitar(ReporteOcupacion reporte) {
-        StringBuilder texto = new StringBuilder("OCUPACION POR CATEGORIA ("
-                + reporte.getPeriodo().getDesde() + " a " + reporte.getPeriodo().getHasta() + ")\n");
+        List<String> lineas = new ArrayList<>();
         for (FilaOcupacion fila : reporte.getFilas()) {
-            texto.append("- ").append(fila.getCategoria().getNombre())
-                 .append(": ").append(fila.getCuposReservados()).append("/").append(fila.getCuposTotales())
-                 .append(" cupos (").append(fila.getCuposLibres()).append(" libres)")
-                 .append("\n");
+            lineas.add(lineaDeOcupacion(fila));
         }
-        return texto.toString();
+        return Formato.conFilas(
+                Formato.encabezadoConPeriodo("OCUPACION POR CATEGORIA", reporte.getPeriodo()),
+                "", lineas);
     }
 
     @Override
     public String visitar(ReporteExposicionProveedor reporte) {
-        StringBuilder texto = new StringBuilder("EXPOSICION POR PROVEEDOR\n");
-        for (FilaExposicon fila : reporte.getFilas()) {
-            texto.append("- ").append(fila.getOperador())
-                 .append(": ").append(fila.getCantidadItems()).append(" items")
-                 .append(" (").append(numero(fila.getPorcentajeCatalogo())).append("% del catalogo)")
-                 .append("\n");
+        List<String> lineas = new ArrayList<>();
+        for (FilaExposicion fila : reporte.getFilas()) {
+            lineas.add("- " + fila.getOperador()
+                    + ": " + fila.getCantidadItems() + " items"
+                    + " (" + Formato.numero(fila.getPorcentajeCatalogo()) + "% del catalogo)");
         }
-        return texto.toString();
+        return Formato.conFilas("EXPOSICION POR PROVEEDOR\n", "", lineas);
     }
 
-    private String numero(double valor) {
-        return String.format(Locale.ROOT, "%.2f", valor);
+    private String lineaDeVentas(FilaVentas fila) {
+        return "- " + fila.getItem().nombre()
+                + ": " + fila.getUnidadesVendidas() + " vendidos"
+                + ", precio promedio $" + Formato.numero(fila.getPrecioPromedioCobrado());
+    }
+
+    private String lineaDeOcupacion(FilaOcupacion fila) {
+        return "- " + fila.getCategoria().getNombre()
+                + ": " + fila.getCuposReservados() + "/" + fila.getCuposTotales()
+                + " cupos (" + fila.getCuposLibres() + " libres)";
     }
 }

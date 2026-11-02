@@ -10,7 +10,8 @@ public class Periodo {
 
     public Periodo(LocalDate desde, LocalDate hasta) {
         if (desde.isAfter(hasta)) {
-            throw new ExcepcionDominio("Las fechas no estan bien");
+            throw new ExcepcionDominio("La fecha de inicio (" + desde
+                    + ") no puede ser posterior a la fecha de fin (" + hasta + ")");
         }
         this.desde = desde;
         this.hasta = hasta;
