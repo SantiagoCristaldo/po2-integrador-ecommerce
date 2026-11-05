@@ -1,5 +1,6 @@
 package unq.catalogo;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +14,11 @@ public class ServicioIndividual implements Catalogo {
     private Categoria categoria;
     private double precioBase;
     private double descuentoPromocional;
-    private int cupoTotal;
-    private int cuposDisponibles;
+    private Cronograma cronograma;
     private List<AtributoDinamico> atributosDinamicos = new ArrayList<>();
 
     public ServicioIndividual(String codigo, String nombre, String descripcion,
-            String operador, Categoria categoria, double precioBase, int cuposDisponibles,
-            double descuentoPromocional) {
+            String operador, Categoria categoria, double precioBase, int cuposDisponibles) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -27,8 +26,7 @@ public class ServicioIndividual implements Catalogo {
         this.categoria = categoria;
         this.precioBase = precioBase;
         this.descuentoPromocional = 0;
-        this.cupoTotal = cuposDisponibles;
-        this.cuposDisponibles = cuposDisponibles;
+        this.cronograma = new Cronograma(cuposDisponibles);
     }
 
     public void aplicarDescuentoPromocional(double porcentaje) {
@@ -40,33 +38,43 @@ public class ServicioIndividual implements Catalogo {
 
     @Override
     public int valorMinimoDeLosCuposDisponibles() {
-        return this.cuposDisponibles;
-    }
-
-    public boolean tieneCupo(int cantidad) {
-        return cuposDisponibles >= cantidad;
+        return this.getCuposDisponibles();
     }
 
     @Override
-    public void decrementarCupo(int cantidad) {
-        if (cantidad > cuposDisponibles) {
-            throw new ExceptionDominio("No hay cupo disponible");
-        }
-        this.cuposDisponibles -= cantidad;
+    public boolean tieneCupo(LocalDate inicio, LocalDate fin, int cantidad) {
+        return cronograma.tieneCupo(inicio, fin, cantidad);
     }
 
     @Override
-    public void incrementarCupo(int cantidad) {
-        this.cuposDisponibles += cantidad;
+    public void decrementarCupo(LocalDate inicio, LocalDate fin, int cantidad) {
+        cronograma.decrementar(inicio, fin, cantidad);
+    }
+
+    @Override
+    public void incrementarCupo(LocalDate inicio, LocalDate fin, int cantidad) {
+        cronograma.incrementar(inicio, fin, cantidad);
     }
 
     @Override
     public int getCuposDisponibles() {
-        return this.cuposDisponibles;
+        return cronograma.cupoMaximo();
     }
 
-    public int getCupoTotal() {
-        return cupoTotal;
+    public int getCuposDisponiblesEn(LocalDate fecha) {
+        return cronograma.cupoEn(fecha);
+    }
+
+    public void definirCupo(LocalDate fecha, int cupo) {
+        cronograma.definirCupo(fecha, cupo);
+    }
+
+    public int cuposTotalesEntre(LocalDate inicio, LocalDate fin) {
+        return cronograma.cuposTotalesEntre(inicio, fin);
+    }
+
+    public int cuposReservadosEntre(LocalDate inicio, LocalDate fin) {
+        return cronograma.cuposReservadosEntre(inicio, fin);
     }
 
     @Override

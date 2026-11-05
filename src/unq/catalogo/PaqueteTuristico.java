@@ -1,5 +1,6 @@
 package unq.catalogo;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,19 +29,19 @@ public class PaqueteTuristico implements Catalogo {
         items.add(item);
     }
 
-    public boolean tieneCupo(int cantidad) {
-        return items.stream().allMatch(i -> i.tieneCupo(cantidad));
+    @Override
+    public boolean tieneCupo(LocalDate inicio, LocalDate fin, int cantidad) {
+        return items.stream().allMatch(i -> i.tieneCupo(inicio, fin, cantidad));
     }
 
-    public void decrementarCupo(int cantidad) {
-        if(this.getCuposDisponibles() < cantidad) {
-            throw new ExcepcionDominio("No hay suficientes cupos disponibles");
-        } 
-        items.forEach(i -> i.decrementarCupo(cantidad));
+    @Override
+    public void decrementarCupo(LocalDate inicio, LocalDate fin, int cantidad) {
+        Catalogo.decrementarCupoDeTodos(items, inicio, fin, cantidad);
     }
 
-    public void incrementarCupo(int cantidad) {
-        items.forEach(i -> i.incrementarCupo(cantidad));
+    @Override
+    public void incrementarCupo(LocalDate inicio, LocalDate fin, int cantidad) {
+        items.forEach(i -> i.incrementarCupo(inicio, fin, cantidad));
     }
 
     @Override
@@ -76,6 +77,11 @@ public class PaqueteTuristico implements Catalogo {
     public double precioFinal() {
         double sumaFinales = this.precioBase();
         return sumaFinales - (sumaFinales * (descuento / 100));
+    }
+
+    @Override
+    public double factorDeDescuento() {
+        return 1 - descuento / 100.0;
     }
 
     @Override

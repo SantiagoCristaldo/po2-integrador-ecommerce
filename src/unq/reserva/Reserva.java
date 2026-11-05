@@ -17,18 +17,34 @@ public class Reserva {
     private MetodoTraslado metodoTraslado;
     private Notificador notificacion = new Notificador();
     private LocalDate fecha;
+    private LocalDate fechaInicio;
+    private LocalDate fechaFin;
     private MedioDePago medioDePago;
     private List<VoucherReembolso> vouchersDeReembolso = new ArrayList<>();
 
-    public Reserva(String email, Direccion destino, int cantidadDePasajeros) {
+    public Reserva(String email, Direccion destino, int cantidadDePasajeros,
+            LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fechaFin.isBefore(fechaInicio)) {
+            throw new ExcepcionDominio("La fecha final no puede ser anterior a la fecha de inicio");
+        }
         this.email = email;
         this.estado = new SolicitudPendiente();
         this.cantidadDePasajeros = cantidadDePasajeros;
         this.fecha = LocalDate.now();
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
     }
 
     public String getEmail() {
         return email;
+    }
+
+    public LocalDate getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public LocalDate getFechaFin() {
+        return fechaFin;
     }
 
     public void agregarObservador(ObservadorReserva observador) {
@@ -127,14 +143,11 @@ public class Reserva {
     }
 
     public void bloquearCupos() {
-        if (!items.stream().allMatch(i -> i.tieneCupo(cantidadDePasajeros))) {
-            throw new ExcepcionDominio("No hay cupo suficiente para todos los servicios");
-        }
-        items.forEach(item -> item.decrementarCupo(cantidadDePasajeros));
+        Catalogo.decrementarCupoDeTodos(items, fechaInicio, fechaFin, cantidadDePasajeros);
     }
 
     public void liberarCupos() {
-        items.forEach(item -> item.incrementarCupo(cantidadDePasajeros));
+        items.forEach(item -> item.incrementarCupo(fechaInicio, fechaFin, cantidadDePasajeros));
     }
 
     public void reembolsarServiciosYTasas() {

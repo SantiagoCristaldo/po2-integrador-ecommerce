@@ -3,8 +3,6 @@ package unq.reportes;
 import unq.catalogo.Categoria;
 
 public class FilaOcupacion {
-    private static final double PORCENTAJE_TOTAL = 100.0;
-
     private Categoria categoria;
     private int cuposTotales;
     private int cuposReservados;
@@ -13,12 +11,9 @@ public class FilaOcupacion {
         this.categoria = categoria;
     }
 
-    void sumarCuposTotales(int cantidad) {
-        cuposTotales = cuposTotales + cantidad;
-    }
-
-    void sumarCuposReservados(int cantidad) {
-        cuposReservados = cuposReservados + cantidad;
+    void sumar(int totales, int reservados) {
+        cuposTotales += totales;
+        cuposReservados += reservados;
     }
 
     public Categoria getCategoria() {
@@ -34,14 +29,6 @@ public class FilaOcupacion {
     }
 
     public int getCuposLibres() {
-        return Math.max(0, cuposTotales - cuposReservados);
-    }
-
-    public double getPorcentajeOcupacion() {
-        if (cuposTotales == 0) {
-            return 0;
-        }
-
-        return cuposReservados * PORCENTAJE_TOTAL / cuposTotales;
+        return cuposTotales - cuposReservados;
     }
 }

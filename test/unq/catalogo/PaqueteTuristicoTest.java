@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
 
 import unq.excepciones.ExcepcionDominio;
@@ -27,6 +29,65 @@ class PaqueteTuristicoTest {
             paquete.agregarItem(item);
         }
         return paquete;
+    }
+
+    // --- Cupos por fecha ---
+
+    private static final LocalDate INICIO = LocalDate.of(2027, 1, 10);
+    private static final LocalDate FIN = LocalDate.of(2027, 1, 12);
+
+    private ServicioIndividual servicioConCupo(int cupo) {
+        return new ServicioIndividual("S1", "Servicio", "d", "op", new Categoria("Excursion"), 100.0, cupo);
+    }
+
+    @Test
+    void tieneCupo_conCupoEnTodosLosItems_esVerdadero() {
+        PaqueteTuristico paquete = paquete(0, servicioConCupo(2), servicioConCupo(5));
+
+        assertTrue(paquete.tieneCupo(INICIO, FIN, 2));
+    }
+
+    @Test
+    void tieneCupo_sinCupoEnUnItem_esFalso() {
+        PaqueteTuristico paquete = paquete(0, servicioConCupo(1), servicioConCupo(5));
+
+        assertFalse(paquete.tieneCupo(INICIO, FIN, 2));
+    }
+
+    @Test
+    void incrementarCupo_devuelveElCupoASusItems() {
+        ServicioIndividual servicio = servicioConCupo(5);
+        PaqueteTuristico paquete = paquete(0, servicio);
+        paquete.decrementarCupo(INICIO, FIN, 2);
+
+        paquete.incrementarCupo(INICIO, FIN, 2);
+
+        assertEquals(5, servicio.getCuposDisponiblesEn(INICIO));
+    }
+
+    @Test
+    void decrementarCupo_enPaquetesAnidados_llegaALosServicios() {
+        ServicioIndividual servicio = servicioConCupo(5);
+        PaqueteTuristico paquete = paquete(0, paquete(0, servicio));
+
+        paquete.decrementarCupo(INICIO, FIN, 2);
+
+        assertEquals(3, servicio.getCuposDisponiblesEn(FIN));
+    }
+
+    @Test
+    void decrementarCupo_conUnServicioRepetidoSinCupoParaAmbos_noDescuentaNada() {
+        ServicioIndividual servicio = servicioConCupo(3);
+        PaqueteTuristico paquete = paquete(0, servicio, servicio);
+
+        assertThrows(ExcepcionDominio.class, () -> paquete.decrementarCupo(INICIO, FIN, 2));
+
+        assertEquals(3, servicio.getCuposDisponiblesEn(INICIO));
+    }
+
+    @Test
+    void factorDeDescuento_esElComplementoDelPorcentaje() {
+        assertEquals(0.9, paquete(10).factorDeDescuento(), 0.001);
     }
 
     @Test

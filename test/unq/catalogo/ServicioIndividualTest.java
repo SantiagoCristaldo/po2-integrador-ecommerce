@@ -11,6 +11,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -110,6 +112,40 @@ class ServicioIndividualTest {
 
         assertThrows(ExcepcionDominio.class,
                 () -> servicio.agregarAtributoDinamico(repetido));
+    }
+
+    @Test
+    void decrementarCupo_descuentaLoLibreSinCambiarLosCuposTotales() {
+        LocalDate dia = LocalDate.of(2027, 1, 10);
+
+        servicio.decrementarCupo(dia, dia, 4);
+
+        assertEquals(6, servicio.getCuposDisponiblesEn(dia));
+        assertEquals(4, servicio.cuposReservadosEntre(dia, dia));
+        assertEquals(10, servicio.cuposTotalesEntre(dia, dia));
+    }
+
+    @Test
+    void getCuposDisponibles_conCupoEnOtraFecha_siguePositivo() {
+        LocalDate dia = LocalDate.of(2027, 1, 10);
+
+        servicio.decrementarCupo(dia, dia, 10);
+
+        assertEquals(0, servicio.getCuposDisponiblesEn(dia));
+        assertEquals(10, servicio.getCuposDisponibles());
+    }
+
+    @Test
+    void definirCupo_daDisponibilidadEnEsaFechaAUnServicioSinCupoPorDefecto() {
+        ServicioIndividual temporada = new ServicioIndividual("HOT-002", "Hotel", "d",
+                "op", new Categoria("Alojamiento"), 1000.0, 0);
+        LocalDate dia = LocalDate.of(2027, 1, 10);
+
+        temporada.definirCupo(dia, 3);
+
+        assertEquals(3, temporada.getCuposDisponibles());
+        assertTrue(temporada.tieneCupo(dia, dia, 3));
+        assertFalse(temporada.tieneCupo(dia, dia.plusDays(1), 3));
     }
 
     @Test

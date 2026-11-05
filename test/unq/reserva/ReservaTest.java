@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import unq.catalogo.Catalogo;
 import unq.catalogo.Categoria;
+import unq.catalogo.PaqueteTuristico;
 import unq.catalogo.ServicioIndividual;
 import unq.notificaciones.ObservadorReserva;
 import unq.excepciones.ExcepcionDominio;
@@ -25,6 +26,9 @@ import static org.mockito.Mockito.*;
  */
 class ReservaTest {
 
+    private static final LocalDate INICIO = LocalDate.of(2027, 1, 10);
+    private static final LocalDate FIN = LocalDate.of(2027, 1, 12);
+
     private Reserva reserva;
     private Direccion destino;   // DUMMY
     private Catalogo hotel;      // STUB
@@ -40,7 +44,7 @@ class ReservaTest {
         excursion = mock(Catalogo.class);
         when(excursion.precioFinal()).thenReturn(4000.0);
 
-        reserva = spy(new Reserva("cliente@mail.com", destino, 2));
+        reserva = spy(new Reserva("cliente@mail.com", destino, 2, INICIO, FIN));
     }
 
     // ---------- estado inicial y datos ----------
@@ -297,7 +301,110 @@ class ReservaTest {
 
         reserva.confirmar();
 
-        assertEquals(8, servicio.getCuposDisponibles());
+        assertEquals(8, servicio.getCuposDisponiblesEn(INICIO));
+    }
+
+    @Test
+    void confirmarDecrementaTodasLasFechasEntreInicioYFin() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        reserva.agregarItem(servicio);
+
+        reserva.confirmar();
+
+        assertEquals(8, servicio.getCuposDisponiblesEn(INICIO));
+        assertEquals(8, servicio.getCuposDisponiblesEn(INICIO.plusDays(1)));
+        assertEquals(8, servicio.getCuposDisponiblesEn(FIN));
+    }
+
+    @Test
+    void confirmarNoTocaLasFechasFueraDelRango() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        reserva.agregarItem(servicio);
+
+        reserva.confirmar();
+
+        assertEquals(10, servicio.getCuposDisponiblesEn(INICIO.minusDays(1)));
+        assertEquals(10, servicio.getCuposDisponiblesEn(FIN.plusDays(1)));
+    }
+
+    @Test
+    void confirmarSinCupoEnUnaFechaDelRangoLanzaExcepcionYSigueEnPendiente() {
+        ServicioIndividual servicio = servicioConCupo(10);
+        servicio.definirCupo(FIN, 1);
+        reserva.agregarItem(servicio);
+
+        assertThrows(ExcepcionDominio.class, reserva::confirmar);
+
+        assertInstanceOf(SolicitudPendiente.class, reserva.getEstadoActual());
+    }
+
+    @Test
+    void confirmarSinCupoEnUnItemNoDescuentaLosDemasItems() {
+        ServicioIndividual conCupo = servicioConCupo(10);
+        ServicioIndividual sinCupo = servicioConCupo(1);
+        reserva.agregarItem(conCupo);
+        reserva.agregarItem(sinCupo);
+
+        assertThrows(ExcepcionDominio.class, reserva::confirmar);
+
+        assertEquals(10, conCupo.getCuposDisponiblesEn(INICIO));
+        assertEquals(1, sinCupo.getCuposDisponiblesEn(INICIO));
+    }
+
+    @Test
+    void confirmarConUnServicioRepetidoSinCupoParaAmbosNoDescuentaNada() {
+        ServicioIndividual servicio = servicioConCupo(3);
+        reserva.agregarItem(servicio);
+        reserva.agregarItem(servicio);
+
+        assertThrows(ExcepcionDominio.class, reserva::confirmar);
+
+        assertEquals(3, servicio.getCuposDisponiblesEn(INICIO));
+    }
+
+    @Test
+    void confirmarSinCupoDentroDeUnPaqueteNoDescuentaNada() {
+        ServicioIndividual suelto = servicioConCupo(10);
+        ServicioIndividual enPaqueteConCupo = servicioConCupo(10);
+        ServicioIndividual enPaqueteSinCupo = servicioConCupo(1);
+        PaqueteTuristico paquete = new PaqueteTuristico("Pack", "d", 0, 0);
+        paquete.agregarItem(enPaqueteConCupo);
+        paquete.agregarItem(enPaqueteSinCupo);
+        reserva.agregarItem(suelto);
+        reserva.agregarItem(paquete);
+
+        assertThrows(ExcepcionDominio.class, reserva::confirmar);
+
+        assertEquals(10, suelto.getCuposDisponiblesEn(INICIO));
+        assertEquals(10, enPaqueteConCupo.getCuposDisponiblesEn(INICIO));
+        assertEquals(1, enPaqueteSinCupo.getCuposDisponiblesEn(INICIO));
+    }
+
+    @Test
+    void confirmarConUnPaqueteDecrementaLosCuposDeSusServicios() {
+        ServicioIndividual hotelReal = servicioConCupo(10);
+        ServicioIndividual tour = servicioConCupo(5);
+        PaqueteTuristico paquete = new PaqueteTuristico("Pack", "d", 0, 0);
+        paquete.agregarItem(hotelReal);
+        paquete.agregarItem(tour);
+        reserva.agregarItem(paquete);
+
+        reserva.confirmar();
+
+        assertEquals(8, hotelReal.getCuposDisponiblesEn(FIN));
+        assertEquals(3, tour.getCuposDisponiblesEn(FIN));
+    }
+
+    @Test
+    void noSePuedeCrearUnaReservaConFinAnteriorAlInicio() {
+        assertThrows(ExcepcionDominio.class,
+                () -> new Reserva("cliente@mail.com", destino, 2, FIN, INICIO));
+    }
+
+    @Test
+    void guardaLasFechasDeInicioYFin() {
+        assertEquals(INICIO, reserva.getFechaInicio());
+        assertEquals(FIN, reserva.getFechaFin());
     }
 
     @Test
@@ -308,7 +415,8 @@ class ReservaTest {
 
         reserva.cancelar();
 
-        assertEquals(10, servicio.getCuposDisponibles());
+        assertEquals(10, servicio.getCuposDisponiblesEn(INICIO));
+        assertEquals(10, servicio.getCuposDisponiblesEn(FIN));
     }
 
     @Test
@@ -320,7 +428,7 @@ class ReservaTest {
 
         reserva.cancelar();
 
-        assertEquals(10, servicio.getCuposDisponibles());
+        assertEquals(10, servicio.getCuposDisponiblesEn(INICIO));
     }
 
     @Test
@@ -333,7 +441,7 @@ class ReservaTest {
 
         reserva.cancelar();
 
-        assertEquals(8, servicio.getCuposDisponibles());
+        assertEquals(8, servicio.getCuposDisponiblesEn(INICIO));
     }
 
     @Test
@@ -343,7 +451,7 @@ class ReservaTest {
 
         reserva.cancelar();
 
-        assertEquals(10, servicio.getCuposDisponibles());
+        assertEquals(10, servicio.getCuposDisponiblesEn(INICIO));
     }
 
     // ---------- reembolsos (enunciado 2.2) ----------

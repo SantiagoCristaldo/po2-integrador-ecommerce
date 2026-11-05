@@ -1,42 +1,30 @@
 package unq.reportes;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ExportadorCSV implements ExportadorReporte {
 
     @Override
     public String visitar(ReporteServiciosMasReservados reporte) {
-        List<String> lineas = new ArrayList<>();
-        for (FilaVentas fila : reporte.getFilas()) {
-            lineas.add(campo(fila.getItem().nombre()) + ","
-                    + fila.getUnidadesVendidas() + ","
-                    + Formato.numero(fila.getPrecioPromedioCobrado()));
-        }
-        return Formato.conFilas("item,unidadesVendidas,precioPromedioCobrado\n", "", lineas);
+        return Formato.conFilas("item,unidadesVendidas,precioPromedioCobrado\n", reporte.getFilas(),
+                fila -> campo(fila.getItem().nombre()) + ","
+                        + fila.getUnidadesVendidas() + ","
+                        + Formato.numero(fila.getPrecioPromedioCobrado()));
     }
 
     @Override
     public String visitar(ReporteOcupacion reporte) {
-        List<String> lineas = new ArrayList<>();
-        for (FilaOcupacion fila : reporte.getFilas()) {
-            lineas.add(campo(fila.getCategoria().getNombre()) + ","
-                    + fila.getCuposTotales() + ","
-                    + fila.getCuposReservados() + ","
-                    + fila.getCuposLibres());
-        }
-        return Formato.conFilas("categoria,cuposTotales,cuposReservados,cuposLibres\n", "", lineas);
+        return Formato.conFilas("categoria,cuposTotales,cuposReservados,cuposLibres\n", reporte.getFilas(),
+                fila -> campo(fila.getCategoria().getNombre()) + ","
+                        + fila.getCuposTotales() + ","
+                        + fila.getCuposReservados() + ","
+                        + fila.getCuposLibres());
     }
 
     @Override
     public String visitar(ReporteExposicionProveedor reporte) {
-        List<String> lineas = new ArrayList<>();
-        for (FilaExposicion fila : reporte.getFilas()) {
-            lineas.add(campo(fila.getOperador()) + ","
-                    + fila.getCantidadItems() + ","
-                    + Formato.numero(fila.getPorcentajeCatalogo()));
-        }
-        return Formato.conFilas("operador,cantidadItems,porcentajeCatalogo\n", "", lineas);
+        return Formato.conFilas("operador,cantidadItems,porcentajeCatalogo\n", reporte.getFilas(),
+                fila -> campo(fila.getOperador()) + ","
+                        + fila.getCantidadItems() + ","
+                        + Formato.numero(fila.getPorcentajeCatalogo()));
     }
 
     // Si el texto tiene comas o comillas, va entre comillas (regla de CSV)

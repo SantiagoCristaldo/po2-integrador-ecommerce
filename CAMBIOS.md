@@ -1,13 +1,188 @@
-# CAMBIOS — últimas dos tandas de trabajo
+# CAMBIOS — últimas tandas de trabajo
 
-Resumen de todo lo que se cambió en las dos últimas tandas:
+Resumen de todo lo que se cambió en las últimas tandas:
 
 1. **Tanda 1** — "hazme todos los test que falten" (ya commiteada como `c5824c4 locura la cantidad de test`).
-2. **Tanda 2** — tests TDD desde el enunciado (`TP_Integrador.txt`) + corrección de `HALLAZGOS.md`
-   (**sin commitear**, está en el working tree).
+2. **Tanda 2** — tests TDD desde el enunciado (`TP_Integrador.txt`) + corrección de `HALLAZGOS.md`.
+3. **Tanda 3** — clase `Cronograma`: cupos por fecha (**sin commitear**, está en el working tree).
+4. **Tanda 4** — refactor de `reportes` y unión con el cronograma (**sin commitear**, está en el working tree).
 
-**Estado final de la suite:** 338 tests, **315 pasan y 23 fallan a propósito**. Los 23 fallos son
-incumplimientos del enunciado documentados como H29–H34 en `HALLAZGOS.md`.
+**Estado actual de la suite:** 392 tests, **366 pasan y 26 fallan**. Los 26 son los mismos de la tanda 3
+y ninguno viene de estas tandas (detalle en 3.6). Al cierre de la tanda 2 eran 338 tests con 23 fallos.
+
+---
+
+## Tanda 4 — Refactor de `reportes` y unión con el cronograma (sin commitear)
+
+### 4.1 Unión con el cronograma
+
+`ReporteOcupacion` ya no cuenta reservas: lee de los cronogramas los cupos de cada servicio en las fechas
+del período. El cronograma es la única fuente de la ocupación, así que el reporte y la confirmación de
+reservas no pueden contradecirse.
+
+**Esto cambia los números del reporte:**
+
+| | Antes | Ahora |
+|---|---|---|
+| **Unidad** | Cupos | Cupos por día: un hotel de 10 cupos tiene 310 totales en un período de 31 días |
+| **Qué reservas entran** | Las **creadas** en el período (`getFecha()`) | Los días de la reserva que **caen dentro** del período |
+| **Reserva de 2 pasajeros, 3 días** | Ocupa 2 | Ocupa 6 |
+| **Reserva que cruza el período** | Cuenta entera o nada | Cuenta sólo los días de adentro |
+| **Cupo de una fecha puntual** | Se ignoraba | Se refleja en los totales |
+
+Por qué cupos por día: el enunciado pide cupos "por categoría y período", y un cupo por fecha sólo se puede
+sumar en un período si se cuenta por día. Las columnas de los exportadores conservan su nombre.
+
+**Cambios en `catalogo`:**
+- `Cronograma.java`: nuevo mapa `reservadosPorFecha` y métodos `cuposTotalesEntre(inicio, fin)` y
+  `cuposReservadosEntre(inicio, fin)`. El mapa hace falta porque con sólo el cupo libre no se distingue una
+  fecha reservada de una con menos capacidad. Total de una fecha = libres + reservados.
+- `ServicioIndividual.java`: delega esos dos métodos en el cronograma. Se eliminan `cupoTotal` y
+  `getCupoTotal()`, que quedaron sin uso.
+
+**Comportamientos a tener en cuenta:**
+- Una reserva **cancelada en curso** sigue ocupando sus cupos en el reporte, porque ese estado no los libera
+  (enunciado 2.2). Antes dejaba de contar, porque una reserva cancelada no cuenta como venta.
+- Una reserva **finalizada** sigue ocupando: es ocupación histórica.
+- Sólo se cuentan los servicios del catálogo que recibe `generar`. Antes también sumaban los reservados que
+  no estuvieran en esa lista.
+- `ReporteServiciosMasReservados` **no** usa el cronograma: sigue filtrando por fecha de creación, porque
+  mide cuándo se vendió y no cuándo se viaja.
+
+### 4.2 Simplificación
+
+El módulo bajó de 604 a 460 líneas. Se mantiene el Visitor que sugiere el enunciado y la salida de los
+reportes de ventas y exposición no cambia ni un carácter.
+
+| Archivo | Cambio |
+|---|---|
+| `Formato.java` | `conFilas(encabezado, filas, linea)` recibe la función que arma cada línea. Se saca el parámetro `pie`. |
+| `ExportadorCSV` / `ExportadorTextoPlano` | Sin bucles repetidos ni métodos auxiliares: cada `visitar` declara su encabezado y su línea. |
+| `ExportadorHTML` | Un solo método `tabla(titulo, columnas, filas, celdas)` y un solo `fila(etiqueta, celdas)`, en vez de tres encabezados y dos métodos de fila casi iguales. |
+| `ReporteServiciosMasReservados` | Se saca el `IdentityHashMap`, que duplicaba la lista de filas, y la recursión pasa de dos métodos a uno. |
+| `ReporteExposicionProveedor` | Se sacan tres métodos auxiliares y la constante `PORCENTAJE_TOTAL`. |
+| `ReporteOcupacion` | Sin el conteo de reservas quedan menos métodos. Las filas se agrupan con un `LinkedHashMap` por categoría. |
+| `FilaOcupacion` | Un solo `sumar(totales, reservados)`. Se sacan `getPorcentajeOcupacion()`, que sólo usaban los tests, y el `Math.max` de libres, porque lo reservado ya no puede superar al total. |
+
+**Queda sin resolver:** `Reporte.generar` recibe `reservas`, pero sólo el reporte de ventas las usa. Se dejó
+así para no cambiar la interfaz; cada reporte que las ignora lo aclara en un comentario.
+
+### 4.3 Tests
+
+- `ReporteOcupacionTest`: reescrito con reservas y cronogramas reales. Casos nuevos: reserva que cruza el
+  período, fuera del período, pendiente, cancelada, cancelada en curso, cupo definido en una fecha y
+  categorías con el mismo nombre.
+- `ReportesCaracterizacionTest`: sólo cambian los datos y los valores esperados de **ocupación**, y el helper
+  de datos deja de recibir el cupo. Los valores esperados de ventas y exposición siguen iguales: son la
+  prueba de que el refactor no cambió esas salidas.
+- `FilasTest` y `ReportesDeEjemplo`: adaptados a `sumar`. Se sacó el caso de libres negativos.
+- `CronogramaTest`: 6 casos nuevos de totales y reservados.
+
+Comparando contra la tanda 3 no hay fallos nuevos ni arreglados. Todas las clases de `reportes` y
+`Cronograma` quedan con 100% de cobertura de instrucciones y ramas en JaCoCo (no se reportan las interfaces,
+que no tienen código).
+
+---
+
+## Tanda 3 — `Cronograma`: cupos por fecha (sin commitear)
+
+### 3.1 Qué problema resuelve
+
+Antes cada servicio tenía **un solo número** de cupos (`cuposDisponibles`), sin relación con las fechas:
+reservar un hotel en enero le quitaba cupo también para marzo. Ahora el cupo se maneja **por fecha** y la
+reserva tiene una fecha de inicio y una fecha final.
+
+### 3.2 La clase `Cronograma` (`src/unq/catalogo/Cronograma.java`, nueva)
+
+Cada `ServicioIndividual` tiene su propio `Cronograma`, que guarda un `Map<LocalDate, Integer>`
+(fecha → cupo de esa fecha).
+
+| Método | Qué hace |
+|---|---|
+| `cupoEn(fecha)` | Cupo de esa fecha. |
+| `definirCupo(fecha, cupo)` | Fija el cupo de una fecha puntual. Lanza `ExcepcionDominio` si es negativo. |
+| `tieneCupo(inicio, fin, cantidad)` | Indica si **todas** las fechas del rango tienen al menos `cantidad`. |
+| `decrementar(inicio, fin, cantidad)` | Descuenta `cantidad` en cada fecha del rango. Si alguna no alcanza, lanza `ExcepcionDominio` y no descuenta ninguna. |
+| `incrementar(inicio, fin, cantidad)` | Devuelve `cantidad` en cada fecha del rango (al cancelar). |
+| `cupoMaximo()` | El mayor cupo de todas las fechas. Es mayor a cero si hay cupo en al menos una fecha. |
+
+### 3.3 Cambios en las demás clases
+
+**`catalogo`**
+- `Catalogo.java`: `tieneCupo`, `decrementarCupo` e `incrementarCupo` ahora reciben `(inicio, fin, cantidad)`.
+  Nuevo método estático `decrementarCupoDeTodos(items, inicio, fin, cantidad)`.
+- `ServicioIndividual.java`: el campo `cuposDisponibles` se reemplaza por un `Cronograma`, al que le delega.
+  Nuevos `getCuposDisponiblesEn(fecha)` y `definirCupo(fecha, cupo)`. `getCupoTotal()` no cambia.
+- `PaqueteTuristico.java`: delega las nuevas operaciones en sus ítems, como antes (Composite).
+
+**`reserva`**
+- `Reserva.java`: el constructor ahora es `Reserva(email, destino, pasajeros, fechaInicio, fechaFin)` y
+  lanza `ExcepcionDominio` si el fin es anterior al inicio. Nuevos `getFechaInicio()` y `getFechaFin()`.
+- `bloquearCupos()` (al confirmar) y `liberarCupos()` (al cancelar) usan ese rango de fechas.
+- `getFecha()` sigue siendo la fecha de **creación** de la reserva, y es la que usan los reportes.
+
+**Comportamiento al confirmar:** si algún ítem no tiene cupo en alguna fecha del rango se lanza
+`ExcepcionDominio`, no se descuenta nada en ningún ítem y la reserva sigue en `SolicitudPendiente`.
+
+### 3.4 Decisiones de diseño
+
+- **Las fechas sin definir tienen el cupo por defecto.** El `int` de cupos que recibe el constructor de
+  `ServicioIndividual` es el cupo de cualquier fecha, y el mapa guarda sólo las que se apartan de ese valor.
+  Así no hay que cargar fecha por fecha un calendario sin fin. Un servicio de temporada se arma con cupo
+  por defecto 0 y `definirCupo` en sus fechas.
+- **El rango incluye las dos puntas.** Una reserva del 10 al 12 descuenta los días 10, 11 y 12. Si un
+  hotel no debería contar el día de salida, hay que cambiarlo en `Cronograma.fechasEntre`.
+- **Sigue siendo un cupo por pasajero** (H36): cada fecha del rango baja `cantidadDePasajeros`.
+- **Todo o nada con deshacer, no con preguntar antes.** Preguntar `tieneCupo` a cada ítem y después
+  descontar deja cupos descontados a medias cuando un servicio aparece dos veces (suelto y dentro de un
+  paquete): cada pregunta por separado da que sí, pero el segundo descuento falla. Por eso
+  `decrementarCupoDeTodos` descuenta y, si algo falla, devuelve lo ya descontado. Lo usan `Reserva` y
+  `PaqueteTuristico`.
+- **`getCuposDisponibles()` ahora es `cupoMaximo()`**, para que `FiltroPorCupos` cumpla "tiene cupos
+  disponibles en al menos una fecha" (enunciado 2.6) sin modificarlo.
+
+**Limitación conocida:** en un paquete, `getCuposDisponibles()` es el mínimo de esos máximos de sus ítems.
+Si un ítem sólo tiene cupo el día 1 y otro sólo el día 2, el paquete figura disponible aunque ninguna fecha
+sirva para ambos. No afecta a la confirmación, que sí valida fecha por fecha.
+
+**Limitación resuelta en la tanda 4:** `ReporteOcupacion` usaba `getCupoTotal()` y no miraba el cronograma,
+así que sus cupos totales no reflejaban los definidos con `definirCupo`.
+
+### 3.5 Arreglos necesarios para compilar
+
+`main` no compilaba antes de esta tanda. Se corrigió lo mínimo:
+
+- `ServicioIndividual.java`: `ExceptionDominio` estaba mal escrito (la línea luego se reemplazó por el `Cronograma`).
+- `Catalogo.java` / `PaqueteTuristico.java`: faltaba `factorDeDescuento()`, que `ReporteServiciosMasReservados`
+  usa y `ServicioIndividual` ya tenía. En el paquete es `1 - descuento / 100.0`.
+- `ServicioIndividual.java`: se sacó el 8.º parámetro del constructor (`descuentoPromocional`). Se ignoraba
+  y ningún test ni clase lo pasaba. El descuento se sigue aplicando con `aplicarDescuentoPromocional`.
+
+### 3.6 Tests
+
+- **Nuevo:** `catalogo/CronogramaTest` (16 tests).
+- **`reserva/ReservaTest`:** usa el nuevo constructor y verifica cupos por fecha. Casos nuevos: todas las
+  fechas del rango bajan, las de afuera no, sin cupo lanza excepción y sigue pendiente, no quedan
+  descuentos a medias (ítem sin cupo, servicio repetido, paquete).
+- **`catalogo/PaqueteTuristicoTest` y `ServicioIndividualTest`:** casos nuevos de cupos por fecha.
+
+Comparando contra la suite con sólo los arreglos de 3.5 (348 tests, 35 fallos):
+
+- **Se arreglaron 9** de `ReservaTest`, que fallaban porque un `Catalogo` mockeado responde `false` a
+  `tieneCupo` y `bloquearCupos` ya no le pregunta.
+- **No hay fallos nuevos.**
+- **Siguen 26 fallos, ajenos a esta tanda:**
+
+| Test | Fallos | Causa |
+|---|---|---|
+| `PuntoEncuentroTest` | 6 | H34 |
+| `AtributoDinamicoTest` | 6 | Rechaza el valor del atributo por tipo ("no es del tipo esperado"). No está en `HALLAZGOS.md`. |
+| `GeneradorComprobantesTest` | 5 | H32 |
+| `PaqueteTuristicoTest` | 4 | H30 |
+| `NotificadorEmailTest` | 2 | H33 |
+| `ClubViajerosTest` | 1 | H33 |
+| `ReporteServiciosMasReservadosTest` | 1 | H30 |
+| `ServicioIndividualTest` | 1 | H29 |
 
 ---
 

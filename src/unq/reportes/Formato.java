@@ -2,6 +2,7 @@ package unq.reportes;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 
 /** Piezas de armado de texto que comparten los tres exportadores. */
 final class Formato {
@@ -19,12 +20,12 @@ final class Formato {
         return titulo + " (" + periodo.getDesde() + " a " + periodo.getHasta() + ")\n";
     }
 
-    /** Encabezado, una línea por fila y un pie; cada línea termina en salto de línea. */
-    static String conFilas(String encabezado, String pie, List<String> filas) {
+    /** El encabezado y una línea por fila; cada línea termina en salto de línea. */
+    static <F> String conFilas(String encabezado, List<F> filas, Function<F, String> linea) {
         StringBuilder texto = new StringBuilder(encabezado);
-        for (String fila : filas) {
-            texto.append(fila).append("\n");
+        for (F fila : filas) {
+            texto.append(linea.apply(fila)).append("\n");
         }
-        return texto.append(pie).toString();
+        return texto.toString();
     }
 }

@@ -11,8 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import unq.catalogo.Catalogo;
 import unq.catalogo.Categoria;
+import unq.catalogo.PaqueteTuristico;
 import unq.catalogo.ServicioIndividual;
 import unq.reserva.Reserva;
+import unq.traslado.Direccion;
 
 /**
  * Tests de caracterización del circuito completo: datos de ejemplo -> generar() -> exportar.
@@ -34,12 +36,11 @@ class ReportesCaracterizacionTest {
     // --- Datos de ejemplo ---
 
     private static ServicioIndividual servicio(String nombre, String categoria, String operador,
-            int cupoTotal, double precioFinal) {
+            double precioFinal) {
         ServicioIndividual servicio = mock(ServicioIndividual.class);
         when(servicio.nombre()).thenReturn(nombre);
         when(servicio.getCategoria()).thenReturn(new Categoria(categoria));
         when(servicio.getOperador()).thenReturn(operador);
-        when(servicio.getCupoTotal()).thenReturn(cupoTotal);
         when(servicio.precioFinal()).thenReturn(precioFinal);
         when(servicio.servicios()).thenReturn(List.of(servicio));
         when(servicio.componentes()).thenReturn(List.of());
@@ -69,8 +70,8 @@ class ReportesCaracterizacionTest {
     }
 
     private ReporteServiciosMasReservados reporteDeVentas() {
-        ServicioIndividual hotel = servicio("Hotel Central", "Alojamiento", "Andes SA", 10, 1000.0);
-        ServicioIndividual tour = servicio("Tour, \"Guía\" <VIP>", "Excursion", "Sur & Viajes, SRL", 5, 400.0);
+        ServicioIndividual hotel = servicio("Hotel Central", "Alojamiento", "Andes SA", 1000.0);
+        ServicioIndividual tour = servicio("Tour, \"Guía\" <VIP>", "Excursion", "Sur & Viajes, SRL", 400.0);
         Catalogo pack = paquete("Pack & Spa", 1260.0, 0.9, hotel, tour);
 
         ReporteServiciosMasReservados reporte = new ReporteServiciosMasReservados(ENERO);
@@ -82,19 +83,27 @@ class ReportesCaracterizacionTest {
         return reporte;
     }
 
+    // Enero tiene 31 días y la reserva ocupa 2 cupos durante 3 días de cada servicio.
     private ReporteOcupacion reporteDeOcupacion() {
-        ServicioIndividual hotel = servicio("Hotel Central", "Alojamiento", "Andes SA", 10, 1000.0);
-        ServicioIndividual tour = servicio("Tour", "Excursion", "Sur & Viajes", 5, 400.0);
-        Catalogo pack = paquete("Pack", 1260.0, 0.9, hotel, tour);
+        ServicioIndividual hotel = new ServicioIndividual("H1", "Hotel Central", "d", "Andes SA",
+                new Categoria("Alojamiento"), 1000.0, 10);
+        ServicioIndividual tour = new ServicioIndividual("T1", "Tour", "d", "Sur & Viajes",
+                new Categoria("Excursion"), 400.0, 5);
+        PaqueteTuristico pack = new PaqueteTuristico("Pack", "d", 10, 0);
+        pack.agregarItem(hotel);
+        pack.agregarItem(tour);
+        Reserva reserva = new Reserva("cliente@mail.com", mock(Direccion.class), 2, EN_ENERO, EN_ENERO.plusDays(2));
+        reserva.agregarItem(pack);
+        reserva.confirmar();
 
         ReporteOcupacion reporte = new ReporteOcupacion(ENERO);
-        reporte.generar(List.of(reserva(true, EN_ENERO, 2, pack)), List.of(hotel, tour, pack));
+        reporte.generar(List.of(reserva), List.of(hotel, tour, pack));
         return reporte;
     }
 
     private ReporteExposicionProveedor reporteDeExposicion() {
-        ServicioIndividual hotel = servicio("Hotel", "Alojamiento", "Andes SA", 10, 1000.0);
-        ServicioIndividual tour = servicio("Tour", "Excursion", "Sur & Viajes, SRL", 5, 400.0);
+        ServicioIndividual hotel = servicio("Hotel", "Alojamiento", "Andes SA", 1000.0);
+        ServicioIndividual tour = servicio("Tour", "Excursion", "Sur & Viajes, SRL", 400.0);
         Catalogo pack = paquete("Pack", 1260.0, 0.9, hotel);
 
         ReporteExposicionProveedor reporte = new ReporteExposicionProveedor();
@@ -148,16 +157,16 @@ class ReportesCaracterizacionTest {
     @Test
     void aceptar_enTextoPlano_fijaLaSalidaExactaDeOcupacion() {
         assertEquals("OCUPACION POR CATEGORIA (2026-01-01 a 2026-01-31)\n"
-                + "- Alojamiento: 2/10 cupos (8 libres)\n"
-                + "- Excursion: 2/5 cupos (3 libres)\n",
+                + "- Alojamiento: 6/310 cupos (304 libres)\n"
+                + "- Excursion: 6/155 cupos (149 libres)\n",
                 reporteDeOcupacion().aceptar(textoPlano));
     }
 
     @Test
     void aceptar_enCSV_fijaLaSalidaExactaDeOcupacion() {
         assertEquals("categoria,cuposTotales,cuposReservados,cuposLibres\n"
-                + "Alojamiento,10,2,8\n"
-                + "Excursion,5,2,3\n",
+                + "Alojamiento,310,6,304\n"
+                + "Excursion,155,6,149\n",
                 reporteDeOcupacion().aceptar(csv));
     }
 
@@ -166,8 +175,8 @@ class ReportesCaracterizacionTest {
         assertEquals("<h1>Ocupacion por categoria</h1>\n"
                 + "<table>\n"
                 + "<tr><th>Categoria</th><th>Cupos totales</th><th>Cupos reservados</th><th>Cupos libres</th></tr>\n"
-                + "<tr><td>Alojamiento</td><td>10</td><td>2</td><td>8</td></tr>\n"
-                + "<tr><td>Excursion</td><td>5</td><td>2</td><td>3</td></tr>\n"
+                + "<tr><td>Alojamiento</td><td>310</td><td>6</td><td>304</td></tr>\n"
+                + "<tr><td>Excursion</td><td>155</td><td>6</td><td>149</td></tr>\n"
                 + "</table>\n",
                 reporteDeOcupacion().aceptar(html));
     }

@@ -15,10 +15,16 @@ import org.junit.jupiter.api.Test;
 
 import unq.catalogo.Catalogo;
 import unq.catalogo.Categoria;
+import unq.catalogo.PaqueteTuristico;
 import unq.catalogo.ServicioIndividual;
 import unq.reserva.Reserva;
+import unq.traslado.Direccion;
 
+/** El período tiene 10 días, así que un servicio de 10 cupos tiene 100 cupos totales. */
 class ReporteOcupacionTest {
+
+    private static final LocalDate DESDE = LocalDate.of(2026, 1, 1);
+    private static final LocalDate HASTA = LocalDate.of(2026, 1, 10);
 
     private Periodo periodo;
     private ReporteOcupacion reporte;
@@ -30,7 +36,7 @@ class ReporteOcupacionTest {
 
     @BeforeEach
     void setUp() {
-        periodo = new Periodo(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
+        periodo = new Periodo(DESDE, HASTA);
         reporte = new ReporteOcupacion(periodo);
         alojamiento = new Categoria("Alojamiento");
         excursion = new Categoria("Excursion");
@@ -39,27 +45,26 @@ class ReporteOcupacionTest {
         tour = new ServicioIndividual("T1", "Tour", "d", "op", excursion, 300.0, 20);
     }
 
-    private Reserva reserva(boolean cuentaComoVenta, LocalDate fecha, int pasajeros, Catalogo... items) {
-        Reserva reserva = mock(Reserva.class);
-        when(reserva.cuentaComoVenta()).thenReturn(cuentaComoVenta);
-        when(reserva.getFecha()).thenReturn(fecha);
-        when(reserva.cantidadDePasajeros()).thenReturn(pasajeros);
-        when(reserva.getItems()).thenReturn(List.of(items));
-        return reserva;
-    }
-
     private FilaOcupacion filaDe(Categoria categoria) {
         return reporte.getFilas().stream()
                 .filter(f -> f.getCategoria().equals(categoria)).findFirst().orElseThrow();
     }
 
+    private Reserva reservaDe(int pasajeros, LocalDate inicio, LocalDate fin, Catalogo... items) {
+        Reserva reserva = new Reserva("cliente@mail.com", mock(Direccion.class), pasajeros, inicio, fin);
+        for (Catalogo item : items) {
+            reserva.agregarItem(item);
+        }
+        return reserva;
+    }
+
     @Test
-    void generar_sumaLosCuposTotalesPorCategoria() {
+    void generar_sumaLosCuposTotalesPorCategoriaYPorDia() {
         reporte.generar(List.of(), List.of(hotel, hostel, tour));
 
         assertEquals(2, reporte.getFilas().size());
-        assertEquals(15, filaDe(alojamiento).getCuposTotales());
-        assertEquals(20, filaDe(excursion).getCuposTotales());
+        assertEquals(150, filaDe(alojamiento).getCuposTotales());
+        assertEquals(200, filaDe(excursion).getCuposTotales());
     }
 
     @Test
@@ -69,46 +74,105 @@ class ReporteOcupacionTest {
 
         reporte.generar(List.of(), List.of(hotel, tour, paquete));
 
-        assertEquals(10, filaDe(alojamiento).getCuposTotales());
-        assertEquals(20, filaDe(excursion).getCuposTotales());
+        assertEquals(100, filaDe(alojamiento).getCuposTotales());
+        assertEquals(200, filaDe(excursion).getCuposTotales());
     }
 
     @Test
-    void generar_sumaLosPasajerosDeLasReservasComoCuposReservados() {
-        LocalDate enero = LocalDate.of(2026, 1, 10);
+    void generar_cuentaDosCategoriasConElMismoNombreComoUnaSola() {
+        ServicioIndividual otro = new ServicioIndividual("H3", "Otro", "d", "op", new Categoria("Alojamiento"), 1.0, 1);
 
-        reporte.generar(List.of(reserva(true, enero, 3, hotel), reserva(true, enero, 2, hostel)),
-                List.of(hotel, hostel, tour));
+        reporte.generar(List.of(), List.of(hotel, otro));
 
-        assertEquals(5, filaDe(alojamiento).getCuposReservados());
-        assertEquals(10, filaDe(alojamiento).getCuposLibres());
+        assertEquals(1, reporte.getFilas().size());
+        assertEquals(110, filaDe(alojamiento).getCuposTotales());
+    }
+
+    @Test
+    void generar_reflejaElCupoDefinidoParaUnaFechaDelCronograma() {
+        hotel.definirCupo(DESDE, 0);
+
+        reporte.generar(List.of(), List.of(hotel));
+
+        assertEquals(90, filaDe(alojamiento).getCuposTotales());
+    }
+
+    @Test
+    void generar_unaReservaConfirmadaOcupaUnCupoPorPasajeroYPorDia() {
+        reservaDe(2, DESDE, DESDE.plusDays(2), hotel).confirmar();
+
+        reporte.generar(List.of(), List.of(hotel, tour));
+
+        assertEquals(6, filaDe(alojamiento).getCuposReservados());
+        assertEquals(94, filaDe(alojamiento).getCuposLibres());
+        assertEquals(100, filaDe(alojamiento).getCuposTotales());
         assertEquals(0, filaDe(excursion).getCuposReservados());
     }
 
     @Test
     void generar_conPaqueteReservado_ocupaCuposEnCadaCategoriaDeSusServicios() {
-        Catalogo paquete = mock(Catalogo.class);
-        when(paquete.servicios()).thenReturn(List.of(hotel, tour));
+        PaqueteTuristico paquete = new PaqueteTuristico("Pack", "d", 0, 0);
+        paquete.agregarItem(hotel);
+        paquete.agregarItem(tour);
+        reservaDe(4, DESDE, DESDE, paquete).confirmar();
 
-        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), 4, paquete)),
-                List.of(hotel, tour, paquete));
+        reporte.generar(List.of(), List.of(paquete));
 
         assertEquals(4, filaDe(alojamiento).getCuposReservados());
         assertEquals(4, filaDe(excursion).getCuposReservados());
     }
 
     @Test
-    void generar_ignoraLasReservasQueNoCuentanComoVenta() {
-        reporte.generar(List.of(reserva(false, LocalDate.of(2026, 1, 10), 3, hotel)), List.of(hotel));
+    void generar_unaReservaPendienteNoOcupaCupos() {
+        reservaDe(3, DESDE, HASTA, hotel);
+
+        reporte.generar(List.of(), List.of(hotel));
 
         assertEquals(0, filaDe(alojamiento).getCuposReservados());
     }
 
     @Test
-    void generar_ignoraLasReservasFueraDelPeriodo() {
-        reporte.generar(List.of(reserva(true, LocalDate.of(2025, 12, 31), 3, hotel)), List.of(hotel));
+    void generar_unaReservaCanceladaDevuelveLosCupos() {
+        Reserva reserva = reservaDe(3, DESDE, HASTA, hotel);
+        reserva.confirmar();
+        reserva.cancelar();
+
+        reporte.generar(List.of(), List.of(hotel));
 
         assertEquals(0, filaDe(alojamiento).getCuposReservados());
+        assertEquals(100, filaDe(alojamiento).getCuposTotales());
+    }
+
+    @Test
+    void generar_unaReservaCanceladaEnCursoSigueOcupandoLosCupos() {
+        Reserva reserva = reservaDe(3, DESDE, DESDE, hotel);
+        reserva.confirmar();
+        reserva.hacerCheckin();
+        reserva.iniciar();
+        reserva.cancelar();
+
+        reporte.generar(List.of(), List.of(hotel));
+
+        assertEquals(3, filaDe(alojamiento).getCuposReservados());
+    }
+
+    @Test
+    void generar_unaReservaFueraDelPeriodoNoOcupaCupos() {
+        reservaDe(3, HASTA.plusDays(1), HASTA.plusDays(5), hotel).confirmar();
+
+        reporte.generar(List.of(), List.of(hotel));
+
+        assertEquals(0, filaDe(alojamiento).getCuposReservados());
+        assertEquals(100, filaDe(alojamiento).getCuposTotales());
+    }
+
+    @Test
+    void generar_unaReservaQueCruzaElPeriodoSoloCuentaLosDiasDeAdentro() {
+        reservaDe(2, DESDE.minusDays(5), DESDE.plusDays(1), hotel).confirmar();
+
+        reporte.generar(List.of(), List.of(hotel));
+
+        assertEquals(4, filaDe(alojamiento).getCuposReservados());
     }
 
     @Test
@@ -116,7 +180,7 @@ class ReporteOcupacionTest {
         reporte.generar(List.of(), List.of(hotel));
         reporte.generar(List.of(), List.of(hotel));
 
-        assertEquals(10, filaDe(alojamiento).getCuposTotales());
+        assertEquals(100, filaDe(alojamiento).getCuposTotales());
     }
 
     @Test

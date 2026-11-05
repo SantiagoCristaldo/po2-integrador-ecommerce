@@ -133,8 +133,8 @@ Cada reembolso queda registrado en la reserva (`getVouchersDeReembolso()`).
 ### H36 — Cupos por pasajero
 
 Al confirmar, `Reserva.bloquearCupos()` descuenta **un cupo por pasajero** en cada ítem; al cancelar
-desde `CONFIRMADA` o `EN_CHECKIN`, `liberarCupos()` los devuelve. Es consistente con
-`ReporteOcupacion`, que cuenta los cupos reservados por cantidad de pasajeros.
+desde `CONFIRMADA` o `EN_CHECKIN`, `liberarCupos()` los devuelve. El descuento se hace en cada fecha
+de la reserva, y `ReporteOcupacion` lee esos mismos cupos del `Cronograma` de cada servicio.
 
 ### H37 — Comprobantes de pago
 

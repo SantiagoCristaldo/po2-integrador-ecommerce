@@ -33,38 +33,26 @@ class FilasTest {
     }
 
     @Test
-    void filaOcupacion_sinCupos_tieneOcupacionCero() {
+    void filaOcupacion_sinCupos_tieneTodoEnCero() {
         FilaOcupacion fila = new FilaOcupacion(new Categoria("Alojamiento"));
 
         assertEquals(0, fila.getCuposTotales());
+        assertEquals(0, fila.getCuposReservados());
         assertEquals(0, fila.getCuposLibres());
-        assertEquals(0.0, fila.getPorcentajeOcupacion(), 0.001);
     }
 
     @Test
-    void filaOcupacion_acumulaCuposYCalculaLibresYPorcentaje() {
+    void filaOcupacion_acumulaCuposYCalculaLibres() {
         Categoria alojamiento = new Categoria("Alojamiento");
         FilaOcupacion fila = new FilaOcupacion(alojamiento);
 
-        fila.sumarCuposTotales(10);
-        fila.sumarCuposTotales(10);
-        fila.sumarCuposReservados(5);
+        fila.sumar(10, 5);
+        fila.sumar(10, 0);
 
         assertEquals(alojamiento, fila.getCategoria());
         assertEquals(20, fila.getCuposTotales());
         assertEquals(5, fila.getCuposReservados());
         assertEquals(15, fila.getCuposLibres());
-        assertEquals(25.0, fila.getPorcentajeOcupacion(), 0.001);
-    }
-
-    @Test
-    void filaOcupacion_conMasReservasQueCupos_noTieneLibresNegativos() {
-        FilaOcupacion fila = new FilaOcupacion(new Categoria("Alojamiento"));
-
-        fila.sumarCuposTotales(2);
-        fila.sumarCuposReservados(3);
-
-        assertEquals(0, fila.getCuposLibres());
     }
 
     @Test

@@ -1,74 +1,55 @@
 package unq.reportes;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class ExportadorHTML implements ExportadorReporte {
 
     @Override
     public String visitar(ReporteServiciosMasReservados reporte) {
-        List<String> filas = new ArrayList<>();
-        for (FilaVentas fila : reporte.getFilas()) {
-            filas.add(fila(
-                    fila.getItem().nombre(),
-                    String.valueOf(fila.getUnidadesVendidas()),
-                    Formato.numero(fila.getPrecioPromedioCobrado())));
-        }
-        return Formato.conFilas(encabezadoDeVentas(), "</table>\n", filas);
+        return tabla("Servicios mas reservados",
+                List.of("Item", "Unidades vendidas", "Precio promedio"),
+                reporte.getFilas(),
+                fila -> List.of(
+                        fila.getItem().nombre(),
+                        String.valueOf(fila.getUnidadesVendidas()),
+                        Formato.numero(fila.getPrecioPromedioCobrado())));
     }
 
     @Override
     public String visitar(ReporteOcupacion reporte) {
-        List<String> filas = new ArrayList<>();
-        for (FilaOcupacion fila : reporte.getFilas()) {
-            filas.add(fila(
-                    fila.getCategoria().getNombre(),
-                    String.valueOf(fila.getCuposTotales()),
-                    String.valueOf(fila.getCuposReservados()),
-                    String.valueOf(fila.getCuposLibres())));
-        }
-        return Formato.conFilas(encabezadoDeOcupacion(), "</table>\n", filas);
+        return tabla("Ocupacion por categoria",
+                List.of("Categoria", "Cupos totales", "Cupos reservados", "Cupos libres"),
+                reporte.getFilas(),
+                fila -> List.of(
+                        fila.getCategoria().getNombre(),
+                        String.valueOf(fila.getCuposTotales()),
+                        String.valueOf(fila.getCuposReservados()),
+                        String.valueOf(fila.getCuposLibres())));
     }
 
     @Override
     public String visitar(ReporteExposicionProveedor reporte) {
-        List<String> filas = new ArrayList<>();
-        for (FilaExposicion fila : reporte.getFilas()) {
-            filas.add(fila(
-                    fila.getOperador(),
-                    String.valueOf(fila.getCantidadItems()),
-                    Formato.numero(fila.getPorcentajeCatalogo())));
-        }
-        return Formato.conFilas(encabezadoDeExposicion(), "</table>\n", filas);
+        return tabla("Exposicion por proveedor",
+                List.of("Operador", "Cantidad de items", "% del catalogo"),
+                reporte.getFilas(),
+                fila -> List.of(
+                        fila.getOperador(),
+                        String.valueOf(fila.getCantidadItems()),
+                        Formato.numero(fila.getPorcentajeCatalogo())));
     }
 
-    private String encabezadoDeVentas() {
-        return "<h1>Servicios mas reservados</h1>\n<table>\n"
-                + filaEncabezado("Item", "Unidades vendidas", "Precio promedio") + "\n";
+    private <F> String tabla(String titulo, List<String> columnas, List<F> filas, Function<F, List<String>> celdas) {
+        String encabezado = "<h1>" + titulo + "</h1>\n<table>\n" + fila("th", columnas) + "\n";
+        return Formato.conFilas(encabezado, filas, f -> fila("td", celdas.apply(f))) + "</table>\n";
     }
 
-    private String encabezadoDeOcupacion() {
-        return "<h1>Ocupacion por categoria</h1>\n<table>\n"
-                + filaEncabezado("Categoria", "Cupos totales", "Cupos reservados", "Cupos libres") + "\n";
-    }
-
-    private String encabezadoDeExposicion() {
-        return "<h1>Exposicion por proveedor</h1>\n<table>\n"
-                + filaEncabezado("Operador", "Cantidad de items", "% del catalogo") + "\n";
-    }
-
-    private String filaEncabezado(String... columnas) {
-        StringBuilder html = new StringBuilder("<tr>");
-        for (String columna : columnas) {
-            html.append("<th>").append(escapar(columna)).append("</th>");
-        }
-        return html.append("</tr>").toString();
-    }
-
-    private String fila(String... celdas) {
+    private String fila(String etiqueta, List<String> celdas) {
         StringBuilder html = new StringBuilder("<tr>");
         for (String celda : celdas) {
-            html.append("<td>").append(escapar(celda)).append("</td>");
+            html.append("<").append(etiqueta).append(">")
+                    .append(escapar(celda))
+                    .append("</").append(etiqueta).append(">");
         }
         return html.append("</tr>").toString();
     }

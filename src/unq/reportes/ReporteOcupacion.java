@@ -1,13 +1,21 @@
 package unq.reportes;
+
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import unq.catalogo.Catalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.ServicioIndividual;
 import unq.reserva.Reserva;
 
+/**
+ * Cupos por categoría en las fechas del período, leídos del cronograma de cada servicio.
+ *
+ * La unidad es el cupo por día: un hotel de 10 cupos tiene 310 cupos totales en un período de 31 días,
+ * y una reserva de 2 pasajeros por 3 días ocupa 6.
+ */
 public class ReporteOcupacion implements Reporte {
     private Periodo periodo;
     private List<FilaOcupacion> filas = new ArrayList<>();
@@ -16,61 +24,25 @@ public class ReporteOcupacion implements Reporte {
         this.periodo = periodo;
     }
 
+    /** Las reservas no se usan: lo que ocupan ya está registrado en los cronogramas. */
     @Override
     public void generar(List<Reserva> reservas, List<Catalogo> catalogo) {
-        filas = new ArrayList<>();
-        sumarCuposTotales(catalogo);
-        sumarCuposReservados(reservas);
+        Map<Categoria, FilaOcupacion> filasPorCategoria = new LinkedHashMap<>();
+        catalogo.stream()
+                .flatMap(item -> item.servicios().stream())
+                .distinct()
+                .forEach(servicio -> filasPorCategoria
+                        .computeIfAbsent(servicio.getCategoria(), FilaOcupacion::new)
+                        .sumar(cuposTotales(servicio), cuposReservados(servicio)));
+        filas = new ArrayList<>(filasPorCategoria.values());
     }
 
-    private void sumarCuposTotales(List<Catalogo> catalogo) {
-        for (ServicioIndividual servicio : serviciosSinRepetidos(catalogo)) {
-            filaDe(servicio.getCategoria()).sumarCuposTotales(servicio.getCupoTotal());
-        }
+    private int cuposTotales(ServicioIndividual servicio) {
+        return servicio.cuposTotalesEntre(periodo.getDesde(), periodo.getHasta());
     }
 
-    private void sumarCuposReservados(List<Reserva> reservas) {
-        for (Reserva reserva : ventasDelPeriodo(reservas)) {
-            sumarCuposReservadosDe(reserva);
-        }
-    }
-
-    private void sumarCuposReservadosDe(Reserva reserva) {
-        for (ServicioIndividual servicio : serviciosDe(reserva.getItems())) {
-            filaDe(servicio.getCategoria()).sumarCuposReservados(reserva.cantidadDePasajeros());
-        }
-    }
-
-    private List<Reserva> ventasDelPeriodo(List<Reserva> reservas) {
-        return reservas.stream()
-                .filter(r -> r.cuentaComoVenta() && periodo.contiene(r.getFecha()))
-                .collect(Collectors.toList());
-    }
-
-    private List<ServicioIndividual> serviciosSinRepetidos(List<Catalogo> items) {
-        return serviciosDe(items).stream().distinct().collect(Collectors.toList());
-    }
-
-    private List<ServicioIndividual> serviciosDe(List<Catalogo> items) {
-        List<ServicioIndividual> servicios = new ArrayList<>();
-        for (Catalogo item : items) {
-            servicios.addAll(item.servicios());
-        }
-        return servicios;
-    }
-
-    // La fila se busca por equals: dos categorías con el mismo nombre son la misma categoría.
-    private FilaOcupacion filaDe(Categoria categoria) {
-        return filas.stream()
-                .filter(fila -> fila.getCategoria().equals(categoria))
-                .findFirst()
-                .orElseGet(() -> crearFila(categoria));
-    }
-
-    private FilaOcupacion crearFila(Categoria categoria) {
-        FilaOcupacion fila = new FilaOcupacion(categoria);
-        filas.add(fila);
-        return fila;
+    private int cuposReservados(ServicioIndividual servicio) {
+        return servicio.cuposReservadosEntre(periodo.getDesde(), periodo.getHasta());
     }
 
     public List<FilaOcupacion> getFilas() {

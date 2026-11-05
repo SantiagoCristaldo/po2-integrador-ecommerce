@@ -30,8 +30,7 @@ class ReportesDeEjemplo {
 
     static FilaOcupacion filaOcupacion(String categoria, int totales, int reservados) {
         FilaOcupacion fila = new FilaOcupacion(new Categoria(categoria));
-        fila.sumarCuposTotales(totales);
-        fila.sumarCuposReservados(reservados);
+        fila.sumar(totales, reservados);
         return fila;
     }
 
