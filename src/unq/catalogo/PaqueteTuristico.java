@@ -10,7 +10,7 @@ public class PaqueteTuristico implements Catalogo {
     private String descripcion;
     private int descuento;
     private List<Catalogo> items = new ArrayList<>();
-    private int cuposDisponibles; // tendriamos que sacar esto y poner q se calcule a partir de los items. 
+     // tendriamos que sacar esto y poner q se calcule a partir de los items. 
 
     public PaqueteTuristico(String nombre, String descripcion, int descuento, int cuposDisponibles) {
         if (descuento < 0 || descuento > 100) {
@@ -19,7 +19,6 @@ public class PaqueteTuristico implements Catalogo {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.descuento = descuento;
-        this.cuposDisponibles = cuposDisponibles;
     }
 
     public void agregarItem(Catalogo item) {
@@ -34,6 +33,9 @@ public class PaqueteTuristico implements Catalogo {
     }
 
     public void decrementarCupo(int cantidad) {
+        if(this.getCuposDisponibles() < cantidad) {
+            throw new ExcepcionDominio("No hay suficientes cupos disponibles");
+        } 
         items.forEach(i -> i.decrementarCupo(cantidad));
     }
 
@@ -41,8 +43,22 @@ public class PaqueteTuristico implements Catalogo {
         items.forEach(i -> i.incrementarCupo(cantidad));
     }
 
+    @Override
+    public int valorMinimoDeLosCuposDisponibles() {
+        if (items.isEmpty()) {
+            return 0; // O si el paquete está vacío
+        }
+        
+        return items.stream()
+                .mapToInt(Catalogo::valorMinimoDeLosCuposDisponibles)
+                .min()
+                .orElse(Integer.MAX_VALUE);
+    }
+
+
     public int getCuposDisponibles() {
-        return this.cuposDisponibles;
+
+        return this.valorMinimoDeLosCuposDisponibles();
     }
 
     public void quitarItem(Catalogo item) {

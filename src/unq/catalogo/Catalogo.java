@@ -21,6 +21,8 @@ public interface Catalogo {
 
     int getCuposDisponibles();
 
+    int valorMinimoDeLosCuposDisponibles();
+
     List<ServicioIndividual> servicios();
 
     List<Catalogo> componentes();

@@ -38,6 +38,11 @@ public class ServicioIndividual implements Catalogo {
         this.descuentoPromocional = porcentaje;
     }
 
+    @Override
+    public int valorMinimoDeLosCuposDisponibles() {
+        return this.cuposDisponibles;
+    }
+
     public boolean tieneCupo(int cantidad) {
         return cuposDisponibles >= cantidad;
     }
