@@ -27,7 +27,6 @@ public class PaqueteTuristico implements Catalogo {
             throw new ExcepcionDominio("Un paquete no puede contenerse a sí mismo");
         }
         items.add(item);
-        item.decrementarCupo(cantidad);
     }
 
     public boolean tieneCupo(int cantidad) {
