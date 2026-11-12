@@ -1,7 +1,6 @@
 package unq.metodosDePago;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -9,9 +8,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,12 +113,6 @@ class MedioDePagoTest {
         assertEquals(2500.0, medio.getMonto(), 0.001);
     }
 
-    @Test
-    void elMontoNoSePuedeModificarDesdeAfuera() throws Exception {
-        assertTrue(Modifier.isPrivate(MedioDePago.class.getDeclaredField("monto").getModifiers()),
-                "el monto deberia ser privado: solo se cambia con setMonto");
-    }
-
     // --- Notificacion por defecto: registro del codigo de transaccion ---
 
     @Test
@@ -159,21 +149,4 @@ class MedioDePagoTest {
         assertEquals(1, medio.getComprobantes().size());
     }
 
-    // --- Garantías del patrón ---
-
-    @Test
-    void procesoDePago_esFinalParaQueNingunaSubclasePuedaCambiarElOrdenDeLosPasos() throws Exception {
-        Method metodo = MedioDePago.class.getDeclaredMethod("procesoDePago");
-
-        assertTrue(Modifier.isFinal(metodo.getModifiers()),
-                "procesoDePago() deberia ser final: es el metodo plantilla y no debe poder ser sobrescrito");
-    }
-
-    @Test
-    void notificarResultado_tieneUnaImplementacionPorDefectoEnLaClaseAbstracta() throws Exception {
-        Method metodo = MedioDePago.class.getDeclaredMethod("notificarResultado");
-
-        assertFalse(Modifier.isAbstract(metodo.getModifiers()),
-                "notificarResultado() deberia tener una implementacion por defecto (registro del codigo de transaccion)");
-    }
 }

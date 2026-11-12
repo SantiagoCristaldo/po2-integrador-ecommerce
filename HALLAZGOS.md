@@ -5,8 +5,8 @@ código. Los tests se escriben **a partir del enunciado** (TDD): si el código n
 enunciado, el test queda en rojo, sin `@Disabled`, y el hallazgo se documenta acá con el test que lo
 expone. Cuando un hallazgo se corrige, se borra de este documento.
 
-**Estado de la suite:** 407 tests, **366 pasan y 41 fallan**. Los 41 fallos corresponden a los
-hallazgos pendientes H29–H34 y H38–H41. Cobertura de instrucciones (JaCoCo): 95.6%.
+**Estado de la suite:** 388 tests, **347 pasan y 41 fallan**. Los 41 fallos corresponden a los
+hallazgos pendientes H29–H34 y H38–H41. Cobertura (JaCoCo): 96.4% de instrucciones, 95.9% de ramas.
 
 ---
 

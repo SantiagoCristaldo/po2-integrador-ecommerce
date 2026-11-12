@@ -46,8 +46,7 @@ class CategoriaTest {
         assertFalse(new Categoria(null).seLlama("Vuelo"));
     }
 
-    // FALLA A PROPÓSITO: Categoria sobrescribe equals pero no hashCode.
-    // Viola el contrato de Object; ver HALLAZGOS.md (cambio mínimo sugerido en producción).
+    // equals y hashCode tienen que ser consistentes (contrato de Object).
     @Test
     void hashCode_conNombresIguales_deberiaSerIgual() {
         assertEquals(new Categoria("Vuelo").hashCode(), new Categoria("Vuelo").hashCode());
