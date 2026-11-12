@@ -197,4 +197,48 @@ class ServicioIndividualTest {
     void esDeCategoria_conOtraCategoria_esFalso() {
         assertFalse(servicio.esDeCategoria(new Categoria("Vuelo")));
     }
+
+    // --- Validación de atributos dinámicos (enunciado 2.1) ---
+    // Un atributo dinámico se DEFINE con nombre, obligatoriedad y tipo; el valor se asigna después.
+    // Es validar() del servicio quien comprueba que todo obligatorio (fijo o dinámico) tenga valor.
+
+    @Test
+    void validar_conAtributoDinamicoObligatorioSinValor_lanzaExcepcionDeDominio() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
+
+        assertThrows(ExcepcionDominio.class, () -> servicio.validar());
+    }
+
+    @Test
+    void validar_conAtributoDinamicoOpcionalSinValor_noLanza() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
+
+        assertDoesNotThrow(() -> servicio.validar());
+    }
+
+    @Test
+    void validar_despuesDeAsignarElValorAlObligatorio_noLanza() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
+
+        servicio.setValorAtributo("CapacidadMaxima", 4);
+
+        assertDoesNotThrow(() -> servicio.validar());
+    }
+
+    @Test
+    void validar_conLosAtributosDinamicosDelEnunciadoCompletos_noLanza() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 4));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", true, new Booleano(), true));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("RatingEstrellas", false, new Numero(), 4.5));
+
+        assertDoesNotThrow(() -> servicio.validar());
+    }
+
+    @Test
+    void validar_conFijosCompletosPeroUnDinamicoObligatorioSinValor_lanza() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 4));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("FechaApertura", true, new Fecha(), null));
+
+        assertThrows(ExcepcionDominio.class, () -> servicio.validar());
+    }
 }

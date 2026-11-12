@@ -13,10 +13,11 @@ import unq.excepciones.ExcepcionDominio;
 
 class AtributoDinamicoTest {
 
+    // La obligatoriedad no se chequea al definir el atributo sino al validar el servicio
+    // (ver ServicioIndividualTest#validar_conAtributoDinamicoObligatorioSinValor_lanzaExcepcionDeDominio).
     @Test
-    void constructor_obligatorioSinValor_lanzaExcepcionDeDominio() {
-        assertThrows(ExcepcionDominio.class,
-                () -> new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
+    void constructor_obligatorioSinValor_noLanza() {
+        assertDoesNotThrow(() -> new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
     }
 
     @Test
@@ -51,10 +52,10 @@ class AtributoDinamicoTest {
     }
 
     @Test
-    void setValor_nuloEnObligatorio_lanzaExcepcionDeDominio() {
+    void setValor_nuloEnObligatorio_noLanza_loDetectaLaValidacionDelServicio() {
         AtributoDinamico atributo = new AtributoDinamico("RatingEstrellas", true, new Numero(), 5);
 
-        assertThrows(ExcepcionDominio.class, () -> atributo.setValor(null));
+        assertDoesNotThrow(() -> atributo.setValor(null));
     }
 
     @Test

@@ -40,6 +40,7 @@ class TarjDeCreditoTest {
     private void datosValidos() {
         when(api.validarCVV(NUMERO_TARJETA, CVV)).thenReturn(true);
         when(api.validarVencimiento(vencimiento)).thenReturn(true);
+        when(api.preAutorizar(NUMERO_TARJETA, MONTO)).thenReturn(true);
     }
 
     // --- Validar datos: numero de tarjeta, CVV y vencimiento ---
@@ -127,6 +128,19 @@ class TarjDeCreditoTest {
         orden.verify(api).preAutorizar(NUMERO_TARJETA, MONTO);
         orden.verify(api).transferirInmediata(MONTO);
         assertEquals(1, tarjeta.getComprobantes().size());
+    }
+
+    // Reservar fondos = pre-autorización al banco emisor. Si el banco la rechaza, no hay fondos
+    // reservados y no se puede ejecutar la transacción.
+    @Test
+    void procesoDePago_conPreAutorizacionRechazada_lanzaPagoInvalidoYNoTransfiere() {
+        datosValidos();
+        when(api.preAutorizar(NUMERO_TARJETA, MONTO)).thenReturn(false);
+
+        assertThrows(ExcepcionPagoInvalido.class, tarjeta::procesoDePago);
+
+        verify(api, never()).transferirInmediata(anyDouble());
+        assertTrue(tarjeta.getComprobantes().isEmpty());
     }
 
     @Test

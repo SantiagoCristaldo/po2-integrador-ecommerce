@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -31,7 +32,8 @@ class PagoTransferenciaTest {
     @BeforeEach
     void setUp() {
         api = mock(APIBancaria.class);
-        pago = new PagoTransferencia(CBU, ALIAS, LocalDateTime.now().plusDays(1), api, MONTO, "TX-1002");
+        // sin fecha programada = transferencia inmediata
+        pago = new PagoTransferencia(CBU, ALIAS, null, api, MONTO, "TX-1002");
     }
 
     // --- Validar datos: CBU/CVU y alias ---
@@ -74,6 +76,26 @@ class PagoTransferenciaTest {
         pago.ejecutarTransaccion();
 
         verify(api).transferirDeInmediato(CBU, MONTO);
+    }
+
+    // Enunciado 2.4: "Transferencia inmediata o programada". La fecha programada se guarda pero hoy
+    // nunca se usa: toda transferencia sale de inmediato.
+    @Test
+    void ejecutarTransaccion_conFechaProgramada_programaLaTransferenciaParaEsaFecha() {
+        LocalDateTime fecha = LocalDateTime.of(2026, 12, 1, 10, 0);
+        PagoTransferencia programada = new PagoTransferencia(CBU, ALIAS, fecha, api, MONTO, "TX-1003");
+
+        programada.ejecutarTransaccion();
+
+        verify(api).programarTransferencia(CBU, MONTO, fecha);
+        verify(api, never()).transferirDeInmediato(anyInt(), anyDouble());
+    }
+
+    @Test
+    void ejecutarTransaccion_sinFechaProgramada_noProgramaNada() {
+        pago.ejecutarTransaccion();
+
+        verify(api, never()).programarTransferencia(anyInt(), anyDouble(), any());
     }
 
     // --- Notificar: comprobante CBU con numero de operacion, generado y registrado ---

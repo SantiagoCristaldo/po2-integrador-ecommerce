@@ -5,8 +5,8 @@ código. Los tests se escriben **a partir del enunciado** (TDD): si el código n
 enunciado, el test queda en rojo, sin `@Disabled`, y el hallazgo se documenta acá con el test que lo
 expone. Cuando un hallazgo se corrige, se borra de este documento.
 
-**Estado de la suite:** 338 tests, **315 pasan y 23 fallan**. Los 23 fallos corresponden a los
-hallazgos pendientes H29–H34.
+**Estado de la suite:** 407 tests, **366 pasan y 41 fallan**. Los 41 fallos corresponden a los
+hallazgos pendientes H29–H34 y H38–H41. Cobertura de instrucciones (JaCoCo): 95.6%.
 
 ---
 
@@ -97,6 +97,53 @@ disponible si el hotel de destino tiene cupo.
 - Tests: los 6 de `PuntoEncuentroTest` sobre disponibilidad y asignación de guías.
 - Cambio sugerido: usar `ubicacion.getCuposDisponibles()` y `ubicacion.asignarGuia()`. El parámetro
   `destino` deja de ser necesario.
+
+### H38 — Falta: `ServicioIndividual.validar()` no valida los atributos dinámicos
+
+Enunciado 2.1: *"Un servicio debería poder ser validado [...] La validación de un servicio comprueba (a)
+que todo atributo obligatorio —fijo o dinámico— tenga valor"*. Hoy `validar()` sólo mira los fijos. La
+obligatoriedad se chequea en el constructor de `AtributoDinamico`, así que no se puede **definir** un
+atributo (nombre + obligatoriedad + tipo) y asignarle el valor después. Además `Texto/Numero/...
+.esValido(null)` da `false`, entonces ni siquiera un atributo **opcional** se puede crear sin valor.
+
+- Tests:
+  - `ServicioIndividualTest#validar_*` (4 tests de atributos dinámicos)
+  - `AtributoDinamicoTest#constructor_obligatorioSinValor_noLanza`,
+    `#setValor_nuloEnObligatorio_noLanza_loDetectaLaValidacionDelServicio` y los 6 que ya fallaban
+    (`constructor_noObligatorioSinValor_noLanza`, `tieneNombre_*`, `mismoNombreQue_*`).
+- Cambio sugerido: en `AtributoDinamico.validar(valor)` chequear el tipo sólo si `valor != null`; agregar
+  `boolean esValido()` (`!obligatorio || valor != null`) y que `ServicioIndividual.validar()` lance
+  `ExcepcionDominio` si algún atributo dinámico no es válido.
+
+### H39 — `EstadoDeReserva` acepta en silencio las operaciones que un estado no redefine
+
+Enunciado 2.2: *"Intentar una operación inválida debe lanzar una excepción de dominio propia"*. Los
+métodos de `EstadoDeReserva` tienen cuerpo vacío: un estado nuevo que no redefina `confirmar` lo acepta
+sin hacer nada. En el patrón State conviene que el estado abstracto declare todo como inválido y que
+cada estado concreto redefina sólo sus transiciones válidas (además elimina los ~30 `throw` repetidos
+de los estados concretos).
+
+- Tests: los 7 de `EstadoDeReservaTest`.
+- Cambio sugerido: que cada método de `EstadoDeReserva` lance `ExcepcionPorInvalido`; después se pueden
+  borrar de los estados concretos los métodos que sólo lanzan.
+
+### H40 — `TarjDeCredito` ejecuta la transacción aunque el banco rechace la pre-autorización
+
+`api.preAutorizar(...)` devuelve `boolean`, pero `reservarFondos()` lo ignora: con la pre-autorización
+rechazada igual se transfiere y se registra el voucher.
+
+- Test: `TarjDeCreditoTest#procesoDePago_conPreAutorizacionRechazada_lanzaPagoInvalidoYNoTransfiere`
+- Cambio sugerido: en `reservarFondos()`, si `preAutorizar` da `false`, lanzar `ExcepcionPagoInvalido`.
+
+### H41 — `PagoTransferencia` no soporta la transferencia programada
+
+Enunciado 2.4: *"Transferencia inmediata o programada"*. `fechaProgramada` se guarda pero nunca se usa.
+Se agregó a la interfaz `APIBancaria` el mensaje `programarTransferencia(cbu, monto, fecha)` (sólo la
+definición, como pide el enunciado).
+
+- Test: `PagoTransferenciaTest#ejecutarTransaccion_conFechaProgramada_programaLaTransferenciaParaEsaFecha`
+- Cambio sugerido: en `ejecutarTransaccion()`, si `fechaProgramada != null` llamar a
+  `programarTransferencia`; si no, a `transferirDeInmediato`.
 
 ---
 
