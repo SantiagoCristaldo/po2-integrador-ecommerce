@@ -11,7 +11,7 @@ public class PaqueteTuristico implements Catalogo {
     private String descripcion;
     private int descuento;
     private List<Catalogo> items = new ArrayList<>();
-     // tendriamos que sacar esto y poner q se calcule a partir de los items. 
+    // tendriamos que sacar esto y poner q se calcule a partir de los items.
 
     public PaqueteTuristico(String nombre, String descripcion, int descuento, int cuposDisponibles) {
         if (descuento < 0 || descuento > 100) {
@@ -36,7 +36,16 @@ public class PaqueteTuristico implements Catalogo {
 
     @Override
     public void decrementarCupo(LocalDate inicio, LocalDate fin, int cantidad) {
-        Catalogo.decrementarCupoDeTodos(items, inicio, fin, cantidad);
+        List<Catalogo> decrementados = new ArrayList<>();
+        try {
+            for (Catalogo item : items) {
+                item.decrementarCupo(inicio, fin, cantidad);
+                decrementados.add(item);
+            }
+        } catch (ExcepcionDominio e) {
+            decrementados.forEach(item -> item.incrementarCupo(inicio, fin, cantidad));
+            throw e;
+        }
     }
 
     @Override
@@ -49,13 +58,12 @@ public class PaqueteTuristico implements Catalogo {
         if (items.isEmpty()) {
             return 0; // O si el paquete está vacío
         }
-        
+
         return items.stream()
                 .mapToInt(Catalogo::valorMinimoDeLosCuposDisponibles)
                 .min()
                 .orElse(Integer.MAX_VALUE);
     }
-
 
     public int getCuposDisponibles() {
 

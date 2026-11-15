@@ -36,20 +36,12 @@ public interface Catalogo {
     boolean tieneCupo(LocalDate inicio, LocalDate fin, int cantidad);
 
     /**
-     * Descuenta el cupo de todos los ítems, o de ninguno: si alguno no tiene cupo, devuelve lo que ya
-     * había descontado y relanza la excepción. Preguntar antes con tieneCupo no alcanza, porque un
-     * mismo servicio puede aparecer más de una vez en la lista (suelto y dentro de un paquete).
+     * Descuenta el cupo de todos los ítems, o de ninguno: si alguno no tiene cupo,
+     * devuelve lo que ya
+     * había descontado y relanza la excepción. Preguntar antes con tieneCupo no
+     * alcanza, porque un
+     * mismo servicio puede aparecer más de una vez en la lista (suelto y dentro de
+     * un paquete).
      */
-    static void decrementarCupoDeTodos(List<Catalogo> items, LocalDate inicio, LocalDate fin, int cantidad) {
-        List<Catalogo> decrementados = new ArrayList<>();
-        try {
-            for (Catalogo item : items) {
-                item.decrementarCupo(inicio, fin, cantidad);
-                decrementados.add(item);
-            }
-        } catch (ExcepcionDominio e) {
-            decrementados.forEach(item -> item.incrementarCupo(inicio, fin, cantidad));
-            throw e;
-        }
-    }
+    void decrementarCupoDeTodos(List<Catalogo> items, LocalDate inicio, LocalDate fin, int cantidad);
 }
