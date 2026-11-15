@@ -15,19 +15,19 @@ public class PuntoEncuentro implements MetodoTraslado {
         return 0; // no tiene costo
     }
 
-    public boolean estaDisponible(Direccion destino) { // preguntar que es mejor cupo de guias en reserva o aca.
-        return destino.getCuposDisponibles() > 0;
+    public boolean estaDisponible() {
+        return ubicacion.getCuposDisponibles() > 0;
     }
 
     public Direccion getUbicacion() {
         return ubicacion;
     }
 
-    public void asignarGuia(Direccion destino){
-        if(destino.getCuposDisponibles() <= 0){
+    public void asignarGuia(){
+        if(!this.estaDisponible()){
             throw new ExcepcionDominio("No hay mas guias para asignar");
         }else{
-            destino.asignarGuia(); 
+            ubicacion.asignarGuia();
         }
     }
 }

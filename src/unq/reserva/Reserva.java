@@ -143,7 +143,7 @@ public class Reserva {
     }
 
     public void bloquearCupos() {
-        Catalogo.decrementarCupoDeTodos(items, fechaInicio, fechaFin, cantidadDePasajeros);
+        items.forEach(item -> item.decrementarCupo(fechaInicio, fechaFin, cantidadDePasajeros));
     }
 
     public void liberarCupos() {

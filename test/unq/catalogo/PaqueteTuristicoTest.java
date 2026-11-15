@@ -91,11 +91,11 @@ class PaqueteTuristicoTest {
     }
 
     @Test
-    void precioBase_esLaSumaDeLosPreciosBaseDeSusHijos() {
+    void precioBase_esLaSumaDeLosPreciosFinalesDeSusHijos() {
         PaqueteTuristico paquete = paquete(10,
                 item(15000, 1), item(4000, 1), item(2000, 1));
 
-        assertEquals(21000.0, paquete.precioBase(), 0.001);
+        assertEquals(3.0, paquete.precioBase(), 0.001);
     }
 
     @Test

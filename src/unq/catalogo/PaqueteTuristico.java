@@ -36,16 +36,7 @@ public class PaqueteTuristico implements Catalogo {
 
     @Override
     public void decrementarCupo(LocalDate inicio, LocalDate fin, int cantidad) {
-        List<Catalogo> decrementados = new ArrayList<>();
-        try {
-            for (Catalogo item : items) {
-                item.decrementarCupo(inicio, fin, cantidad);
-                decrementados.add(item);
-            }
-        } catch (ExcepcionDominio e) {
-            decrementados.forEach(item -> item.incrementarCupo(inicio, fin, cantidad));
-            throw e;
-        }
+        items.forEach(i -> i.decrementarCupo(inicio, fin, cantidad));
     }
 
     @Override
@@ -84,7 +75,7 @@ public class PaqueteTuristico implements Catalogo {
     @Override
     public double precioFinal() {
         double sumaFinales = this.precioBase();
-        return sumaFinales - (sumaFinales * (descuento / 100));
+        return sumaFinales - (sumaFinales * (descuento / 100.0));
     }
 
     @Override

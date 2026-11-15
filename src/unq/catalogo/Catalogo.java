@@ -1,10 +1,7 @@
 package unq.catalogo;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-
-import unq.excepciones.ExcepcionDominio;
 
 public interface Catalogo {
     String nombre();
@@ -35,13 +32,4 @@ public interface Catalogo {
 
     boolean tieneCupo(LocalDate inicio, LocalDate fin, int cantidad);
 
-    /**
-     * Descuenta el cupo de todos los ítems, o de ninguno: si alguno no tiene cupo,
-     * devuelve lo que ya
-     * había descontado y relanza la excepción. Preguntar antes con tieneCupo no
-     * alcanza, porque un
-     * mismo servicio puede aparecer más de una vez en la lista (suelto y dentro de
-     * un paquete).
-     */
-    void decrementarCupoDeTodos(List<Catalogo> items, LocalDate inicio, LocalDate fin, int cantidad);
 }

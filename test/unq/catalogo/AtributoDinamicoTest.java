@@ -13,16 +13,19 @@ import unq.excepciones.ExcepcionDominio;
 
 class AtributoDinamicoTest {
 
-    // La obligatoriedad no se chequea al definir el atributo sino al validar el servicio
-    // (ver ServicioIndividualTest#validar_conAtributoDinamicoObligatorioSinValor_lanzaExcepcionDeDominio).
+    // Decisión de diseño: un atributo dinámico se crea siempre con un valor de su tipo. La
+    // obligatoriedad y el tipo se chequean al asignar el valor (constructor y setValor), así que
+    // un atributo nunca queda sin valor.
     @Test
-    void constructor_obligatorioSinValor_noLanza() {
-        assertDoesNotThrow(() -> new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
+    void constructor_obligatorioSinValor_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class,
+                () -> new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
     }
 
     @Test
-    void constructor_noObligatorioSinValor_noLanza() {
-        assertDoesNotThrow(() -> new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
+    void constructor_noObligatorioSinValor_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class,
+                () -> new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
     }
 
     @Test
@@ -52,10 +55,10 @@ class AtributoDinamicoTest {
     }
 
     @Test
-    void setValor_nuloEnObligatorio_noLanza_loDetectaLaValidacionDelServicio() {
+    void setValor_nuloEnObligatorio_lanzaExcepcionDeDominio() {
         AtributoDinamico atributo = new AtributoDinamico("RatingEstrellas", true, new Numero(), 5);
 
-        assertDoesNotThrow(() -> atributo.setValor(null));
+        assertThrows(ExcepcionDominio.class, () -> atributo.setValor(null));
     }
 
     @Test
@@ -67,37 +70,37 @@ class AtributoDinamicoTest {
 
     @Test
     void tieneNombre_conElMismoNombre_esVerdadero() {
-        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
+        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", false, new Numero(), 10);
 
         assertTrue(atributo.tieneNombre("CapacidadMaxima"));
     }
 
     @Test
     void tieneNombre_conOtroNombre_esFalso() {
-        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
+        AtributoDinamico atributo = new AtributoDinamico("CapacidadMaxima", false, new Numero(), 10);
 
         assertFalse(atributo.tieneNombre("PoliticaMascotas"));
     }
 
     @Test
     void tieneNombre_conNombreInternoNulo_esFalso() {
-        AtributoDinamico atributo = new AtributoDinamico(null, false, new Numero(), null);
+        AtributoDinamico atributo = new AtributoDinamico(null, false, new Numero(), 10);
 
         assertFalse(atributo.tieneNombre("CapacidadMaxima"));
     }
 
     @Test
     void mismoNombreQue_conAtributosHomónimos_esVerdadero() {
-        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
-        AtributoDinamico otro = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
+        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", false, new Numero(), 10);
+        AtributoDinamico otro = new AtributoDinamico("CapacidadMaxima", false, new Numero(), 10);
 
         assertTrue(uno.mismoNombreQue(otro));
     }
 
     @Test
     void mismoNombreQue_conDistintoNombre_esFalso() {
-        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", false, new Numero(), null);
-        AtributoDinamico otro = new AtributoDinamico("PoliticaMascotas", false, new Numero(), null);
+        AtributoDinamico uno = new AtributoDinamico("CapacidadMaxima", false, new Numero(), 10);
+        AtributoDinamico otro = new AtributoDinamico("PoliticaMascotas", false, new Numero(), 10);
 
         assertFalse(uno.mismoNombreQue(otro));
     }

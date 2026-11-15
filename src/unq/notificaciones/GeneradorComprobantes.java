@@ -13,7 +13,7 @@ public class GeneradorComprobantes implements ObservadorReserva {
 
     @Override
     public void actualizar(Reserva reserva, EstadoDeReserva estadoAnterior, EstadoDeReserva estadoActual) {
-        if (estadoAnterior.debeGenerarVoucher()){
+        if (estadoActual.debeGenerarVoucher()) {
             this.generarFactura(reserva);
             this.generarVoucher(reserva);
         }

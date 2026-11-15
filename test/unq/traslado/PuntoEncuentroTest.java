@@ -48,47 +48,40 @@ class PuntoEncuentroTest {
 
     @Test
     void estaDisponible_conCupoDeGuiasEnElPunto_esVerdadero() {
-        assertTrue(punto.estaDisponible(hotel));
+        assertTrue(punto.estaDisponible());
     }
 
     @Test
     void estaDisponible_sinCupoDeGuiasEnElPunto_esFalso() {
-        assertFalse(puntoSinGuias().estaDisponible(hotel));
-    }
-
-    @Test
-    void estaDisponible_noDependeDelCupoDelDestino() {
-        Direccion destinoSinCupo = new Direccion("Hostel", 5, "CABA", "1001", 0);
-
-        assertTrue(punto.estaDisponible(destinoSinCupo));
+        assertFalse(puntoSinGuias().estaDisponible());
     }
 
     @Test
     void asignarGuia_descuentaUnCupoDelPunto() {
-        punto.asignarGuia(hotel);
+        punto.asignarGuia();
 
         assertEquals(2, ezeiza.getCuposDisponibles());
     }
 
     @Test
     void asignarGuia_noTocaElCupoDelDestino() {
-        punto.asignarGuia(hotel);
+        punto.asignarGuia();
 
         assertEquals(5, hotel.getCuposDisponibles());
     }
 
     @Test
     void asignarGuia_sinCupoDeGuiasEnElPunto_lanzaExcepcionDeDominio() {
-        assertThrows(ExcepcionDominio.class, () -> puntoSinGuias().asignarGuia(hotel));
+        assertThrows(ExcepcionDominio.class, () -> puntoSinGuias().asignarGuia());
     }
 
     @Test
     void asignarGuia_hastaAgotarLosGuias_dejaElPuntoNoDisponible() {
-        punto.asignarGuia(hotel);
-        punto.asignarGuia(hotel);
-        punto.asignarGuia(hotel);
+        punto.asignarGuia();
+        punto.asignarGuia();
+        punto.asignarGuia();
 
-        assertFalse(punto.estaDisponible(hotel));
-        assertThrows(ExcepcionDominio.class, () -> punto.asignarGuia(hotel));
+        assertFalse(punto.estaDisponible());
+        assertThrows(ExcepcionDominio.class, () -> punto.asignarGuia());
     }
 }

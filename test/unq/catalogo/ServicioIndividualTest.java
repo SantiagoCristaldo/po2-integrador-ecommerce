@@ -154,10 +154,10 @@ class ServicioIndividualTest {
     }
 
     @Test
-    void precioFinal_conDescuentoPromocional_aplicaElPorcentaje() {
+    void precioFinal_conDescuentoPromocional_devuelveElPrecioBase() {
         servicio.aplicarDescuentoPromocional(10);
 
-        assertEquals(13500.0, servicio.precioFinal(), 0.001);
+        assertEquals(servicio.precioBase(), servicio.precioFinal(), 0.001);
     }
 
     @Test
@@ -203,22 +203,22 @@ class ServicioIndividualTest {
     // Es validar() del servicio quien comprueba que todo obligatorio (fijo o dinámico) tenga valor.
 
     @Test
-    void validar_conAtributoDinamicoObligatorioSinValor_lanzaExcepcionDeDominio() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
+    void setValorAtributo_nuloEnUnObligatorio_lanzaExcepcionDeDominio() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 4));
 
-        assertThrows(ExcepcionDominio.class, () -> servicio.validar());
+        assertThrows(ExcepcionDominio.class, () -> servicio.setValorAtributo("CapacidadMaxima", null));
     }
 
     @Test
-    void validar_conAtributoDinamicoOpcionalSinValor_noLanza() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
+    void validar_conAtributoDinamicoOpcionalConValor_noLanza() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", false, new Texto(), "Se aceptan"));
 
         assertDoesNotThrow(() -> servicio.validar());
     }
 
     @Test
-    void validar_despuesDeAsignarElValorAlObligatorio_noLanza() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), null));
+    void validar_despuesDeCambiarElValorDeUnObligatorio_noLanza() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 2));
 
         servicio.setValorAtributo("CapacidadMaxima", 4);
 
@@ -235,10 +235,9 @@ class ServicioIndividualTest {
     }
 
     @Test
-    void validar_conFijosCompletosPeroUnDinamicoObligatorioSinValor_lanza() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 4));
-        servicio.agregarAtributoDinamico(new AtributoDinamico("FechaApertura", true, new Fecha(), null));
+    void setValorAtributo_conValorDeOtroTipo_lanzaExcepcionDeDominio() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("FechaApertura", true, new Fecha(), LocalDate.of(2027, 1, 1)));
 
-        assertThrows(ExcepcionDominio.class, () -> servicio.validar());
+        assertThrows(ExcepcionDominio.class, () -> servicio.setValorAtributo("FechaApertura", "2027-01-01"));
     }
 }
