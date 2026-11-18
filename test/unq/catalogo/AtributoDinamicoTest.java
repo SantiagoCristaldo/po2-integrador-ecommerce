@@ -13,9 +13,8 @@ import unq.excepciones.ExcepcionDominio;
 
 class AtributoDinamicoTest {
 
-    // Decisión de diseño: un atributo dinámico se crea siempre con un valor de su tipo. La
-    // obligatoriedad y el tipo se chequean al asignar el valor (constructor y setValor), así que
-    // un atributo nunca queda sin valor.
+    // Decisión de diseño: la obligatoriedad y el tipo se chequean al asignar el valor (constructor y
+    // setValor), así que un atributo obligatorio nunca queda sin valor. Uno opcional sí puede.
     @Test
     void constructor_obligatorioSinValor_lanzaExcepcionDeDominio() {
         assertThrows(ExcepcionDominio.class,
@@ -23,9 +22,8 @@ class AtributoDinamicoTest {
     }
 
     @Test
-    void constructor_noObligatorioSinValor_lanzaExcepcionDeDominio() {
-        assertThrows(ExcepcionDominio.class,
-                () -> new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
+    void constructor_noObligatorioSinValor_noLanza() {
+        assertDoesNotThrow(() -> new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
     }
 
     @Test

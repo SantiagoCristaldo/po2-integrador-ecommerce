@@ -143,7 +143,16 @@ public class Reserva {
     }
 
     public void bloquearCupos() {
-        items.forEach(item -> item.decrementarCupo(fechaInicio, fechaFin, cantidadDePasajeros));
+        List<Catalogo> bloqueados = new ArrayList<>();
+        try {
+            for (Catalogo item : items) {
+                item.decrementarCupo(fechaInicio, fechaFin, cantidadDePasajeros);
+                bloqueados.add(item);
+            }
+        } catch (ExcepcionDominio e) {
+            bloqueados.forEach(item -> item.incrementarCupo(fechaInicio, fechaFin, cantidadDePasajeros));
+            throw e;
+        }
     }
 
     public void liberarCupos() {

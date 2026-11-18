@@ -21,9 +21,16 @@ public class AtributoDinamico {
         this.valor = valor;
     }
 
+    public void validar() {
+        validar(this.valor);
+    }
+
     private void validar(Object valor) {
-        if (valor == null && obligatorio) {
-            throw new ExcepcionDominio("El atributo dinámico '" + nombre + "' es obligatorio");
+        if (valor == null) {
+            if (obligatorio) {
+                throw new ExcepcionDominio("El atributo dinámico '" + nombre + "' es obligatorio");
+            }
+            return;
         }
         if (!tipoValor.esValido(valor)) {
             throw new ExcepcionDominio("El valor del atributo dinámico '" + nombre + "' no es del tipo esperado");

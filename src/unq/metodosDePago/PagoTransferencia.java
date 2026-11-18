@@ -40,7 +40,11 @@ public class PagoTransferencia extends MedioDePago {
 
     @Override
     public void ejecutarTransaccion(){
-        api.transferirDeInmediato(CBU, getMonto());
+        if (fechaProgramada == null) {
+            api.transferirDeInmediato(CBU, getMonto());
+        } else {
+            api.programarTransferencia(CBU, getMonto(), fechaProgramada);
+        }
     } 
 
     @Override 

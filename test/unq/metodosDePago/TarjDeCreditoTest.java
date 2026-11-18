@@ -90,6 +90,8 @@ class TarjDeCreditoTest {
 
     @Test
     void reservarFondos_haceLaPreAutorizacionDelMontoEnLaTarjeta() {
+        when(api.preAutorizar(NUMERO_TARJETA, MONTO)).thenReturn(true);
+
         tarjeta.reservarFondos();
 
         verify(api).preAutorizar(NUMERO_TARJETA, MONTO);

@@ -2,6 +2,8 @@ package unq.metodosDePago;
 
 import java.time.LocalDateTime;
 
+import unq.excepciones.ExcepcionPagoInvalido;
+
 public class TarjDeCredito extends MedioDePago {
     private int nroTarjeta;
     private int CVV;
@@ -36,7 +38,9 @@ public class TarjDeCredito extends MedioDePago {
 
     @Override
     public void reservarFondos() {
-        api.preAutorizar(nroTarjeta, getMonto());
+        if (!api.preAutorizar(nroTarjeta, getMonto())) {
+            throw new ExcepcionPagoInvalido("El banco emisor rechazo la pre-autorizacion");
+        }
     }
 
     @Override

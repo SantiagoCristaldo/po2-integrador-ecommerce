@@ -13,9 +13,9 @@ public class NotificadorEmail implements ObservadorReserva {
     @Override
     public void actualizar(Reserva reserva, EstadoDeReserva estadoAnterior, EstadoDeReserva estadoActual) {
         if (estadoActual.debeNotificarEmail()) {
-            String destino = null; // aca va la direccion de la reserva 
+            String destino = reserva.getEmail(); // aca va la direccion de la reserva 
             String titulo = "Actualización en su reserva";
-            String mensaje = "Se actualizo el estado de su reserva a" + estadoActual ;
+            String mensaje = "Se actualizo el estado de su reserva a " + estadoActual.nombre();
 
             mailSender.enviarMail(destino, titulo, mensaje, null); // Nulo porque ni idea que ponerle
         }

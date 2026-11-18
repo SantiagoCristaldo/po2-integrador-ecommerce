@@ -210,6 +210,13 @@ class ServicioIndividualTest {
     }
 
     @Test
+    void validar_conAtributoDinamicoOpcionalSinValor_noLanza() {
+        servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", false, new Texto(), null));
+
+        assertDoesNotThrow(() -> servicio.validar());
+    }
+
+    @Test
     void validar_conAtributoDinamicoOpcionalConValor_noLanza() {
         servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", false, new Texto(), "Se aceptan"));
 

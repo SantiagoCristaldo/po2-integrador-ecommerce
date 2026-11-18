@@ -16,12 +16,12 @@ public class ClubViajeros implements ObservadorReserva {
     public void actualizar(Reserva reserva, EstadoDeReserva estadoAnterior, EstadoDeReserva estadoActual) {
         
         if (estadoActual.esCancelada()) {
-            mailSender.enviarMail(null,"Actualizacion de el estado de la reserva",
-                                     "Su reserva se encuentra cancelada", this.generarCupon(null));
+            mailSender.enviarMail(reserva.getEmail(), "Actualizacion del estado de la reserva",
+                                     "Su reserva se encuentra cancelada", this.generarCupon());
         }
     }
 
-    private CuponDescuento generarCupon(Reserva r) {
+    private CuponDescuento generarCupon() {
         contadorCupones++;
         return new CuponDescuento("CuponNro" + contadorCupones, porcentajeCupon);
     }

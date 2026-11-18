@@ -157,6 +157,7 @@ public class ServicioIndividual implements Catalogo {
         exigirTexto(nombre, "nombre");
         exigirTexto(operador, "operador");
         exigirNoNulo(categoria, "categoria");
+        atributosDinamicos.forEach(AtributoDinamico::validar);
     }
 
     private void exigirTexto(String valor, String atributo) {
