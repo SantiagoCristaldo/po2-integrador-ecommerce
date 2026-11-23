@@ -69,6 +69,10 @@ public class ServicioIndividual implements ItemCatalogo {
         cronograma.definirCupo(fecha, cupo);
     }
 
+    public void definirCupo(LocalDate inicio, LocalDate fin, int cupo) {
+        cronograma.definirCupo(inicio, fin, cupo);
+    }
+
     public int cuposTotalesEntre(LocalDate inicio, LocalDate fin) {
         return cronograma.cuposTotalesEntre(inicio, fin);
     }

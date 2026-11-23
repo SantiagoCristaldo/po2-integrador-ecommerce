@@ -45,6 +45,38 @@ class CronogramaTest {
     }
 
     @Test
+    void definirCupoEnRango_cambiaTodasLasFechasDelRangoInclusive() {
+        cronograma.definirCupo(DIA_1, DIA_3, 4);
+
+        assertEquals(4, cronograma.cupoEn(DIA_1));
+        assertEquals(4, cronograma.cupoEn(DIA_2));
+        assertEquals(4, cronograma.cupoEn(DIA_3));
+        assertEquals(10, cronograma.cupoEn(DIA_4));
+    }
+
+    @Test
+    void definirCupoEnRango_respetaLoYaReservado() {
+        cronograma.decrementar(DIA_1, DIA_1, 2);
+
+        cronograma.definirCupo(DIA_1, DIA_2, 5);
+
+        assertEquals(5, cronograma.cupoEn(DIA_1));
+        assertEquals(2, cronograma.cuposReservadosEntre(DIA_1, DIA_1));
+    }
+
+    @Test
+    void definirCupoEnRango_negativo_lanzaYNoCambiaNingunaFecha() {
+        assertThrows(ExcepcionDominio.class, () -> cronograma.definirCupo(DIA_1, DIA_3, -1));
+
+        assertEquals(10, cronograma.cupoEn(DIA_1));
+    }
+
+    @Test
+    void definirCupoEnRango_conFinAnteriorAlInicio_lanzaExcepcionDeDominio() {
+        assertThrows(ExcepcionDominio.class, () -> cronograma.definirCupo(DIA_3, DIA_1, 4));
+    }
+
+    @Test
     void decrementar_descuentaCadaFechaDelRangoIncluyendoInicioYFin() {
         cronograma.decrementar(DIA_1, DIA_3, 2);
 
