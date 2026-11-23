@@ -2,7 +2,7 @@ package unq.reserva;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -11,13 +11,13 @@ class EnCursoTest {
 
     private EnCurso estado;
     private Reserva reserva;   // MOCK
-    private Catalogo item;     // DUMMY
+    private ItemCatalogo item;     // DUMMY
 
     @BeforeEach
     void setUp() {
         estado = new EnCurso();
         reserva = mock(Reserva.class);
-        item = mock(Catalogo.class);
+        item = mock(ItemCatalogo.class);
     }
 
     @Test

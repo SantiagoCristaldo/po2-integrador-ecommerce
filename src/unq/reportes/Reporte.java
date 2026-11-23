@@ -5,7 +5,7 @@ import unq.catalogo.Catalogo;
 import unq.reserva.Reserva;
 
 public interface Reporte {
-    void generar(List<Reserva> reservas, List<Catalogo> catalogo);
+    void generar(List<Reserva> reservas, Catalogo catalogo);
     String aceptar(ExportadorReporte exportador);
    
 }

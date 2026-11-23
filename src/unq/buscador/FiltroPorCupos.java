@@ -1,10 +1,10 @@
 package unq.buscador;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class FiltroPorCupos implements Filtro {
     @Override
-    public boolean cumple(Catalogo item){
+    public boolean cumple(ItemCatalogo item){
         return item.getCuposDisponibles() > 0;
     }
 }

@@ -16,16 +16,16 @@ import unq.excepciones.ExcepcionDominio;
 
 class PaqueteTuristicoTest {
 
-    private Catalogo item(double precioBase, double precioFinal) {
-        Catalogo item = mock(Catalogo.class);
+    private ItemCatalogo item(double precioBase, double precioFinal) {
+        ItemCatalogo item = mock(ItemCatalogo.class);
         when(item.precioBase()).thenReturn(precioBase);
         when(item.precioFinal()).thenReturn(precioFinal);
         return item;
     }
 
-    private PaqueteTuristico paquete(int descuento, Catalogo... items) {
+    private PaqueteTuristico paquete(int descuento, ItemCatalogo... items) {
         PaqueteTuristico paquete = new PaqueteTuristico("Paquete", "Un paquete", descuento, 10);
-        for (Catalogo item : items) {
+        for (ItemCatalogo item : items) {
             paquete.agregarItem(item);
         }
         return paquete;
@@ -125,7 +125,7 @@ class PaqueteTuristicoTest {
 
     @Test
     void quitarItem_loSacaDeLaSumaDeSusPartes() {
-        Catalogo hotel = item(15000, 15000);
+        ItemCatalogo hotel = item(15000, 15000);
         PaqueteTuristico paquete = paquete(0, hotel);
 
         paquete.quitarItem(hotel);

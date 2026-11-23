@@ -16,14 +16,14 @@ public class ReporteExposicionProveedor implements Reporte {
 
     /** Las reservas no se usan: el reporte mide qué parte del catálogo depende de cada operador. */
     @Override
-    public void generar(List<Reserva> reservas, List<Catalogo> catalogo) {
-        Map<String, Long> itemsPorOperador = catalogo.stream()
+    public void generar(List<Reserva> reservas, Catalogo catalogo) {
+        Map<String, Long> itemsPorOperador = catalogo.getItems().stream()
                 .flatMap(item -> item.servicios().stream().map(ServicioIndividual::getOperador).distinct())
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         filas = new ArrayList<>();
         itemsPorOperador.forEach((operador, cantidad) -> filas.add(
-                new FilaExposicion(operador, cantidad.intValue(), cantidad * 100.0 / catalogo.size())));
+                new FilaExposicion(operador, cantidad.intValue(), cantidad * 100.0 / catalogo.cantidadDeItems())));
         filas.sort(Comparator.comparingInt(FilaExposicion::getCantidadItems).reversed());
     }
 

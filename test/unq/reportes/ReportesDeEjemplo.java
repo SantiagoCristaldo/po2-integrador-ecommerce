@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 
 /** Arma reportes mockeados con filas conocidas para probar los exportadores. */
@@ -14,8 +14,8 @@ class ReportesDeEjemplo {
 
     static final Periodo ENERO = new Periodo(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
 
-    static Catalogo item(String nombre) {
-        Catalogo item = mock(Catalogo.class);
+    static ItemCatalogo item(String nombre) {
+        ItemCatalogo item = mock(ItemCatalogo.class);
         when(item.nombre()).thenReturn(nombre);
         return item;
     }

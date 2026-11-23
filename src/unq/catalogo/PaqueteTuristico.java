@@ -6,11 +6,11 @@ import java.util.List;
 
 import unq.excepciones.ExcepcionDominio;
 
-public class PaqueteTuristico implements Catalogo {
+public class PaqueteTuristico implements ItemCatalogo {
     private String nombre;
     private String descripcion;
     private int descuento;
-    private List<Catalogo> items = new ArrayList<>();
+    private List<ItemCatalogo> items = new ArrayList<>();
     // tendriamos que sacar esto y poner q se calcule a partir de los items.
 
     public PaqueteTuristico(String nombre, String descripcion, int descuento, int cuposDisponibles) {
@@ -22,7 +22,7 @@ public class PaqueteTuristico implements Catalogo {
         this.descuento = descuento;
     }
 
-    public void agregarItem(Catalogo item) {
+    public void agregarItem(ItemCatalogo item) {
         if (item == this || contieneA(item, this)) {
             throw new ExcepcionDominio("Un paquete no puede contenerse a sí mismo");
         }
@@ -36,9 +36,9 @@ public class PaqueteTuristico implements Catalogo {
 
     @Override
     public void decrementarCupo(LocalDate inicio, LocalDate fin, int cantidad) {
-        List<Catalogo> decrementados = new ArrayList<>();
+        List<ItemCatalogo> decrementados = new ArrayList<>();
         try {
-            for (Catalogo item : items) {
+            for (ItemCatalogo item : items) {
                 item.decrementarCupo(inicio, fin, cantidad);
                 decrementados.add(item);
             }
@@ -60,7 +60,7 @@ public class PaqueteTuristico implements Catalogo {
         }
 
         return items.stream()
-                .mapToInt(Catalogo::valorMinimoDeLosCuposDisponibles)
+                .mapToInt(ItemCatalogo::valorMinimoDeLosCuposDisponibles)
                 .min()
                 .orElse(Integer.MAX_VALUE);
     }
@@ -70,14 +70,14 @@ public class PaqueteTuristico implements Catalogo {
         return this.valorMinimoDeLosCuposDisponibles();
     }
 
-    public void quitarItem(Catalogo item) {
+    public void quitarItem(ItemCatalogo item) {
         items.remove(item);
     }
 
     @Override
     public double precioBase() {
         return items.stream()
-                .mapToDouble(Catalogo::precioFinal)
+                .mapToDouble(ItemCatalogo::precioFinal)
                 .sum();
     }
 
@@ -109,7 +109,7 @@ public class PaqueteTuristico implements Catalogo {
 
     @Override
     public boolean esDeCategoria(Categoria categoria) {
-        for (Catalogo item : items) {
+        for (ItemCatalogo item : items) {
             if (item.esDeCategoria(categoria)) {
                 return true;
             }
@@ -118,12 +118,12 @@ public class PaqueteTuristico implements Catalogo {
     }
 
     @Override
-    public List<Catalogo> componentes() {
+    public List<ItemCatalogo> componentes() {
         return new ArrayList<>(items);
     }
 
-    private static boolean contieneA(Catalogo contenedor, Catalogo buscado) {
-        for (Catalogo componente : contenedor.componentes()) {
+    private static boolean contieneA(ItemCatalogo contenedor, ItemCatalogo buscado) {
+        for (ItemCatalogo componente : contenedor.componentes()) {
             if (componente == buscado || contieneA(componente, buscado)) {
                 return true;
             }
@@ -134,7 +134,7 @@ public class PaqueteTuristico implements Catalogo {
     @Override
     public List<ServicioIndividual> servicios() {
         List<ServicioIndividual> servicios = new ArrayList<>();
-        for (Catalogo item : items) {
+        for (ItemCatalogo item : items) {
             servicios.addAll(item.servicios());
         }
         return servicios;

@@ -1,7 +1,7 @@
 package unq.buscador;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public interface Filtro {
-    boolean cumple(Catalogo item);
+    boolean cumple(ItemCatalogo item);
 }

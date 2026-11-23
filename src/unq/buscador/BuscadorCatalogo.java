@@ -3,22 +3,23 @@ package unq.buscador;
 import  java.util.ArrayList;
 import java.util.List;
 import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class BuscadorCatalogo {
-    private List<Catalogo> items = new ArrayList<>();
+    private Catalogo catalogo;
 
-    public BuscadorCatalogo(List<Catalogo> items) {
-        this.items = items;
-    }
-    
-    public void agregarItem(Catalogo item){
-        items.add(item);
+    public BuscadorCatalogo(Catalogo catalogo) {
+        this.catalogo = catalogo;
     }
 
-    public List<Catalogo> buscar(Filtro filtro) {
-        List<Catalogo> resultados = new ArrayList<>();
+    public void agregarItem(ItemCatalogo item){
+        catalogo.agregarItem(item);
+    }
 
-        for (Catalogo item : items){
+    public List<ItemCatalogo> buscar(Filtro filtro) {
+        List<ItemCatalogo> resultados = new ArrayList<>();
+
+        for (ItemCatalogo item : catalogo.getItems()){
             if (filtro.cumple(item)){
                 resultados.add(item);
             }

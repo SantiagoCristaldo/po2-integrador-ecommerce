@@ -1,35 +1,31 @@
 package unq.catalogo;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-public interface Catalogo {
-    String nombre();
+/**
+ * Contenedor de los ítems que ofrece la empresa: servicios individuales y paquetes turísticos.
+ */
+public class Catalogo {
+    private List<ItemCatalogo> items = new ArrayList<>();
 
-    String descripcion();
+    public Catalogo(ItemCatalogo... items) {
+        this.items.addAll(List.of(items));
+    }
 
-    double precioBase();
+    public void agregarItem(ItemCatalogo item) {
+        items.add(item);
+    }
 
-    double precioFinal();
+    public void quitarItem(ItemCatalogo item) {
+        items.remove(item);
+    }
 
-    double factorDeDescuento();
+    public List<ItemCatalogo> getItems() {
+        return new ArrayList<>(items);
+    }
 
-    boolean contieneEnNombre(String texto);
-
-    boolean esDeCategoria(Categoria categoria);
-
-    void decrementarCupo(LocalDate inicio, LocalDate fin, int cantidad);
-
-    void incrementarCupo(LocalDate inicio, LocalDate fin, int cantidad);
-
-    int getCuposDisponibles();
-
-    int valorMinimoDeLosCuposDisponibles();
-
-    List<ServicioIndividual> servicios();
-
-    List<Catalogo> componentes();
-
-    boolean tieneCupo(LocalDate inicio, LocalDate fin, int cantidad);
-
+    public int cantidadDeItems() {
+        return items.size();
+    }
 }

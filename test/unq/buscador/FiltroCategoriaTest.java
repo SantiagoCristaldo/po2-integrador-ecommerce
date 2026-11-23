@@ -9,18 +9,18 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 
 class FiltroCategoriaTest {
 
-    private Catalogo item;
+    private ItemCatalogo item;
     private Categoria alojamiento;
     private FiltroCategoria filtro;
 
     @BeforeEach
     void setUp() {
-        item = mock(Catalogo.class);
+        item = mock(ItemCatalogo.class);
         alojamiento = new Categoria("Alojamiento");
         filtro = new FiltroCategoria(alojamiento);
     }

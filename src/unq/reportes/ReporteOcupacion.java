@@ -26,9 +26,9 @@ public class ReporteOcupacion implements Reporte {
 
     /** Las reservas no se usan: lo que ocupan ya está registrado en los cronogramas. */
     @Override
-    public void generar(List<Reserva> reservas, List<Catalogo> catalogo) {
+    public void generar(List<Reserva> reservas, Catalogo catalogo) {
         Map<Categoria, FilaOcupacion> filasPorCategoria = new LinkedHashMap<>();
-        catalogo.stream()
+        catalogo.getItems().stream()
                 .flatMap(item -> item.servicios().stream())
                 .distinct()
                 .forEach(servicio -> filasPorCategoria

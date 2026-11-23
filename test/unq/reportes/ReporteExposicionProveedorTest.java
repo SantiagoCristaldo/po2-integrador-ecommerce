@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.ServicioIndividual;
 
@@ -38,7 +39,7 @@ class ReporteExposicionProveedorTest {
 
     @Test
     void generar_cuentaLosItemsDeCadaOperador() {
-        reporte.generar(List.of(), List.of(hotel, hostel, tour));
+        reporte.generar(List.of(), new Catalogo(hotel, hostel, tour));
 
         assertEquals(2, filaDe("Andes SA").getCantidadItems());
         assertEquals(1, filaDe("Sur Viajes").getCantidadItems());
@@ -46,7 +47,7 @@ class ReporteExposicionProveedorTest {
 
     @Test
     void generar_calculaElPorcentajeSobreElTotalDelCatalogo() {
-        reporte.generar(List.of(), List.of(hotel, hostel, tour, hotel));
+        reporte.generar(List.of(), new Catalogo(hotel, hostel, tour, hotel));
 
         assertEquals(75.0, filaDe("Andes SA").getPorcentajeCatalogo(), 0.001);
         assertEquals(25.0, filaDe("Sur Viajes").getPorcentajeCatalogo(), 0.001);
@@ -54,10 +55,10 @@ class ReporteExposicionProveedorTest {
 
     @Test
     void generar_unPaqueteCuentaUnaSolaVezPorOperadorAunqueTengaVariosServiciosSuyos() {
-        Catalogo paquete = mock(Catalogo.class);
+        ItemCatalogo paquete = mock(ItemCatalogo.class);
         when(paquete.servicios()).thenReturn(List.of(hotel, hostel, tour));
 
-        reporte.generar(List.of(), List.of(paquete));
+        reporte.generar(List.of(), new Catalogo(paquete));
 
         assertEquals(1, filaDe("Andes SA").getCantidadItems());
         assertEquals(1, filaDe("Sur Viajes").getCantidadItems());
@@ -66,7 +67,7 @@ class ReporteExposicionProveedorTest {
 
     @Test
     void generar_ordenaDeMayorAMenorPorCantidadDeItems() {
-        reporte.generar(List.of(), List.of(tour, hotel, hostel));
+        reporte.generar(List.of(), new Catalogo(tour, hotel, hostel));
 
         assertEquals("Andes SA", reporte.getFilas().get(0).getOperador());
         assertEquals("Sur Viajes", reporte.getFilas().get(1).getOperador());
@@ -74,15 +75,15 @@ class ReporteExposicionProveedorTest {
 
     @Test
     void generar_conCatalogoVacio_noTieneFilas() {
-        reporte.generar(List.of(), List.of());
+        reporte.generar(List.of(), new Catalogo());
 
         assertTrue(reporte.getFilas().isEmpty());
     }
 
     @Test
     void generar_dosVeces_noAcumulaLasFilasAnteriores() {
-        reporte.generar(List.of(), List.of(hotel));
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(1, reporte.getFilas().size());
         assertEquals(1, filaDe("Andes SA").getCantidadItems());

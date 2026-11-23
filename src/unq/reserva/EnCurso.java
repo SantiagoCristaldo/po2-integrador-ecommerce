@@ -1,6 +1,6 @@
 package unq.reserva;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class EnCurso extends EstadoDeReserva {
 
@@ -9,12 +9,12 @@ public class EnCurso extends EstadoDeReserva {
     }
 
     @Override
-    public void agregarItem(Reserva reserva, Catalogo item) {
+    public void agregarItem(Reserva reserva, ItemCatalogo item) {
         throw new ExcepcionPorInvalido("No se pueden agregar items a una reserva en curso");
     }
 
     @Override
-    public void quitarItem(Reserva reserva, Catalogo item) {
+    public void quitarItem(Reserva reserva, ItemCatalogo item) {
         throw new ExcepcionPorInvalido("No se pueden quitar items de una reserva en curso");
     }
 

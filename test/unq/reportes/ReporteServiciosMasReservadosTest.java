@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.PaqueteTuristico;
 import unq.catalogo.ServicioIndividual;
@@ -23,20 +24,20 @@ class ReporteServiciosMasReservadosTest {
 
     private Periodo periodo;
     private ReporteServiciosMasReservados reporte;
-    private Catalogo hotel;
-    private Catalogo tour;
+    private ItemCatalogo hotel;
+    private ItemCatalogo tour;
 
     @BeforeEach
     void setUp() {
         periodo = new Periodo(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
         reporte = new ReporteServiciosMasReservados(periodo);
-        hotel = mock(Catalogo.class);
-        tour = mock(Catalogo.class);
+        hotel = mock(ItemCatalogo.class);
+        tour = mock(ItemCatalogo.class);
         when(hotel.precioFinal()).thenReturn(1000.0);
         when(tour.precioFinal()).thenReturn(400.0);
     }
 
-    private Reserva reserva(boolean cuentaComoVenta, LocalDate fecha, Catalogo... items) {
+    private Reserva reserva(boolean cuentaComoVenta, LocalDate fecha, ItemCatalogo... items) {
         Reserva reserva = mock(Reserva.class);
         when(reserva.cuentaComoVenta()).thenReturn(cuentaComoVenta);
         when(reserva.getFecha()).thenReturn(fecha);
@@ -44,13 +45,13 @@ class ReporteServiciosMasReservadosTest {
         return reserva;
     }
 
-    private FilaVentas filaDe(Catalogo item) {
+    private FilaVentas filaDe(ItemCatalogo item) {
         return reporte.getFilas().stream().filter(f -> f.getItem() == item).findFirst().orElseThrow();
     }
 
     @Test
     void generar_sinReservas_listaTodoElCatalogoConCeroVentas() {
-        reporte.generar(List.of(), List.of(hotel, tour));
+        reporte.generar(List.of(), new Catalogo(hotel, tour));
 
         assertEquals(2, reporte.getFilas().size());
         assertEquals(0, filaDe(hotel).getUnidadesVendidas());
@@ -62,7 +63,7 @@ class ReporteServiciosMasReservadosTest {
         LocalDate enero = LocalDate.of(2026, 1, 10);
 
         reporte.generar(List.of(reserva(true, enero, hotel), reserva(true, enero, hotel, tour)),
-                List.of(hotel, tour));
+                new Catalogo(hotel, tour));
 
         assertEquals(2, filaDe(hotel).getUnidadesVendidas());
         assertEquals(1, filaDe(tour).getUnidadesVendidas());
@@ -73,7 +74,7 @@ class ReporteServiciosMasReservadosTest {
         LocalDate enero = LocalDate.of(2026, 1, 10);
 
         reporte.generar(List.of(reserva(true, enero, tour), reserva(true, enero, tour)),
-                List.of(hotel, tour));
+                new Catalogo(hotel, tour));
 
         assertSame(tour, reporte.getFilas().get(0).getItem());
         assertSame(hotel, reporte.getFilas().get(1).getItem());
@@ -81,34 +82,34 @@ class ReporteServiciosMasReservadosTest {
 
     @Test
     void generar_ignoraLasReservasQueNoCuentanComoVenta() {
-        reporte.generar(List.of(reserva(false, LocalDate.of(2026, 1, 10), hotel)), List.of(hotel));
+        reporte.generar(List.of(reserva(false, LocalDate.of(2026, 1, 10), hotel)), new Catalogo(hotel));
 
         assertEquals(0, filaDe(hotel).getUnidadesVendidas());
     }
 
     @Test
     void generar_ignoraLasReservasFueraDelPeriodo() {
-        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 2, 1), hotel)), List.of(hotel));
+        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 2, 1), hotel)), new Catalogo(hotel));
 
         assertEquals(0, filaDe(hotel).getUnidadesVendidas());
     }
 
     @Test
     void generar_registraElPrecioFinalCobrado() {
-        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), hotel)), List.of(hotel));
+        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), hotel)), new Catalogo(hotel));
 
         assertEquals(1000.0, filaDe(hotel).getPrecioPromedioCobrado(), 0.001);
     }
 
     @Test
     void generar_conPaquete_registraLaVentaDeSusComponentesConElDescuentoDelPaquete() {
-        Catalogo paquete = mock(Catalogo.class);
+        ItemCatalogo paquete = mock(ItemCatalogo.class);
         when(paquete.precioFinal()).thenReturn(1260.0);
         when(paquete.factorDeDescuento()).thenReturn(0.9);
         when(paquete.componentes()).thenReturn(List.of(hotel, tour));
 
         reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), paquete)),
-                List.of(paquete, hotel, tour));
+                new Catalogo(paquete, hotel, tour));
 
         assertEquals(1, filaDe(paquete).getUnidadesVendidas());
         assertEquals(1260.0, filaDe(paquete).getPrecioPromedioCobrado(), 0.001);
@@ -135,7 +136,7 @@ class ReporteServiciosMasReservadosTest {
         pack.agregarItem(traslado);
 
         reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), pack)),
-                List.of(pack, noche, museo, traslado));
+                new Catalogo(pack, noche, museo, traslado));
 
         assertEquals(18900.0, filaDe(pack).getPrecioPromedioCobrado(), 0.001);
         assertEquals(13500.0, filaDe(noche).getPrecioPromedioCobrado(), 0.001);
@@ -153,7 +154,7 @@ class ReporteServiciosMasReservadosTest {
         kit.agregarItem(pack);
         kit.agregarItem(gastronomico);
 
-        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), kit)), List.of(kit));
+        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), kit)), new Catalogo(kit));
 
         assertEquals(10800.0, filaDe(noche).getPrecioPromedioCobrado(), 0.001);
         assertEquals(4000.0, filaDe(gastronomico).getPrecioPromedioCobrado(), 0.001);
@@ -166,7 +167,7 @@ class ReporteServiciosMasReservadosTest {
         pack.agregarItem(noche);
         LocalDate enero = LocalDate.of(2026, 1, 10);
 
-        reporte.generar(List.of(reserva(true, enero, noche), reserva(true, enero, pack)), List.of(noche, pack));
+        reporte.generar(List.of(reserva(true, enero, noche), reserva(true, enero, pack)), new Catalogo(noche, pack));
 
         assertEquals(2, filaDe(noche).getUnidadesVendidas());
         assertEquals(14250.0, filaDe(noche).getPrecioPromedioCobrado(), 0.001);
@@ -174,15 +175,15 @@ class ReporteServiciosMasReservadosTest {
 
     @Test
     void generar_dosVeces_noAcumulaLasFilasAnteriores() {
-        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), hotel)), List.of(hotel));
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), hotel)), new Catalogo(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(0, filaDe(hotel).getUnidadesVendidas());
     }
 
     @Test
     void generar_conCatalogoVacio_soloListaLosItemsVendidos() {
-        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), hotel)), List.of());
+        reporte.generar(List.of(reserva(true, LocalDate.of(2026, 1, 10), hotel)), new Catalogo());
 
         assertEquals(1, reporte.getFilas().size());
     }

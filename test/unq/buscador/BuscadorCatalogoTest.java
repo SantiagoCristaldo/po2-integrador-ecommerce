@@ -5,30 +5,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.PaqueteTuristico;
 import unq.catalogo.ServicioIndividual;
 
 class BuscadorCatalogoTest {
 
-    private Catalogo hotel;
-    private Catalogo excursion;
+    private ItemCatalogo hotel;
+    private ItemCatalogo excursion;
     private Filtro filtro;
     private BuscadorCatalogo buscador;
 
     @BeforeEach
     void setUp() {
-        hotel = mock(Catalogo.class);
-        excursion = mock(Catalogo.class);
+        hotel = mock(ItemCatalogo.class);
+        excursion = mock(ItemCatalogo.class);
         filtro = mock(Filtro.class);
-        buscador = new BuscadorCatalogo(new ArrayList<>(List.of(hotel, excursion)));
+        buscador = new BuscadorCatalogo(new Catalogo(hotel, excursion));
     }
 
     @Test
@@ -54,7 +54,7 @@ class BuscadorCatalogoTest {
 
     @Test
     void agregarItem_haceQueElItemParticipeDeLaBusqueda() {
-        Catalogo traslado = mock(Catalogo.class);
+        ItemCatalogo traslado = mock(ItemCatalogo.class);
         when(filtro.cumple(traslado)).thenReturn(true);
 
         buscador.agregarItem(traslado);
@@ -82,7 +82,7 @@ class BuscadorCatalogoTest {
         ServicioIndividual tour = new ServicioIndividual("T1", "Tour Hotelero", "d", "op",
                 new Categoria("Excursion"), 3000.0, 5);
         BuscadorCatalogo real = new BuscadorCatalogo(
-                new ArrayList<>(List.of(hotelBarato, hotelCaro, hotelSinCupo, tour)));
+                new Catalogo(hotelBarato, hotelCaro, hotelSinCupo, tour));
 
         Filtro criterio = new FiltroAnd(
                 new FiltroNombre("hotel"),
@@ -105,7 +105,7 @@ class BuscadorCatalogoTest {
     @Test
     void buscar_porNombre_noDistingueMayusculas() {
         ServicioIndividual hotel = servicio("HOTEL Central", catAlojamiento, 15000.0, 5);
-        BuscadorCatalogo real = new BuscadorCatalogo(new ArrayList<>(List.of(hotel)));
+        BuscadorCatalogo real = new BuscadorCatalogo(new Catalogo(hotel));
 
         assertEquals(List.of(hotel), real.buscar(new FiltroNombre("hotel")));
     }
@@ -117,7 +117,7 @@ class BuscadorCatalogoTest {
         ServicioIndividual tourOferta = servicio("Tour en oferta", catExcursion, 3000.0, 0);
         ServicioIndividual tourComun = servicio("Tour comun", catExcursion, 3000.0, 5);
         BuscadorCatalogo real = new BuscadorCatalogo(
-                new ArrayList<>(List.of(hotelDisponible, hotelLleno, tourOferta, tourComun)));
+                new Catalogo(hotelDisponible, hotelLleno, tourOferta, tourComun));
 
         Filtro criterio = new FiltroOr(
                 new FiltroAnd(new FiltroCategoria(catAlojamiento), new FiltroPorCupos()),
@@ -133,7 +133,7 @@ class BuscadorCatalogoTest {
         ServicioIndividual tour = servicio("Tour", catExcursion, 4000.0, 5);
         ServicioIndividual vuelo = servicio("Vuelo", new Categoria("Vuelo"), 9000.0, 5);
         BuscadorCatalogo real = new BuscadorCatalogo(
-                new ArrayList<>(List.of(hotelBarato, hotelCaro, tour, vuelo)));
+                new Catalogo(hotelBarato, hotelCaro, tour, vuelo));
 
         Filtro precioMayorA15000 = new FiltroNot(new FiltroPrecioMaximo(15000.0));
         Filtro criterio = new FiltroAnd(
@@ -153,7 +153,7 @@ class BuscadorCatalogoTest {
         packCaro.agregarItem(servicio("Suite", catAlojamiento, 40000.0, 5));
         ServicioIndividual hotelSuelto = servicio("Hotel sin paquete", catAlojamiento, 1000.0, 5);
         BuscadorCatalogo real = new BuscadorCatalogo(
-                new ArrayList<>(List.of(packAlojamiento, packExcursiones, packCaro, hotelSuelto)));
+                new Catalogo(packAlojamiento, packExcursiones, packCaro, hotelSuelto));
 
         Filtro criterio = new FiltroAnd(
                 new FiltroNombre("pack"),
@@ -167,7 +167,7 @@ class BuscadorCatalogoTest {
     void buscar_unPaqueteEsDeLaCategoriaDeAlgunoDeSusItems() {
         PaqueteTuristico pack = new PaqueteTuristico("Pack", "d", 0, 5);
         pack.agregarItem(servicio("Hotel", catAlojamiento, 1000.0, 5));
-        BuscadorCatalogo real = new BuscadorCatalogo(new ArrayList<>(List.of(pack)));
+        BuscadorCatalogo real = new BuscadorCatalogo(new Catalogo(pack));
 
         assertEquals(List.of(pack), real.buscar(new FiltroCategoria(catAlojamiento)));
     }

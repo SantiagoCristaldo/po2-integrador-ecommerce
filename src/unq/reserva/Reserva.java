@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import unq.traslado.*;
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.notificaciones.*;
 import unq.excepciones.*;
 import unq.metodosDePago.*;
@@ -12,7 +12,7 @@ import unq.metodosDePago.*;
 public class Reserva {
     private String email;
     private EstadoDeReserva estado;
-    private List<Catalogo> items = new ArrayList<>();
+    private List<ItemCatalogo> items = new ArrayList<>();
     private int cantidadDePasajeros;
     private MetodoTraslado metodoTraslado;
     private Notificador notificacion = new Notificador();
@@ -59,7 +59,7 @@ public class Reserva {
         return fecha;
     }
 
-    public List<Catalogo> getItems() {
+    public List<ItemCatalogo> getItems() {
         return new ArrayList<>(items);
     }
 
@@ -83,7 +83,7 @@ public class Reserva {
 
     public double valorServicios() {
         return items.stream()
-                .mapToDouble(Catalogo::precioFinal)
+                .mapToDouble(ItemCatalogo::precioFinal)
                 .sum();
     }
 
@@ -92,11 +92,11 @@ public class Reserva {
         return this.valorServicios() + costoEnvio;
     }
 
-    public void agregarItem(Catalogo item) {
+    public void agregarItem(ItemCatalogo item) {
         estado.agregarItem(this, item);
     }
 
-    public void quitarItem(Catalogo item) {
+    public void quitarItem(ItemCatalogo item) {
         estado.quitarItem(this, item);
     }
 
@@ -134,18 +134,18 @@ public class Reserva {
         this.medioDePago = medioDePago;
     }
 
-    void agregarItemDirecto(Catalogo item) {
+    void agregarItemDirecto(ItemCatalogo item) {
         items.add(item);
     }
 
-    void quitarItemDirecto(Catalogo item) {
+    void quitarItemDirecto(ItemCatalogo item) {
         items.remove(item);
     }
 
     public void bloquearCupos() {
-        List<Catalogo> bloqueados = new ArrayList<>();
+        List<ItemCatalogo> bloqueados = new ArrayList<>();
         try {
-            for (Catalogo item : items) {
+            for (ItemCatalogo item : items) {
                 item.decrementarCupo(fechaInicio, fechaFin, cantidadDePasajeros);
                 bloqueados.add(item);
             }

@@ -8,17 +8,17 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 class FiltroNotTest {
 
-    private Catalogo item;
+    private ItemCatalogo item;
     private Filtro criterio;
     private FiltroNot filtro;
 
     @BeforeEach
     void setUp() {
-        item = mock(Catalogo.class);
+        item = mock(ItemCatalogo.class);
         criterio = mock(Filtro.class);
         filtro = new FiltroNot(criterio);
     }

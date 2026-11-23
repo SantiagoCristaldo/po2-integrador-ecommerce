@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.ServicioIndividual;
 import unq.reserva.Reserva;
@@ -41,19 +42,19 @@ class ReportesPuntaAPuntaTest {
         return servicio;
     }
 
-    private static Catalogo paquete(String nombre, double precioFinal, double factorDeDescuento,
+    private static ItemCatalogo paquete(String nombre, double precioFinal, double factorDeDescuento,
             ServicioIndividual... servicios) {
-        Catalogo paquete = mock(Catalogo.class);
+        ItemCatalogo paquete = mock(ItemCatalogo.class);
         when(paquete.nombre()).thenReturn(nombre);
         when(paquete.precioFinal()).thenReturn(precioFinal);
         when(paquete.factorDeDescuento()).thenReturn(factorDeDescuento);
         when(paquete.servicios()).thenReturn(List.of(servicios));
-        when(paquete.componentes()).thenReturn(List.<Catalogo>of(servicios));
+        when(paquete.componentes()).thenReturn(List.<ItemCatalogo>of(servicios));
         return paquete;
     }
 
     private static Reserva reserva(boolean cuentaComoVenta, LocalDate fecha, int pasajeros,
-            Catalogo... items) {
+            ItemCatalogo... items) {
         Reserva reserva = mock(Reserva.class);
         when(reserva.cuentaComoVenta()).thenReturn(cuentaComoVenta);
         when(reserva.getFecha()).thenReturn(fecha);
@@ -65,14 +66,14 @@ class ReportesPuntaAPuntaTest {
     private ReporteServiciosMasReservados reporteDeVentas() {
         ServicioIndividual hotel = servicio("Hotel Central", "Alojamiento", "Andes SA", 1000.0);
         ServicioIndividual tour = servicio("Tour, \"Guía\" <VIP>", "Excursion", "Sur & Viajes, SRL", 400.0);
-        Catalogo pack = paquete("Pack & Spa", 1260.0, 0.9, hotel, tour);
+        ItemCatalogo pack = paquete("Pack & Spa", 1260.0, 0.9, hotel, tour);
 
         ReporteServiciosMasReservados reporte = new ReporteServiciosMasReservados(ENERO);
         reporte.generar(
                 List.of(reserva(true, EN_ENERO, 2, pack),
                         reserva(true, LocalDate.of(2026, 2, 10), 3, hotel),
                         reserva(false, EN_ENERO, 1, tour)),
-                List.of(hotel, tour, pack));
+                new Catalogo(hotel, tour, pack));
         return reporte;
     }
 

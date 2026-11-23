@@ -9,16 +9,16 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 class FiltroNombreTest {
 
-    private Catalogo item;
+    private ItemCatalogo item;
     private FiltroNombre filtro;
 
     @BeforeEach
     void setUp() {
-        item = mock(Catalogo.class);
+        item = mock(ItemCatalogo.class);
         filtro = new FiltroNombre("hotel");
     }
 

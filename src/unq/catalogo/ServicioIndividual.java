@@ -6,7 +6,7 @@ import java.util.List;
 
 import unq.excepciones.ExcepcionDominio;
 
-public class ServicioIndividual implements Catalogo {
+public class ServicioIndividual implements ItemCatalogo {
     private String codigo;
     private String nombre;
     private String descripcion;
@@ -113,7 +113,7 @@ public class ServicioIndividual implements Catalogo {
     }
 
     @Override
-    public List<Catalogo> componentes() {
+    public List<ItemCatalogo> componentes() {
         return List.of();
     }
 
@@ -137,7 +137,7 @@ public class ServicioIndividual implements Catalogo {
         atributosDinamicos.add(atributo);
     }
 
-    public void setValorAtributo(String nombreAtributo, Object valor) {
+    public void setValorAtributo(String nombreAtributo, String valor) {
         AtributoDinamico atributo = buscarAtributo(nombreAtributo);
         if (atributo == null) {
             throw new ExcepcionDominio("No existe el atributo dinámico '" + nombreAtributo + "'");

@@ -2,7 +2,7 @@ package unq.reserva;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.PaqueteTuristico;
 import unq.catalogo.ServicioIndividual;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Tests de la Reserva real usando:
- *  - STUBS de Catalogo (precio fijo con when/thenReturn)
+ *  - STUBS de ItemCatalogo (precio fijo con when/thenReturn)
  *  - DUMMY de Direccion
  *  - MOCKS de MetodoTraslado y MedioDePago para costo de envio y pago
  */
@@ -30,17 +30,17 @@ class ReservaTest {
 
     private Reserva reserva;
     private Direccion destino;   // DUMMY
-    private Catalogo hotel;      // STUB
-    private Catalogo excursion;  // STUB
+    private ItemCatalogo hotel;      // STUB
+    private ItemCatalogo excursion;  // STUB
 
     @BeforeEach
     void setUp() {
         destino = mock(Direccion.class);
 
-        hotel = mock(Catalogo.class);
+        hotel = mock(ItemCatalogo.class);
         when(hotel.precioFinal()).thenReturn(15000.0);
 
-        excursion = mock(Catalogo.class);
+        excursion = mock(ItemCatalogo.class);
         when(excursion.precioFinal()).thenReturn(4000.0);
 
         reserva = new Reserva("cliente@mail.com", destino, 2, INICIO, FIN);

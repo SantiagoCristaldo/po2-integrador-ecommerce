@@ -11,17 +11,17 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 class FiltroAndTest {
 
-    private Catalogo item;
+    private ItemCatalogo item;
     private Filtro verdadero;
     private Filtro falso;
 
     @BeforeEach
     void setUp() {
-        item = mock(Catalogo.class);
+        item = mock(ItemCatalogo.class);
         verdadero = mock(Filtro.class);
         falso = mock(Filtro.class);
         when(verdadero.cumple(item)).thenReturn(true);

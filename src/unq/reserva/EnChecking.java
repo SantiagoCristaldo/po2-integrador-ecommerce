@@ -1,6 +1,6 @@
 package unq.reserva;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class EnChecking extends EstadoDeReserva {
 
@@ -9,12 +9,12 @@ public class EnChecking extends EstadoDeReserva {
     }
 
     @Override
-    public void agregarItem(Reserva reserva, Catalogo item) {
+    public void agregarItem(Reserva reserva, ItemCatalogo item) {
         throw new ExcepcionPorInvalido("No se pueden agregar items durante el check-in");
     }
 
     @Override
-    public void quitarItem(Reserva reserva, Catalogo item) {
+    public void quitarItem(Reserva reserva, ItemCatalogo item) {
         throw new ExcepcionPorInvalido("No se pueden quitar items durante el check-in");
     }
 

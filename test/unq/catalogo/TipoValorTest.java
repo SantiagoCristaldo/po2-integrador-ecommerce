@@ -3,8 +3,6 @@ package unq.catalogo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.Test;
 
 class TipoValorTest {
@@ -25,28 +23,23 @@ class TipoValorTest {
     }
 
     @Test
-    void texto_conOtroTipo_esInvalido() {
-        assertFalse(texto.esValido(10));
-    }
-
-    @Test
     void texto_conNull_esInvalido() {
         assertFalse(texto.esValido(null));
     }
 
     @Test
     void numero_conEntero_esValido() {
-        assertTrue(numero.esValido(10));
+        assertTrue(numero.esValido("10"));
     }
 
     @Test
     void numero_conDecimal_esValido() {
-        assertTrue(numero.esValido(10.5));
+        assertTrue(numero.esValido("10.5"));
     }
 
     @Test
-    void numero_conTexto_esInvalido() {
-        assertFalse(numero.esValido("10"));
+    void numero_conTextoNoNumerico_esInvalido() {
+        assertFalse(numero.esValido("diez"));
     }
 
     @Test
@@ -55,13 +48,13 @@ class TipoValorTest {
     }
 
     @Test
-    void fecha_conLocalDate_esValida() {
-        assertTrue(fecha.esValido(LocalDate.of(2026, 11, 12)));
+    void fecha_conFormatoIso_esValida() {
+        assertTrue(fecha.esValido("2026-11-12"));
     }
 
     @Test
-    void fecha_conTexto_esInvalida() {
-        assertFalse(fecha.esValido("2026-11-12"));
+    void fecha_conOtroFormato_esInvalida() {
+        assertFalse(fecha.esValido("12/11/2026"));
     }
 
     @Test
@@ -70,13 +63,15 @@ class TipoValorTest {
     }
 
     @Test
-    void booleano_conBoolean_esValido() {
-        assertTrue(booleano.esValido(true));
+    void booleano_conTrueOFalse_esValido() {
+        assertTrue(booleano.esValido("true"));
+        assertTrue(booleano.esValido("false"));
+        assertTrue(booleano.esValido("TRUE"));
     }
 
     @Test
-    void booleano_conTexto_esInvalido() {
-        assertFalse(booleano.esValido("true"));
+    void booleano_conOtroTexto_esInvalido() {
+        assertFalse(booleano.esValido("si"));
     }
 
     @Test

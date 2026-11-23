@@ -1,6 +1,6 @@
 package unq.reserva;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class SolicitudPendiente extends EstadoDeReserva {
 
@@ -9,12 +9,12 @@ public class SolicitudPendiente extends EstadoDeReserva {
     }
 
     @Override
-    public void agregarItem(Reserva reserva, Catalogo item) {
+    public void agregarItem(Reserva reserva, ItemCatalogo item) {
         reserva.agregarItemDirecto(item);
     }
 
     @Override
-    public void quitarItem(Reserva reserva, Catalogo item) {
+    public void quitarItem(Reserva reserva, ItemCatalogo item) {
         reserva.quitarItemDirecto(item);
     }
 

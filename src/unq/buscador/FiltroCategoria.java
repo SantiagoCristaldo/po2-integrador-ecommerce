@@ -1,6 +1,6 @@
 package unq.buscador;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 
 public class FiltroCategoria implements Filtro {
@@ -11,7 +11,7 @@ public class FiltroCategoria implements Filtro {
     }
 
     @Override 
-    public boolean cumple(Catalogo item){
+    public boolean cumple(ItemCatalogo item){
         return  item.esDeCategoria(categoria);
     }
 }

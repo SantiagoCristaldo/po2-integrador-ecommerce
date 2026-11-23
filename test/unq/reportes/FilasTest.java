@@ -6,14 +6,14 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 
 class FilasTest {
 
     @Test
     void filaVentas_sinVentas_tieneCeroUnidadesYPromedioCero() {
-        FilaVentas fila = new FilaVentas(mock(Catalogo.class));
+        FilaVentas fila = new FilaVentas(mock(ItemCatalogo.class));
 
         assertEquals(0, fila.getUnidadesVendidas());
         assertEquals(0.0, fila.getPrecioPromedioCobrado(), 0.001);
@@ -21,7 +21,7 @@ class FilasTest {
 
     @Test
     void filaVentas_registrarVenta_sumaUnidadesYPromediaLoCobrado() {
-        Catalogo item = mock(Catalogo.class);
+        ItemCatalogo item = mock(ItemCatalogo.class);
         FilaVentas fila = new FilaVentas(item);
 
         fila.registrarVenta(1000.0);

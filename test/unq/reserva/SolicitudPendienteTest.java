@@ -2,7 +2,7 @@ package unq.reserva;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -11,13 +11,13 @@ class SolicitudPendienteTest {
 
     private SolicitudPendiente estado;
     private Reserva reserva;   // MOCK: el estado se testea aislado de la reserva real
-    private Catalogo item;     // DUMMY: solo se pasa como parámetro
+    private ItemCatalogo item;     // DUMMY: solo se pasa como parámetro
 
     @BeforeEach
     void setUp() {
         estado = new SolicitudPendiente();
         reserva = mock(Reserva.class);
-        item = mock(Catalogo.class);
+        item = mock(ItemCatalogo.class);
     }
 
     @Test

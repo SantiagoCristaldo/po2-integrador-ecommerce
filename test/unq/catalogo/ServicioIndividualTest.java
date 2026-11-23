@@ -86,9 +86,9 @@ class ServicioIndividualTest {
         servicio.agregarAtributoDinamico(hotel);
         servicio.agregarAtributoDinamico(vuelo);
 
-        servicio.setValorAtributo("CapacidadMaxima", 10);
+        servicio.setValorAtributo("CapacidadMaxima", "10");
 
-        verify(hotel).setValor(10);
+        verify(hotel).setValor("10");
         verify(vuelo, never()).setValor(any());
     }
 
@@ -98,7 +98,7 @@ class ServicioIndividualTest {
         servicio.agregarAtributoDinamico(hotel);
 
         assertThrows(ExcepcionDominio.class,
-                () -> servicio.setValorAtributo("Inexistente", 1));
+                () -> servicio.setValorAtributo("Inexistente", "1"));
 
         verify(hotel, never()).setValor(any());
     }
@@ -204,7 +204,7 @@ class ServicioIndividualTest {
 
     @Test
     void setValorAtributo_nuloEnUnObligatorio_lanzaExcepcionDeDominio() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 4));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), "4"));
 
         assertThrows(ExcepcionDominio.class, () -> servicio.setValorAtributo("CapacidadMaxima", null));
     }
@@ -225,26 +225,26 @@ class ServicioIndividualTest {
 
     @Test
     void validar_despuesDeCambiarElValorDeUnObligatorio_noLanza() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 2));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), "2"));
 
-        servicio.setValorAtributo("CapacidadMaxima", 4);
+        servicio.setValorAtributo("CapacidadMaxima", "4");
 
         assertDoesNotThrow(() -> servicio.validar());
     }
 
     @Test
     void validar_conLosAtributosDinamicosDelEnunciadoCompletos_noLanza() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), 4));
-        servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", true, new Booleano(), true));
-        servicio.agregarAtributoDinamico(new AtributoDinamico("RatingEstrellas", false, new Numero(), 4.5));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("CapacidadMaxima", true, new Numero(), "4"));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("PoliticaMascotas", true, new Booleano(), "true"));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("RatingEstrellas", false, new Numero(), "4.5"));
 
         assertDoesNotThrow(() -> servicio.validar());
     }
 
     @Test
     void setValorAtributo_conValorDeOtroTipo_lanzaExcepcionDeDominio() {
-        servicio.agregarAtributoDinamico(new AtributoDinamico("FechaApertura", true, new Fecha(), LocalDate.of(2027, 1, 1)));
+        servicio.agregarAtributoDinamico(new AtributoDinamico("FechaApertura", true, new Fecha(), "2027-01-01"));
 
-        assertThrows(ExcepcionDominio.class, () -> servicio.setValorAtributo("FechaApertura", "2027-01-01"));
+        assertThrows(ExcepcionDominio.class, () -> servicio.setValorAtributo("FechaApertura", "01/01/2027"));
     }
 }

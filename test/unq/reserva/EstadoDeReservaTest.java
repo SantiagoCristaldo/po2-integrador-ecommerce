@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 /**
  * Enunciado 2.2: "Intentar una operación inválida debe lanzar una excepción de dominio propia".
@@ -21,13 +21,13 @@ class EstadoDeReservaTest {
 
     private EstadoDeReserva estadoSinTransiciones;
     private Reserva reserva;
-    private Catalogo item;
+    private ItemCatalogo item;
 
     @BeforeEach
     void setUp() {
         estadoSinTransiciones = new EstadoDeReserva() {};
         reserva = mock(Reserva.class);
-        item = mock(Catalogo.class);
+        item = mock(ItemCatalogo.class);
     }
 
     @Test

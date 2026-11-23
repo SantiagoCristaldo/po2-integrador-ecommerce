@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.reserva.Reserva;
 
 public class ReporteServiciosMasReservados implements Reporte {
@@ -16,9 +17,9 @@ public class ReporteServiciosMasReservados implements Reporte {
     }
 
     @Override
-    public void generar(List<Reserva> reservas, List<Catalogo> catalogo) {
+    public void generar(List<Reserva> reservas, Catalogo catalogo) {
         filas = new ArrayList<>();
-        catalogo.forEach(this::filaDe);
+        catalogo.getItems().forEach(this::filaDe);
         reservas.stream()
                 .filter(reserva -> reserva.cuentaComoVenta() && periodo.contiene(reserva.getFecha()))
                 .forEach(reserva -> registrarVentas(reserva.getItems(), 1.0));
@@ -26,22 +27,22 @@ public class ReporteServiciosMasReservados implements Reporte {
     }
 
     // Cada componente de un paquete hereda el descuento que ya trae la jerarquía.
-    private void registrarVentas(List<Catalogo> items, double factorAcumulado) {
-        for (Catalogo item : items) {
+    private void registrarVentas(List<ItemCatalogo> items, double factorAcumulado) {
+        for (ItemCatalogo item : items) {
             filaDe(item).registrarVenta(item.precioFinal() * factorAcumulado);
             registrarVentas(item.componentes(), factorAcumulado * item.factorDeDescuento());
         }
     }
 
     // La fila se busca por identidad: dos ítems distintos con los mismos datos son ventas distintas.
-    private FilaVentas filaDe(Catalogo item) {
+    private FilaVentas filaDe(ItemCatalogo item) {
         return filas.stream()
                 .filter(fila -> fila.getItem() == item)
                 .findFirst()
                 .orElseGet(() -> crearFila(item));
     }
 
-    private FilaVentas crearFila(Catalogo item) {
+    private FilaVentas crearFila(ItemCatalogo item) {
         FilaVentas fila = new FilaVentas(item);
         filas.add(fila);
         return fila;

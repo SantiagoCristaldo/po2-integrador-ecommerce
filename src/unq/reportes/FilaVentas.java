@@ -1,13 +1,13 @@
 package unq.reportes;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class FilaVentas {
-    private Catalogo item;
+    private ItemCatalogo item;
     private int unidadesVendidas;
     private double totalCobrado;
 
-    public FilaVentas(Catalogo item) {
+    public FilaVentas(ItemCatalogo item) {
         this.item = item;
     }
 
@@ -16,7 +16,7 @@ public class FilaVentas {
         totalCobrado = totalCobrado +  precioCobrado;
     }
 
-    public Catalogo getItem() {
+    public ItemCatalogo getItem() {
         return item;
     }
 

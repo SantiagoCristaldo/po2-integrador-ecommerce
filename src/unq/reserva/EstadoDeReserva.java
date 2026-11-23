@@ -1,6 +1,6 @@
 package unq.reserva;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public abstract class EstadoDeReserva {
     public String nombreDeEstado;
@@ -9,11 +9,11 @@ public abstract class EstadoDeReserva {
         return this.nombreDeEstado;
     }
 
-    public void agregarItem(Reserva reserva, Catalogo item) {
+    public void agregarItem(Reserva reserva, ItemCatalogo item) {
         throw new ExcepcionPorInvalido("No se pueden agregar items en el estado " + this.nombre());
     }
 
-    public void quitarItem(Reserva reserva, Catalogo item) {
+    public void quitarItem(Reserva reserva, ItemCatalogo item) {
         throw new ExcepcionPorInvalido("No se pueden quitar items en el estado " + this.nombre());
     }
 

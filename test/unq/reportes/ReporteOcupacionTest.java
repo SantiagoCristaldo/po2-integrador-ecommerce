@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 import unq.catalogo.Categoria;
 import unq.catalogo.PaqueteTuristico;
 import unq.catalogo.ServicioIndividual;
@@ -50,9 +51,9 @@ class ReporteOcupacionTest {
                 .filter(f -> f.getCategoria().equals(categoria)).findFirst().orElseThrow();
     }
 
-    private Reserva reservaDe(int pasajeros, LocalDate inicio, LocalDate fin, Catalogo... items) {
+    private Reserva reservaDe(int pasajeros, LocalDate inicio, LocalDate fin, ItemCatalogo... items) {
         Reserva reserva = new Reserva("cliente@mail.com", mock(Direccion.class), pasajeros, inicio, fin);
-        for (Catalogo item : items) {
+        for (ItemCatalogo item : items) {
             reserva.agregarItem(item);
         }
         return reserva;
@@ -60,7 +61,7 @@ class ReporteOcupacionTest {
 
     @Test
     void generar_sumaLosCuposTotalesPorCategoriaYPorDia() {
-        reporte.generar(List.of(), List.of(hotel, hostel, tour));
+        reporte.generar(List.of(), new Catalogo(hotel, hostel, tour));
 
         assertEquals(2, reporte.getFilas().size());
         assertEquals(150, filaDe(alojamiento).getCuposTotales());
@@ -69,10 +70,10 @@ class ReporteOcupacionTest {
 
     @Test
     void generar_noCuentaDosVecesUnServicioQueTambienEstaEnUnPaquete() {
-        Catalogo paquete = mock(Catalogo.class);
+        ItemCatalogo paquete = mock(ItemCatalogo.class);
         when(paquete.servicios()).thenReturn(List.of(hotel, tour));
 
-        reporte.generar(List.of(), List.of(hotel, tour, paquete));
+        reporte.generar(List.of(), new Catalogo(hotel, tour, paquete));
 
         assertEquals(100, filaDe(alojamiento).getCuposTotales());
         assertEquals(200, filaDe(excursion).getCuposTotales());
@@ -82,7 +83,7 @@ class ReporteOcupacionTest {
     void generar_cuentaDosCategoriasConElMismoNombreComoUnaSola() {
         ServicioIndividual otro = new ServicioIndividual("H3", "Otro", "d", "op", new Categoria("Alojamiento"), 1.0, 1);
 
-        reporte.generar(List.of(), List.of(hotel, otro));
+        reporte.generar(List.of(), new Catalogo(hotel, otro));
 
         assertEquals(1, reporte.getFilas().size());
         assertEquals(110, filaDe(alojamiento).getCuposTotales());
@@ -92,7 +93,7 @@ class ReporteOcupacionTest {
     void generar_reflejaElCupoDefinidoParaUnaFechaDelCronograma() {
         hotel.definirCupo(DESDE, 0);
 
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(90, filaDe(alojamiento).getCuposTotales());
     }
@@ -101,7 +102,7 @@ class ReporteOcupacionTest {
     void generar_unaReservaConfirmadaOcupaUnCupoPorPasajeroYPorDia() {
         reservaDe(2, DESDE, DESDE.plusDays(2), hotel).confirmar();
 
-        reporte.generar(List.of(), List.of(hotel, tour));
+        reporte.generar(List.of(), new Catalogo(hotel, tour));
 
         assertEquals(6, filaDe(alojamiento).getCuposReservados());
         assertEquals(94, filaDe(alojamiento).getCuposLibres());
@@ -116,7 +117,7 @@ class ReporteOcupacionTest {
         paquete.agregarItem(tour);
         reservaDe(4, DESDE, DESDE, paquete).confirmar();
 
-        reporte.generar(List.of(), List.of(paquete));
+        reporte.generar(List.of(), new Catalogo(paquete));
 
         assertEquals(4, filaDe(alojamiento).getCuposReservados());
         assertEquals(4, filaDe(excursion).getCuposReservados());
@@ -126,7 +127,7 @@ class ReporteOcupacionTest {
     void generar_unaReservaPendienteNoOcupaCupos() {
         reservaDe(3, DESDE, HASTA, hotel);
 
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(0, filaDe(alojamiento).getCuposReservados());
     }
@@ -137,7 +138,7 @@ class ReporteOcupacionTest {
         reserva.confirmar();
         reserva.cancelar();
 
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(0, filaDe(alojamiento).getCuposReservados());
         assertEquals(100, filaDe(alojamiento).getCuposTotales());
@@ -151,7 +152,7 @@ class ReporteOcupacionTest {
         reserva.iniciar();
         reserva.cancelar();
 
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(3, filaDe(alojamiento).getCuposReservados());
     }
@@ -160,7 +161,7 @@ class ReporteOcupacionTest {
     void generar_unaReservaFueraDelPeriodoNoOcupaCupos() {
         reservaDe(3, HASTA.plusDays(1), HASTA.plusDays(5), hotel).confirmar();
 
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(0, filaDe(alojamiento).getCuposReservados());
         assertEquals(100, filaDe(alojamiento).getCuposTotales());
@@ -170,15 +171,15 @@ class ReporteOcupacionTest {
     void generar_unaReservaQueCruzaElPeriodoSoloCuentaLosDiasDeAdentro() {
         reservaDe(2, DESDE.minusDays(5), DESDE.plusDays(1), hotel).confirmar();
 
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(4, filaDe(alojamiento).getCuposReservados());
     }
 
     @Test
     void generar_dosVeces_noAcumulaLasFilasAnteriores() {
-        reporte.generar(List.of(), List.of(hotel));
-        reporte.generar(List.of(), List.of(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
+        reporte.generar(List.of(), new Catalogo(hotel));
 
         assertEquals(100, filaDe(alojamiento).getCuposTotales());
     }

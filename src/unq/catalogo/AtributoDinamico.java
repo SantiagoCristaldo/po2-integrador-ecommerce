@@ -5,10 +5,10 @@ import unq.excepciones.ExcepcionDominio;
 public class AtributoDinamico {
     private String nombre;
     private boolean obligatorio;
-    private Object valor;
+    private String valor;
     private TipoValor tipoValor;
 
-    public AtributoDinamico(String nombre, boolean obligatorio, TipoValor tipoValor, Object valor) {
+    public AtributoDinamico(String nombre, boolean obligatorio, TipoValor tipoValor, String valor) {
         this.nombre = nombre;
         this.obligatorio = obligatorio;
         this.tipoValor = tipoValor;
@@ -16,7 +16,7 @@ public class AtributoDinamico {
         this.valor = valor;
     }
 
-    public void setValor(Object valor) {
+    public void setValor(String valor) {
         validar(valor);
         this.valor = valor;
     }
@@ -25,7 +25,7 @@ public class AtributoDinamico {
         validar(this.valor);
     }
 
-    private void validar(Object valor) {
+    private void validar(String valor) {
         if (valor == null) {
             if (obligatorio) {
                 throw new ExcepcionDominio("El atributo dinámico '" + nombre + "' es obligatorio");

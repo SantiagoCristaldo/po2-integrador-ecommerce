@@ -1,6 +1,6 @@
 package unq.buscador;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class FiltroAnd extends FiltroCompuesto {
     public FiltroAnd(Filtro... criterios){
@@ -8,7 +8,7 @@ public class FiltroAnd extends FiltroCompuesto {
     }
 
     @Override 
-    public boolean cumple(Catalogo item){
+    public boolean cumple(ItemCatalogo item){
         for (Filtro criterio : criterios){
             if (!criterio.cumple(item)) {
                 return false;

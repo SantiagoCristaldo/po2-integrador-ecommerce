@@ -1,6 +1,6 @@
 package unq.buscador;
 
-import unq.catalogo.Catalogo;
+import unq.catalogo.ItemCatalogo;
 
 public class FiltroPrecioMaximo implements Filtro {
 
@@ -12,7 +12,7 @@ public class FiltroPrecioMaximo implements Filtro {
 
     @Override 
 
-    public  boolean cumple(Catalogo item) {
+    public  boolean cumple(ItemCatalogo item) {
         
         return item.precioBase() <= precioMaximo;
     }
