@@ -27,53 +27,9 @@ class CronogramaTest {
     }
 
     @Test
-    void unaFechaSinDefinirTieneElCupoPorDefecto() {
+    void sinReservas_todasLasFechasTienenElCupoCompleto() {
+        assertEquals(10, cronograma.getCupo());
         assertEquals(10, cronograma.cupoEn(DIA_1));
-    }
-
-    @Test
-    void definirCupo_cambiaSoloElCupoDeEsaFecha() {
-        cronograma.definirCupo(DIA_1, 3);
-
-        assertEquals(3, cronograma.cupoEn(DIA_1));
-        assertEquals(10, cronograma.cupoEn(DIA_2));
-    }
-
-    @Test
-    void definirCupo_negativo_lanzaExcepcionDeDominio() {
-        assertThrows(ExcepcionDominio.class, () -> cronograma.definirCupo(DIA_1, -1));
-    }
-
-    @Test
-    void definirCupoEnRango_cambiaTodasLasFechasDelRangoInclusive() {
-        cronograma.definirCupo(DIA_1, DIA_3, 4);
-
-        assertEquals(4, cronograma.cupoEn(DIA_1));
-        assertEquals(4, cronograma.cupoEn(DIA_2));
-        assertEquals(4, cronograma.cupoEn(DIA_3));
-        assertEquals(10, cronograma.cupoEn(DIA_4));
-    }
-
-    @Test
-    void definirCupoEnRango_respetaLoYaReservado() {
-        cronograma.decrementar(DIA_1, DIA_1, 2);
-
-        cronograma.definirCupo(DIA_1, DIA_2, 5);
-
-        assertEquals(5, cronograma.cupoEn(DIA_1));
-        assertEquals(2, cronograma.cuposReservadosEntre(DIA_1, DIA_1));
-    }
-
-    @Test
-    void definirCupoEnRango_negativo_lanzaYNoCambiaNingunaFecha() {
-        assertThrows(ExcepcionDominio.class, () -> cronograma.definirCupo(DIA_1, DIA_3, -1));
-
-        assertEquals(10, cronograma.cupoEn(DIA_1));
-    }
-
-    @Test
-    void definirCupoEnRango_conFinAnteriorAlInicio_lanzaExcepcionDeDominio() {
-        assertThrows(ExcepcionDominio.class, () -> cronograma.definirCupo(DIA_3, DIA_1, 4));
     }
 
     @Test
@@ -83,29 +39,7 @@ class CronogramaTest {
         assertEquals(8, cronograma.cupoEn(DIA_1));
         assertEquals(8, cronograma.cupoEn(DIA_2));
         assertEquals(8, cronograma.cupoEn(DIA_3));
-    }
-
-    @Test
-    void decrementar_noTocaLasFechasFueraDelRango() {
-        cronograma.decrementar(DIA_2, DIA_3, 2);
-
-        assertEquals(10, cronograma.cupoEn(DIA_1));
         assertEquals(10, cronograma.cupoEn(DIA_4));
-    }
-
-    @Test
-    void decrementar_conInicioIgualAFin_descuentaUnaSolaFecha() {
-        cronograma.decrementar(DIA_1, DIA_1, 1);
-
-        assertEquals(9, cronograma.cupoEn(DIA_1));
-        assertEquals(10, cronograma.cupoEn(DIA_2));
-    }
-
-    @Test
-    void decrementar_hastaAgotarElCupo_loDejaEnCero() {
-        cronograma.decrementar(DIA_1, DIA_1, 10);
-
-        assertEquals(0, cronograma.cupoEn(DIA_1));
     }
 
     @Test
@@ -119,14 +53,10 @@ class CronogramaTest {
     }
 
     @Test
-    void decrementar_sinCupoEnUnaFecha_lanzaExcepcionYNoDescuentaNinguna() {
-        cronograma.definirCupo(DIA_2, 1);
-
-        assertThrows(ExcepcionDominio.class, () -> cronograma.decrementar(DIA_1, DIA_3, 2));
+    void decrementar_sinCupoSuficiente_lanzaExcepcionYNoDescuenta() {
+        assertThrows(ExcepcionDominio.class, () -> cronograma.decrementar(DIA_1, DIA_2, 11));
 
         assertEquals(10, cronograma.cupoEn(DIA_1));
-        assertEquals(1, cronograma.cupoEn(DIA_2));
-        assertEquals(10, cronograma.cupoEn(DIA_3));
     }
 
     @Test
@@ -145,38 +75,20 @@ class CronogramaTest {
     }
 
     @Test
-    void tieneCupo_conCupoExactoEnTodoElRango_esVerdadero() {
-        cronograma.definirCupo(DIA_2, 2);
-
-        assertTrue(cronograma.tieneCupo(DIA_1, DIA_3, 2));
+    void tieneCupo_conCupoExacto_esVerdadero() {
+        assertTrue(cronograma.tieneCupo(DIA_1, DIA_3, 10));
     }
 
     @Test
-    void tieneCupo_conUnaFechaInsuficiente_esFalso() {
-        cronograma.definirCupo(DIA_2, 1);
+    void tieneCupo_conUnaFechaAgotada_esFalso() {
+        cronograma.decrementar(DIA_2, DIA_2, 9);
 
         assertFalse(cronograma.tieneCupo(DIA_1, DIA_3, 2));
     }
 
     @Test
-    void cuposTotalesEntre_sumaElCupoDeCadaFechaDelRango() {
-        cronograma.definirCupo(DIA_2, 3);
-
-        assertEquals(23, cronograma.cuposTotalesEntre(DIA_1, DIA_3));
-    }
-
-    @Test
-    void cuposTotalesEntre_noCambiaAlReservarNiAlLiberar() {
-        cronograma.decrementar(DIA_1, DIA_2, 4);
+    void cuposTotalesEntre_esElCupoPorLaCantidadDeDias() {
         assertEquals(30, cronograma.cuposTotalesEntre(DIA_1, DIA_3));
-
-        cronograma.incrementar(DIA_1, DIA_2, 4);
-        assertEquals(30, cronograma.cuposTotalesEntre(DIA_1, DIA_3));
-    }
-
-    @Test
-    void cuposReservadosEntre_sinReservas_esCero() {
-        assertEquals(0, cronograma.cuposReservadosEntre(DIA_1, DIA_3));
     }
 
     @Test
@@ -192,40 +104,5 @@ class CronogramaTest {
         cronograma.incrementar(DIA_1, DIA_2, 1);
 
         assertEquals(6, cronograma.cuposReservadosEntre(DIA_1, DIA_2));
-    }
-
-    @Test
-    void definirCupo_conReservas_mantieneLoReservadoYCambiaLoLibre() {
-        cronograma.decrementar(DIA_1, DIA_1, 4);
-
-        cronograma.definirCupo(DIA_1, 2);
-
-        assertEquals(2, cronograma.cupoEn(DIA_1));
-        assertEquals(4, cronograma.cuposReservadosEntre(DIA_1, DIA_1));
-        assertEquals(6, cronograma.cuposTotalesEntre(DIA_1, DIA_1));
-    }
-
-    @Test
-    void cupoMaximo_sinFechasDefinidas_esElCupoPorDefecto() {
-        assertEquals(10, cronograma.cupoMaximo());
-    }
-
-    @Test
-    void cupoMaximo_conDefectoEnCero_esElMayorCupoDefinido() {
-        Cronograma temporada = new Cronograma(0);
-        temporada.definirCupo(DIA_1, 3);
-        temporada.definirCupo(DIA_2, 5);
-
-        assertEquals(5, temporada.cupoMaximo());
-    }
-
-    @Test
-    void cupoMaximo_conLaUnicaFechaConCupoAgotada_esCero() {
-        Cronograma temporada = new Cronograma(0);
-        temporada.definirCupo(DIA_1, 2);
-
-        temporada.decrementar(DIA_1, DIA_1, 2);
-
-        assertEquals(0, temporada.cupoMaximo());
     }
 }

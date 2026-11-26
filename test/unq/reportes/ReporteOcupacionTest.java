@@ -90,15 +90,6 @@ class ReporteOcupacionTest {
     }
 
     @Test
-    void generar_reflejaElCupoDefinidoParaUnaFechaDelCronograma() {
-        hotel.definirCupo(DESDE, 0);
-
-        reporte.generar(List.of(), new Catalogo(hotel));
-
-        assertEquals(90, filaDe(alojamiento).getCuposTotales());
-    }
-
-    @Test
     void generar_unaReservaConfirmadaOcupaUnCupoPorPasajeroYPorDia() {
         reservaDe(2, DESDE, DESDE.plusDays(2), hotel).confirmar();
 

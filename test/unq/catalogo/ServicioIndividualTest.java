@@ -136,32 +136,6 @@ class ServicioIndividualTest {
     }
 
     @Test
-    void definirCupo_daDisponibilidadEnEsaFechaAUnServicioSinCupoPorDefecto() {
-        ServicioIndividual temporada = new ServicioIndividual("HOT-002", "Hotel", "d",
-                "op", new Categoria("Alojamiento"), 1000.0, 0);
-        LocalDate dia = LocalDate.of(2027, 1, 10);
-
-        temporada.definirCupo(dia, 3);
-
-        assertEquals(3, temporada.getCuposDisponibles());
-        assertTrue(temporada.tieneCupo(dia, dia, 3));
-        assertFalse(temporada.tieneCupo(dia, dia.plusDays(1), 3));
-    }
-
-    @Test
-    void definirCupoEnRango_daDisponibilidadEnTodaLaTemporada() {
-        ServicioIndividual temporada = new ServicioIndividual("HOT-003", "Hotel", "d",
-                "op", new Categoria("Alojamiento"), 1000.0, 0);
-        LocalDate desde = LocalDate.of(2027, 1, 1);
-        LocalDate hasta = LocalDate.of(2027, 1, 31);
-
-        temporada.definirCupo(desde, hasta, 5);
-
-        assertTrue(temporada.tieneCupo(desde, hasta, 5));
-        assertFalse(temporada.tieneCupo(desde, hasta.plusDays(1), 5));
-    }
-
-    @Test
     void precioFinal_sinDescuentoPromocional_esIgualAlPrecioBase() {
         assertEquals(15000.0, servicio.precioFinal(), 0.001);
     }

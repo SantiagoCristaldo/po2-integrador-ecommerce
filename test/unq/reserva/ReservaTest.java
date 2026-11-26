@@ -286,7 +286,7 @@ class ReservaTest {
     @Test
     void confirmarSinCupoEnUnaFechaDelRangoLanzaExcepcionYSigueEnPendiente() {
         ServicioIndividual servicio = servicioConCupo(10);
-        servicio.definirCupo(FIN, 1);
+        servicio.decrementarCupo(FIN, FIN, 9);
         reserva.agregarItem(servicio);
 
         assertThrows(ExcepcionDominio.class, reserva::confirmar);

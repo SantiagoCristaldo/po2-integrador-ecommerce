@@ -58,19 +58,11 @@ public class ServicioIndividual implements ItemCatalogo {
 
     @Override
     public int getCuposDisponibles() {
-        return cronograma.cupoMaximo();
+        return cronograma.getCupo();
     }
 
     public int getCuposDisponiblesEn(LocalDate fecha) {
         return cronograma.cupoEn(fecha);
-    }
-
-    public void definirCupo(LocalDate fecha, int cupo) {
-        cronograma.definirCupo(fecha, cupo);
-    }
-
-    public void definirCupo(LocalDate inicio, LocalDate fin, int cupo) {
-        cronograma.definirCupo(inicio, fin, cupo);
     }
 
     public int cuposTotalesEntre(LocalDate inicio, LocalDate fin) {
